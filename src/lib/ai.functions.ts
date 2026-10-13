@@ -61,7 +61,7 @@ const jobInput = z.object({
 });
 
 export const evaluateApplication = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ job: jobInput, resume: z.string().min(20).max(15000), coverLetter: z.string().max(5000) }).parse(d),
   )
   .handler(async ({ data }) => {
@@ -86,7 +86,7 @@ export const evaluateApplication = createServerFn({ method: "POST" })
 const msg = z.object({ role: z.enum(["interviewer", "candidate"]), text: z.string().max(4000) });
 
 export const interviewTurn = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ job: jobInput, resume: z.string().max(15000), history: z.array(msg).max(40) }).parse(d))
+  .validator((d: unknown) => z.object({ job: jobInput, resume: z.string().max(15000), history: z.array(msg).max(40) }).parse(d))
   .handler(async ({ data }) => {
     const asked = data.history.filter((m) => m.role === "interviewer").length;
     const schema = { type: "object", additionalProperties: false, required: ["question", "done"], properties: { question: { type: "string" }, done: { type: "boolean" } } };
@@ -98,7 +98,7 @@ export const interviewTurn = createServerFn({ method: "POST" })
   });
 
 export const interviewFeedback = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ job: jobInput, history: z.array(msg).max(40) }).parse(d))
+  .validator((d: unknown) => z.object({ job: jobInput, history: z.array(msg).max(40) }).parse(d))
   .handler(async ({ data }) => {
     const schema = {
       type: "object", additionalProperties: false, required: ["overall", "summary", "scores", "improvements"],
