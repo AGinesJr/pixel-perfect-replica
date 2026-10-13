@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { getStoredSession, isSupabaseConfigured, signIn, signOut, signUp } from "@/lib/supabase";
 
 export const Route = createFileRoute("/account")({
@@ -24,7 +24,7 @@ function Account() {
     return () => window.removeEventListener("wp-auth", update);
   }, []);
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");
