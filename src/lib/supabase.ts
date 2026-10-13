@@ -1,14 +1,14 @@
 import type { ProgressState } from "@/lib/progress";
 
-const URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
-const KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
+const URL = (import.meta.env['VITE_SUPABASE_URL'] as string | undefined)?.replace(/\/$/, "");
+const KEY = (import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ?? import.meta.env['VITE_SUPABASE_ANON_KEY']) as string | undefined;
 const SESSION_KEY = "workforce-prep-auth-v1";
 
 export type AuthUser = { id: string; email?: string };
 export type AuthSession = {
   access_token: string;
   refresh_token: string;
-  expires_at?: number;
+  expires_at?: number | undefined;
   user: AuthUser;
 };
 
