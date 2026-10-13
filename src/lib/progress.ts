@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { getStoredSession, loadCloudProgress, saveCloudProgress } from "@/lib/supabase";
 
 export type Evaluation = {
   decision: "interview" | "more_info" | "reject";
@@ -49,17 +50,56 @@ export function useProgress() {
   const [state, setState] = useState<ProgressState>(empty);
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    setState(read());
+    let active = true;
+    const local = read();
+    setState(local);
     setReady(true);
-    const on = () => setState(read());
-    window.addEventListener("wp-progress", on);
-    return () => window.removeEventListener("wp-progress", on);
+
+    const syncFromCloud = async () => {
+      if (!getStoredSession()) return;
+      try {
+        const cloud = await loadCloudProgress();
+        if (!active) return;
+        if (cloud) {
+          localStorage.setItem(KEY, JSON.stringify(cloud));
+          setState(cloud);
+          window.dispatchEvent(new Event("wp-progress"));
+        } else {
+          // First sign-in: migrate this browser's existing practice data once.
+          await saveCloudProgress(read());
+        }
+      } catch (error) {
+        if (active) {
+          window.dispatchEvent(new CustomEvent("wp-sync-error", {
+            detail: error instanceof Error ? error.message : "Cloud sync failed.",
+          }));
+        }
+      }
+    };
+
+    const onLocalProgress = () => setState(read());
+    const onAuthChange = () => { void syncFromCloud(); };
+    window.addEventListener("wp-progress", onLocalProgress);
+    window.addEventListener("wp-auth", onAuthChange);
+    void syncFromCloud();
+    return () => {
+      active = false;
+      window.removeEventListener("wp-progress", onLocalProgress);
+      window.removeEventListener("wp-auth", onAuthChange);
+    };
   }, []);
   const update = useCallback((fn: (s: ProgressState) => ProgressState) => {
     const next = fn(read());
     localStorage.setItem(KEY, JSON.stringify(next));
     setState(next);
     window.dispatchEvent(new Event("wp-progress"));
+    if (getStoredSession()) {
+      void saveCloudProgress(next).catch((error: unknown) => {
+        window.dispatchEvent(new CustomEvent("wp-sync-error", {
+          detail: error instanceof Error ? error.message : "Cloud sync failed.",
+        }));
+      });
+    }
   }, []);
   return { state, update, ready };
 }
