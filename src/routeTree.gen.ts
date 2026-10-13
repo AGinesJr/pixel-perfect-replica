@@ -10,33 +10,140 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ApplicationsIdRouteImport } from './routes/applications.$id'
+import { Route as InterviewIdRouteImport } from './routes/interview.$id'
+import { Route as JobsIndexRouteImport } from './routes/jobs.index'
+import { Route as JobsIdRouteImport } from './routes/jobs.$id'
+import { Route as JobsIdApplyRouteImport } from './routes/jobs.$id.apply'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplicationsIdRoute = ApplicationsIdRouteImport.update({
+  id: '/applications/$id',
+  path: '/applications/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InterviewIdRoute = InterviewIdRouteImport.update({
+  id: '/interview/$id',
+  path: '/interview/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsIndexRoute = JobsIndexRouteImport.update({
+  id: '/jobs/',
+  path: '/jobs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsIdRoute = JobsIdRouteImport.update({
+  id: '/jobs/$id',
+  path: '/jobs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsIdApplyRoute = JobsIdApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => JobsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/insights': typeof InsightsRoute
+  '/profile': typeof ProfileRoute
+  '/applications/$id': typeof ApplicationsIdRoute
+  '/interview/$id': typeof InterviewIdRoute
+  '/jobs/$id': typeof JobsIdRouteWithChildren
+  '/jobs/': typeof JobsIndexRoute
+  '/jobs/$id/apply': typeof JobsIdApplyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/insights': typeof InsightsRoute
+  '/profile': typeof ProfileRoute
+  '/applications/$id': typeof ApplicationsIdRoute
+  '/interview/$id': typeof InterviewIdRoute
+  '/jobs/$id': typeof JobsIdRouteWithChildren
+  '/jobs': typeof JobsIndexRoute
+  '/jobs/$id/apply': typeof JobsIdApplyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/insights': typeof InsightsRoute
+  '/profile': typeof ProfileRoute
+  '/applications/$id': typeof ApplicationsIdRoute
+  '/interview/$id': typeof InterviewIdRoute
+  '/jobs/$id': typeof JobsIdRouteWithChildren
+  '/jobs/': typeof JobsIndexRoute
+  '/jobs/$id/apply': typeof JobsIdApplyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/profile'
+    | '/applications/$id'
+    | '/interview/$id'
+    | '/jobs/$id'
+    | '/jobs/'
+    | '/jobs/$id/apply'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/profile'
+    | '/applications/$id'
+    | '/interview/$id'
+    | '/jobs/$id'
+    | '/jobs'
+    | '/jobs/$id/apply'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/profile'
+    | '/applications/$id'
+    | '/interview/$id'
+    | '/jobs/$id'
+    | '/jobs/'
+    | '/jobs/$id/apply'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  InsightsRoute: typeof InsightsRoute
+  ProfileRoute: typeof ProfileRoute
+  ApplicationsIdRoute: typeof ApplicationsIdRoute
+  InterviewIdRoute: typeof InterviewIdRoute
+  JobsIdRoute: typeof JobsIdRouteWithChildren
+  JobsIndexRoute: typeof JobsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +155,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/applications/$id': {
+      id: '/applications/$id'
+      path: '/applications/$id'
+      fullPath: '/applications/$id'
+      preLoaderRoute: typeof ApplicationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interview/$id': {
+      id: '/interview/$id'
+      path: '/interview/$id'
+      fullPath: '/interview/$id'
+      preLoaderRoute: typeof InterviewIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs/': {
+      id: '/jobs/'
+      path: '/jobs'
+      fullPath: '/jobs/'
+      preLoaderRoute: typeof JobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs/$id': {
+      id: '/jobs/$id'
+      path: '/jobs/$id'
+      fullPath: '/jobs/$id'
+      preLoaderRoute: typeof JobsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs/$id/apply': {
+      id: '/jobs/$id/apply'
+      path: '/apply'
+      fullPath: '/jobs/$id/apply'
+      preLoaderRoute: typeof JobsIdApplyRouteImport
+      parentRoute: typeof JobsIdRoute
+    }
   }
 }
 
+interface JobsIdRouteChildren {
+  JobsIdApplyRoute: typeof JobsIdApplyRoute
+}
+
+const JobsIdRouteChildren: JobsIdRouteChildren = {
+  JobsIdApplyRoute: JobsIdApplyRoute,
+}
+
+const JobsIdRouteWithChildren =
+  JobsIdRoute._addFileChildren(JobsIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  InsightsRoute: InsightsRoute,
+  ProfileRoute: ProfileRoute,
+  ApplicationsIdRoute: ApplicationsIdRoute,
+  InterviewIdRoute: InterviewIdRoute,
+  JobsIdRoute: JobsIdRouteWithChildren,
+  JobsIndexRoute: JobsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
