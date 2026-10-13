@@ -112,6 +112,7 @@ function Interview() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.onresult = (event) => {
+      if (recognitionRef.current !== recognition) return;
       const words: string[] = [];
       for (let i = 0; i < event.results.length; i += 1) {
         const transcript = event.results[i]?.[0]?.transcript;
@@ -146,7 +147,11 @@ function Interview() {
 
   function submitAnswer() {
     if (!answer.trim() || busy) return;
-    if (listening) stopListening();
+    if (listening) {
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      setListening(false);
+    }
     const h: Msg[] = [...history, { role: "candidate", text: answer.trim() }];
     setHistory(h);
     setAnswer("");
