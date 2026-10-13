@@ -14,10 +14,10 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ApplicationsIdRouteImport } from './routes/applications.$id'
+import { Route as ApplyIdRouteImport } from './routes/apply.$id'
 import { Route as InterviewIdRouteImport } from './routes/interview.$id'
 import { Route as JobsIndexRouteImport } from './routes/jobs.index'
 import { Route as JobsIdRouteImport } from './routes/jobs.$id'
-import { Route as JobsIdApplyRouteImport } from './routes/jobs.$id.apply'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -44,6 +44,11 @@ const ApplicationsIdRoute = ApplicationsIdRouteImport.update({
   path: '/applications/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApplyIdRoute = ApplyIdRouteImport.update({
+  id: '/apply/$id',
+  path: '/apply/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InterviewIdRoute = InterviewIdRouteImport.update({
   id: '/interview/$id',
   path: '/interview/$id',
@@ -59,11 +64,6 @@ const JobsIdRoute = JobsIdRouteImport.update({
   path: '/jobs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsIdApplyRoute = JobsIdApplyRouteImport.update({
-  id: '/apply',
-  path: '/apply',
-  getParentRoute: () => JobsIdRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,10 +71,10 @@ export interface FileRoutesByFullPath {
   '/insights': typeof InsightsRoute
   '/profile': typeof ProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
+  '/apply/$id': typeof ApplyIdRoute
   '/interview/$id': typeof InterviewIdRoute
-  '/jobs/$id': typeof JobsIdRouteWithChildren
+  '/jobs/$id': typeof JobsIdRoute
   '/jobs/': typeof JobsIndexRoute
-  '/jobs/$id/apply': typeof JobsIdApplyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,10 +82,10 @@ export interface FileRoutesByTo {
   '/insights': typeof InsightsRoute
   '/profile': typeof ProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
+  '/apply/$id': typeof ApplyIdRoute
   '/interview/$id': typeof InterviewIdRoute
-  '/jobs/$id': typeof JobsIdRouteWithChildren
+  '/jobs/$id': typeof JobsIdRoute
   '/jobs': typeof JobsIndexRoute
-  '/jobs/$id/apply': typeof JobsIdApplyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,10 +94,10 @@ export interface FileRoutesById {
   '/insights': typeof InsightsRoute
   '/profile': typeof ProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
+  '/apply/$id': typeof ApplyIdRoute
   '/interview/$id': typeof InterviewIdRoute
-  '/jobs/$id': typeof JobsIdRouteWithChildren
+  '/jobs/$id': typeof JobsIdRoute
   '/jobs/': typeof JobsIndexRoute
-  '/jobs/$id/apply': typeof JobsIdApplyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,10 +107,10 @@ export interface FileRouteTypes {
     | '/insights'
     | '/profile'
     | '/applications/$id'
+    | '/apply/$id'
     | '/interview/$id'
     | '/jobs/$id'
     | '/jobs/'
-    | '/jobs/$id/apply'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,10 +118,10 @@ export interface FileRouteTypes {
     | '/insights'
     | '/profile'
     | '/applications/$id'
+    | '/apply/$id'
     | '/interview/$id'
     | '/jobs/$id'
     | '/jobs'
-    | '/jobs/$id/apply'
   id:
     | '__root__'
     | '/'
@@ -129,10 +129,10 @@ export interface FileRouteTypes {
     | '/insights'
     | '/profile'
     | '/applications/$id'
+    | '/apply/$id'
     | '/interview/$id'
     | '/jobs/$id'
     | '/jobs/'
-    | '/jobs/$id/apply'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -141,8 +141,9 @@ export interface RootRouteChildren {
   InsightsRoute: typeof InsightsRoute
   ProfileRoute: typeof ProfileRoute
   ApplicationsIdRoute: typeof ApplicationsIdRoute
+  ApplyIdRoute: typeof ApplyIdRoute
   InterviewIdRoute: typeof InterviewIdRoute
-  JobsIdRoute: typeof JobsIdRouteWithChildren
+  JobsIdRoute: typeof JobsIdRoute
   JobsIndexRoute: typeof JobsIndexRoute
 }
 
@@ -183,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApplicationsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/apply/$id': {
+      id: '/apply/$id'
+      path: '/apply/$id'
+      fullPath: '/apply/$id'
+      preLoaderRoute: typeof ApplyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/interview/$id': {
       id: '/interview/$id'
       path: '/interview/$id'
@@ -204,26 +212,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JobsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs/$id/apply': {
-      id: '/jobs/$id/apply'
-      path: '/apply'
-      fullPath: '/jobs/$id/apply'
-      preLoaderRoute: typeof JobsIdApplyRouteImport
-      parentRoute: typeof JobsIdRoute
-    }
   }
 }
-
-interface JobsIdRouteChildren {
-  JobsIdApplyRoute: typeof JobsIdApplyRoute
-}
-
-const JobsIdRouteChildren: JobsIdRouteChildren = {
-  JobsIdApplyRoute: JobsIdApplyRoute,
-}
-
-const JobsIdRouteWithChildren =
-  JobsIdRoute._addFileChildren(JobsIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -231,8 +221,9 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   ProfileRoute: ProfileRoute,
   ApplicationsIdRoute: ApplicationsIdRoute,
+  ApplyIdRoute: ApplyIdRoute,
   InterviewIdRoute: InterviewIdRoute,
-  JobsIdRoute: JobsIdRouteWithChildren,
+  JobsIdRoute: JobsIdRoute,
   JobsIndexRoute: JobsIndexRoute,
 }
 export const routeTree = rootRouteImport
