@@ -25,7 +25,7 @@ export const Route = createFileRoute("/jobs/$id")({
 
 function JobPage() {
   const { job } = Route.useLoaderData();
-  const emp = employers[job.employer];
+  const emp = employers[job.employer]!;
   const { state } = useProgress();
   const applied = state.applications.find((a) => a.jobId === job.id);
   return (
@@ -43,7 +43,7 @@ function JobPage() {
           {applied ? (
             <Link to="/applications/$id" params={{ id: applied.id }} className="inline-flex h-11 items-center rounded-md border px-6 font-semibold">View your application</Link>
           ) : (
-            <Link to="/jobs/$id/apply" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90">Apply now</Link>
+            <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90">Apply now</Link>
           )}
         </div>
         <Section title="About the role"><p>{job.summary}</p></Section>

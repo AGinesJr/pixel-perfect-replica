@@ -6,7 +6,7 @@ import { useProgress } from "@/lib/progress";
 import { evaluateApplication } from "@/lib/ai.functions";
 import { jobPayload } from "@/lib/job-payload";
 
-export const Route = createFileRoute("/jobs/$id/apply")({
+export const Route = createFileRoute("/apply/$id")({
   loader: ({ params }) => {
     const job = jobs.find((j) => j.id === params.id);
     if (!job) throw notFound();
