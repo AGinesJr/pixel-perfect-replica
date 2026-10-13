@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useProgress } from "@/lib/progress";
+import { useProgress, type ProgressState } from "@/lib/progress";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -14,21 +14,55 @@ export const Route = createFileRoute("/profile")({
   component: Profile,
 });
 
+function downloadPracticeData(data: ProgressState) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `workforce-prep-data-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
 function Profile() {
   const { state, update, ready } = useProgress();
   const [name, setName] = useState("");
   const [resume, setResume] = useState("");
   const [saved, setSaved] = useState(false);
+  const [notice, setNotice] = useState("");
   useEffect(() => { if (ready) { setName(state.name); setResume(state.resume); } }, [ready]); // eslint-disable-line
+
+  function clearPracticeData() {
+    const confirmed = window.confirm("Delete all Workforce Prep practice data saved in this browser? This removes your resume, saved jobs, applications, and interview feedback. This cannot be undone unless you exported a backup.");
+    if (!confirmed) return;
+    update(() => ({ name: "", resume: "", saved: [], applications: [] }));
+    setName("");
+    setResume("");
+    setSaved(false);
+    setNotice("All Workforce Prep practice data has been removed from this browser.");
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-3xl font-bold">My resume</h1>
-      <p className="text-muted-foreground">Stored privately in this browser and pre-filled on every application.</p>
-      <form onSubmit={(e) => { e.preventDefault(); update((s) => ({ ...s, name, resume })); setSaved(true); }} className="mt-6 space-y-4 rounded-lg border bg-card p-6">
-        <label className="block"><span className="font-semibold">Name</span><input value={name} onChange={(e) => { setName(e.target.value); setSaved(false); }} className="mt-2 h-10 w-full rounded-md border bg-background px-3" /></label>
-        <label className="block"><span className="font-semibold">Resume text</span><textarea value={resume} onChange={(e) => { setResume(e.target.value); setSaved(false); }} rows={16} className="mt-2 w-full rounded-md border bg-background p-3 text-sm" /></label>
+      <p className="text-muted-foreground">Your practice data is stored in this browser on this device. It is not synced to an account or backed up automatically.</p>
+      <form onSubmit={(e) => { e.preventDefault(); update((s) => ({ ...s, name, resume })); setSaved(true); setNotice("Your resume was saved in this browser."); }} className="mt-6 space-y-4 rounded-lg border bg-card p-6">
+        <label className="block"><span className="font-semibold">Name</span><input value={name} maxLength={160} onChange={(e) => { setName(e.target.value); setSaved(false); }} className="mt-2 h-10 w-full rounded-md border bg-background px-3" /></label>
+        <label className="block"><span className="font-semibold">Resume text</span><span className="block text-sm text-muted-foreground">Avoid including sensitive information such as Social Security numbers, account numbers, or full home addresses.</span><textarea value={resume} maxLength={15000} onChange={(e) => { setResume(e.target.value); setSaved(false); }} rows={16} className="mt-2 w-full rounded-md border bg-background p-3 text-sm" /></label>
+        <p className="text-right text-xs text-muted-foreground">{resume.length.toLocaleString()} / 15,000 characters</p>
         <button className="h-11 rounded-md bg-primary px-6 font-semibold text-primary-foreground">{saved ? "Saved ✓" : "Save resume"}</button>
       </form>
+      <section className="mt-6 rounded-lg border bg-card p-6">
+        <h2 className="text-lg font-semibold">Your data</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Export a backup before clearing data. The export includes your saved resume and practice applications, so keep it somewhere private.</p>
+        {notice && <p role="status" className="mt-3 text-sm text-muted-foreground">{notice}</p>}
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button type="button" onClick={() => { downloadPracticeData(state); setNotice("Your practice data export was prepared."); }} disabled={!ready} className="h-10 rounded-md border px-4 text-sm font-semibold disabled:opacity-50">Export practice data</button>
+          <button type="button" onClick={clearPracticeData} disabled={!ready} className="h-10 rounded-md border border-destructive/40 px-4 text-sm font-semibold text-destructive disabled:opacity-50">Delete all practice data</button>
+        </div>
+      </section>
     </div>
   );
 }
