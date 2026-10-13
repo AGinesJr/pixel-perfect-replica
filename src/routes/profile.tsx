@@ -42,7 +42,6 @@ function Profile() {
   const [notice, setNotice] = useState("");
 
   // Hydrate form fields from browser-local state after mount.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (ready) {
       setName(state.name);
