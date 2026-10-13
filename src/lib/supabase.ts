@@ -23,7 +23,16 @@ type AuthResponse = {
   error?: string;
 };
 
-type CloudProfileRow = { display_name: string; resume_text: string };
+type CloudProfileRow = {
+  display_name: string;
+  resume_text: string;
+  contact_email: string;
+  phone: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  avatar_data_url: string;
+};
 type CloudPracticeRow = { saved_jobs: string[]; applications: ProgressState["applications"] };
 
 export const isSupabaseConfigured = Boolean(URL && KEY && URL.startsWith("https://"));
@@ -132,10 +141,6 @@ export async function getValidSession(): Promise<AuthSession | null> {
   }
 }
 
-/**
- * Merge cloud records independently. If either cloud row is absent, retain
- * that section from local storage so a partial cloud account cannot erase it.
- */
 export function reconcileCloudProgress(
   local: ProgressState,
   profiles: CloudProfileRow[],
@@ -149,6 +154,12 @@ export function reconcileCloudProgress(
     progress: {
       name: profile ? profile.display_name : local.name,
       resume: profile ? profile.resume_text : local.resume,
+      contactEmail: profile ? profile.contact_email : local.contactEmail,
+      phone: profile ? profile.phone : local.phone,
+      city: profile ? profile.city : local.city,
+      state: profile ? profile.state : local.state,
+      zipCode: profile ? profile.zip_code : local.zipCode,
+      avatarDataUrl: profile ? profile.avatar_data_url : local.avatarDataUrl,
       saved: practice ? practice.saved_jobs : local.saved,
       applications: practice ? practice.applications : local.applications,
     },
@@ -202,6 +213,12 @@ export async function saveCloudProgress(progress: ProgressState): Promise<void> 
       user_id: session.user.id,
       display_name: progress.name.slice(0, 160),
       resume_text: progress.resume.slice(0, 15000),
+      contact_email: progress.contactEmail.slice(0, 254),
+      phone: progress.phone.slice(0, 40),
+      city: progress.city.slice(0, 100),
+      state: progress.state.slice(0, 2),
+      zip_code: progress.zipCode.slice(0, 10),
+      avatar_data_url: progress.avatarDataUrl.slice(0, 400000),
     }),
     restRequest("practice_data", session, "POST", {
       user_id: session.user.id,
