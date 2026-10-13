@@ -1,7 +1,7 @@
 import type { ProgressState } from "@/lib/progress";
 
-const URL = (import.meta.env['VITE_SUPABASE_URL'] as string | undefined)?.replace(/\/$/, "");
-const KEY = (import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ?? import.meta.env['VITE_SUPABASE_ANON_KEY']) as string | undefined;
+const URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
+const KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
 const SESSION_KEY = "workforce-prep-auth-v1";
 
 export type AuthUser = { id: string; email?: string };
@@ -23,11 +23,14 @@ type AuthResponse = {
   error?: string;
 };
 
+type CloudProfileRow = { display_name: string; resume_text: string };
+type CloudPracticeRow = { saved_jobs: string[]; applications: ProgressState["applications"] };
+
 export const isSupabaseConfigured = Boolean(URL && KEY && URL.startsWith("https://"));
 
 function config() {
   if (!URL || !KEY || !URL.startsWith("https://")) {
-    throw new Error("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to the app's hosting environment, then rebuild it.");
+    throw new Error("Supabase is not configured. Add VITE_SUPABASE_URL and either VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY to the app's hosting environment, then rebuild it.");
   }
   return { url: URL, key: KEY };
 }
@@ -129,6 +132,30 @@ export async function getValidSession(): Promise<AuthSession | null> {
   }
 }
 
+/**
+ * Merge cloud records independently. If either cloud row is absent, retain
+ * that section from local storage so a partial cloud account cannot erase it.
+ */
+export function reconcileCloudProgress(
+  local: ProgressState,
+  profiles: CloudProfileRow[],
+  rows: CloudPracticeRow[],
+): { progress: ProgressState; needsRepair: boolean } | null {
+  if (!profiles.length && !rows.length) return null;
+
+  const profile = profiles[0];
+  const practice = rows[0];
+  return {
+    progress: {
+      name: profile ? profile.display_name : local.name,
+      resume: profile ? profile.resume_text : local.resume,
+      saved: practice ? practice.saved_jobs : local.saved,
+      applications: practice ? practice.applications : local.applications,
+    },
+    needsRepair: !profile || !practice,
+  };
+}
+
 async function restRequest<T>(
   table: "profiles" | "practice_data",
   session: AuthSession,
@@ -155,20 +182,16 @@ async function restRequest<T>(
   return (await response.json().catch(() => [])) as T;
 }
 
-export async function loadCloudProgress(): Promise<ProgressState | null> {
+export async function loadCloudProgress(
+  localFallback: ProgressState,
+): Promise<{ progress: ProgressState; needsRepair: boolean } | null> {
   const session = await getValidSession();
   if (!session) return null;
   const [profiles, rows] = await Promise.all([
-    restRequest<Array<{ display_name: string; resume_text: string }>>("profiles", session, "GET"),
-    restRequest<Array<{ saved_jobs: string[]; applications: ProgressState["applications"] }>>("practice_data", session, "GET"),
+    restRequest<CloudProfileRow[]>("profiles", session, "GET"),
+    restRequest<CloudPracticeRow[]>("practice_data", session, "GET"),
   ]);
-  if (!profiles.length && !rows.length) return null;
-  return {
-    name: profiles[0]?.display_name ?? "",
-    resume: profiles[0]?.resume_text ?? "",
-    saved: rows[0]?.saved_jobs ?? [],
-    applications: rows[0]?.applications ?? [],
-  };
+  return reconcileCloudProgress(localFallback, profiles, rows);
 }
 
 export async function saveCloudProgress(progress: ProgressState): Promise<void> {
