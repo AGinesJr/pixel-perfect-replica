@@ -49,9 +49,18 @@ function Profile() {
     }
   }, [ready, state.name, state.resume]);
 
+  useEffect(() => {
+    const onSyncError = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail;
+      setNotice(`Cloud sync issue: ${detail} Your data remains in this browser.`);
+    };
+    window.addEventListener("wp-sync-error", onSyncError);
+    return () => window.removeEventListener("wp-sync-error", onSyncError);
+  }, []);
+
   function clearPracticeData() {
     const confirmed = window.confirm(
-      "Delete all Workforce Prep practice data saved in this browser? This removes your resume, saved jobs, applications, and interview feedback. This cannot be undone unless you exported a backup.",
+      "Delete all Workforce Prep practice data saved in this browser? This removes your resume, saved jobs, applications, and interview feedback from this browser and, if signed in, syncs the deletion to your cloud account. This cannot be undone unless you exported a backup.",
     );
     if (!confirmed) return;
 
@@ -59,22 +68,21 @@ function Profile() {
     setName("");
     setResume("");
     setSaved(false);
-    setNotice("All Workforce Prep practice data has been removed from this browser.");
+    setNotice("Practice data was removed from this browser. If signed in, cloud deletion is being synced.");
   }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-3xl font-bold">My resume</h1>
       <p className="text-muted-foreground">
-        Your practice data is stored in this browser on this device. It is not
-        synced to an account or backed up automatically.
+        Your practice data is always kept in this browser. When you sign in, Workforce Prep also syncs your resume, saved jobs, and practice applications to your private Supabase account.
       </p>
       <form
         onSubmit={(event) => {
           event.preventDefault();
           update((current) => ({ ...current, name, resume }));
           setSaved(true);
-          setNotice("Your resume was saved in this browser.");
+          setNotice("Your resume was saved in this browser. If you are signed in, cloud sync is also being attempted.");
         }}
         className="mt-6 space-y-4 rounded-lg border bg-card p-6"
       >
