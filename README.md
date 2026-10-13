@@ -8,6 +8,7 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 - Submit a practice application with resume text and an optional cover letter.
 - Receive AI-generated practice screening when the configured AI gateway is available.
 - Practice an AI interview and receive rubric-based coaching feedback.
+- Use a hosted, browser-based voice interview prototype: spoken questions, microphone speech recognition, editable transcripts, and typed-answer fallback.
 - Maintain a career profile with full name, contact email, phone number, city, state, ZIP code, profile photo, and resume.
 - Save resume text, profile details, applications, and progress in the current browser, with account cloud sync available after deployment configuration and verification.
 - Export or delete browser-local practice data from **My profile and resume**.
@@ -18,7 +19,8 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 - **Profile contact email is separate from the Supabase sign-in email.** Updating the profile contact email does not change account credentials.
 - **Supabase sign-in and cloud sync require deployment configuration and live testing.** The account page uses Supabase Auth and the app syncs profile and practice data to the RLS-protected tables. Add the required Supabase URL and public key to the hosting build environment, run both database migrations, rebuild, and test sign-up/sign-in before relying on cloud storage. Until configured and verified, practice data remains browser-local.
 - **The profile photo is compressed in the browser and stored as a data URL** with the profile record. The image is resized to a square and compressed before saving. Avoid uploading sensitive images.
-- **AI needs a configured server-side gateway key and available credits.** If AI is unavailable or the workspace is out of credits, application screening and interview coaching cannot complete. The app should show an error rather than fabricate an AI assessment.
+- **AI needs a configured server-side gateway key and available credits.** If AI is unavailable or the workspace is out of credits, application screening and interview coaching cannot complete. The app should show an error rather than fabricate an AI assessment. Existing interview AI calls can use Lovable AI credits; the voice prototype does not guarantee unlimited free AI usage.
+- **Voice support depends on the browser.** Spoken questions use the browser's speech synthesis. Microphone answers use browser speech recognition when available (typically best supported in current Chrome or Edge). Some browsers may send recognition audio to their own speech service; this prototype does not save an audio recording. If speech recognition is unavailable or permission is denied, users can type their answer instead.
 - **No real applications are submitted.** Simulated decisions are not actual employer decisions or guarantees of hiring outcomes.
 - **Do not enter sensitive personal data.** Never include Social Security numbers, financial account details, or other unnecessary sensitive information in a resume or practice answer.
 
