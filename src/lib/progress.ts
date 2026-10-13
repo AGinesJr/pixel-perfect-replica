@@ -58,15 +58,20 @@ export function useProgress() {
     const syncFromCloud = async () => {
       if (!getStoredSession()) return;
       try {
-        const cloud = await loadCloudProgress();
+        const localProgress = read();
+        const cloud = await loadCloudProgress(localProgress);
         if (!active) return;
         if (cloud) {
-          localStorage.setItem(KEY, JSON.stringify(cloud));
-          setState(cloud);
+          localStorage.setItem(KEY, JSON.stringify(cloud.progress));
+          setState(cloud.progress);
           window.dispatchEvent(new Event("wp-progress"));
+          if (cloud.needsRepair) {
+            // Fill the missing cloud row without discarding local-only data.
+            await saveCloudProgress(cloud.progress);
+          }
         } else {
           // First sign-in: migrate this browser's existing practice data once.
-          await saveCloudProgress(read());
+          await saveCloudProgress(localProgress);
         }
       } catch (error) {
         if (active) {
