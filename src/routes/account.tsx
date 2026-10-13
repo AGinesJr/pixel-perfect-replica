@@ -71,7 +71,7 @@ function Account() {
       {!isSupabaseConfigured ? (
         <div className="mt-6 rounded-lg border p-5">
           <h2 className="font-semibold">Supabase configuration needed</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to the hosting environment and rebuild the app. These must be the Project URL and public publishable/anon key—not a service-role or secret key.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Add VITE_SUPABASE_URL and either VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY to the hosting environment, then rebuild the app. Use the Project URL and public publishable/anon key—not a service-role or secret key.</p>
         </div>
       ) : userEmail ? (
         <section className="mt-6 rounded-lg border bg-card p-6">

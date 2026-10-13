@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { achievements, levelFor, xpFor, type ProgressState } from "./progress";
+import { reconcileCloudProgress } from "./supabase";
 
 const emptyState: ProgressState = {
   name: "",
@@ -90,5 +91,67 @@ describe("career progress helpers", () => {
     expect(
       completed.find((achievement) => achievement.name === "Strong performer")?.done,
     ).toBe(true);
+  });
+});
+
+describe("cloud progress reconciliation", () => {
+  const local: ProgressState = {
+    name: "Local name",
+    resume: "Local resume",
+    saved: ["local-job"],
+    applications: [],
+  };
+
+  it("preserves local practice data when only the cloud profile exists", () => {
+    const result = reconcileCloudProgress(
+      local,
+      [{ display_name: "Cloud name", resume_text: "Cloud resume" }],
+      [],
+    );
+    expect(result).toEqual({
+      progress: {
+        name: "Cloud name",
+        resume: "Cloud resume",
+        saved: ["local-job"],
+        applications: [],
+      },
+      needsRepair: true,
+    });
+  });
+
+  it("preserves local profile data when only cloud practice data exists", () => {
+    const result = reconcileCloudProgress(
+      local,
+      [],
+      [{ saved_jobs: ["cloud-job"], applications: [] }],
+    );
+    expect(result).toEqual({
+      progress: {
+        name: "Local name",
+        resume: "Local resume",
+        saved: ["cloud-job"],
+        applications: [],
+      },
+      needsRepair: true,
+    });
+  });
+
+  it("returns null when neither cloud record exists so first sign-in can migrate local data", () => {
+    expect(reconcileCloudProgress(local, [], [])).toBeNull();
+  });
+
+  it("does not request repair when both cloud records exist", () => {
+    const result = reconcileCloudProgress(
+      local,
+      [{ display_name: "Cloud name", resume_text: "Cloud resume" }],
+      [{ saved_jobs: ["cloud-job"], applications: [] }],
+    );
+    expect(result?.needsRepair).toBe(false);
+    expect(result?.progress).toEqual({
+      name: "Cloud name",
+      resume: "Cloud resume",
+      saved: ["cloud-job"],
+      applications: [],
+    });
   });
 });
