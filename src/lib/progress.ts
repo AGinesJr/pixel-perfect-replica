@@ -30,12 +30,29 @@ export type Application = {
 export type ProgressState = {
   name: string;
   resume: string;
+  contactEmail: string;
+  phone: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  avatarDataUrl: string;
   saved: string[];
   applications: Application[];
 };
 
 const KEY = "workforce-prep-v1";
-const empty: ProgressState = { name: "", resume: "", saved: [], applications: [] };
+const empty: ProgressState = {
+  name: "",
+  resume: "",
+  contactEmail: "",
+  phone: "",
+  city: "",
+  state: "",
+  zipCode: "",
+  avatarDataUrl: "",
+  saved: [],
+  applications: [],
+};
 
 function read(): ProgressState {
   try {

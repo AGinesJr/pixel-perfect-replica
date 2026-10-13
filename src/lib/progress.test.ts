@@ -5,9 +5,26 @@ import { reconcileCloudProgress } from "./supabase";
 const emptyState: ProgressState = {
   name: "",
   resume: "",
+  contactEmail: "",
+  phone: "",
+  city: "",
+  state: "",
+  zipCode: "",
+  avatarDataUrl: "",
   saved: [],
   applications: [],
 };
+
+const cloudProfile = (display_name: string, resume_text: string) => ({
+  display_name,
+  resume_text,
+  contact_email: "candidate@example.com",
+  phone: "555-0100",
+  city: "Sanford",
+  state: "FL",
+  zip_code: "32771",
+  avatar_data_url: "",
+});
 
 describe("career progress helpers", () => {
   it("starts at level one with no progress", () => {
@@ -79,59 +96,49 @@ describe("career progress helpers", () => {
       ],
     };
     const completed = achievements(state);
-    expect(
-      completed.find((achievement) => achievement.name === "Resume ready")?.done,
-    ).toBe(true);
-    expect(
-      completed.find((achievement) => achievement.name === "Got the call")?.done,
-    ).toBe(true);
-    expect(
-      completed.find((achievement) => achievement.name === "Interview complete")?.done,
-    ).toBe(true);
-    expect(
-      completed.find((achievement) => achievement.name === "Strong performer")?.done,
-    ).toBe(true);
+    expect(completed.find((achievement) => achievement.name === "Resume ready")?.done).toBe(true);
+    expect(completed.find((achievement) => achievement.name === "Got the call")?.done).toBe(true);
+    expect(completed.find((achievement) => achievement.name === "Interview complete")?.done).toBe(true);
+    expect(completed.find((achievement) => achievement.name === "Strong performer")?.done).toBe(true);
   });
 });
 
 describe("cloud progress reconciliation", () => {
   const local: ProgressState = {
+    ...emptyState,
     name: "Local name",
     resume: "Local resume",
+    contactEmail: "local@example.com",
+    phone: "555-0199",
+    city: "Orlando",
+    state: "FL",
+    zipCode: "32801",
+    avatarDataUrl: "local-photo",
     saved: ["local-job"],
-    applications: [],
   };
 
   it("preserves local practice data when only the cloud profile exists", () => {
-    const result = reconcileCloudProgress(
-      local,
-      [{ display_name: "Cloud name", resume_text: "Cloud resume" }],
-      [],
-    );
+    const result = reconcileCloudProgress(local, [cloudProfile("Cloud name", "Cloud resume")], []);
     expect(result).toEqual({
       progress: {
+        ...local,
         name: "Cloud name",
         resume: "Cloud resume",
-        saved: ["local-job"],
-        applications: [],
+        contactEmail: "candidate@example.com",
+        phone: "555-0100",
+        city: "Sanford",
+        state: "FL",
+        zipCode: "32771",
+        avatarDataUrl: "",
       },
       needsRepair: true,
     });
   });
 
   it("preserves local profile data when only cloud practice data exists", () => {
-    const result = reconcileCloudProgress(
-      local,
-      [],
-      [{ saved_jobs: ["cloud-job"], applications: [] }],
-    );
+    const result = reconcileCloudProgress(local, [], [{ saved_jobs: ["cloud-job"], applications: [] }]);
     expect(result).toEqual({
-      progress: {
-        name: "Local name",
-        resume: "Local resume",
-        saved: ["cloud-job"],
-        applications: [],
-      },
+      progress: { ...local, saved: ["cloud-job"], applications: [] },
       needsRepair: true,
     });
   });
@@ -143,13 +150,20 @@ describe("cloud progress reconciliation", () => {
   it("does not request repair when both cloud records exist", () => {
     const result = reconcileCloudProgress(
       local,
-      [{ display_name: "Cloud name", resume_text: "Cloud resume" }],
+      [cloudProfile("Cloud name", "Cloud resume")],
       [{ saved_jobs: ["cloud-job"], applications: [] }],
     );
     expect(result?.needsRepair).toBe(false);
     expect(result?.progress).toEqual({
+      ...local,
       name: "Cloud name",
       resume: "Cloud resume",
+      contactEmail: "candidate@example.com",
+      phone: "555-0100",
+      city: "Sanford",
+      state: "FL",
+      zipCode: "32771",
+      avatarDataUrl: "",
       saved: ["cloud-job"],
       applications: [],
     });
