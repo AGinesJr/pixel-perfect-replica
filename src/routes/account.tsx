@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useProgress, type ProgressState } from "@/lib/progress";
 import { getStoredSession, isSupabaseConfigured, signIn, signOut, signUp } from "@/lib/supabase";
@@ -64,7 +64,6 @@ function compressAvatar(file: File): Promise<string> {
 }
 
 function Account() {
-  const navigate = useNavigate();
   const { state, update, ready } = useProgress();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
