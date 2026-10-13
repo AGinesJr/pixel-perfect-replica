@@ -14,7 +14,7 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 ## Important limitations
 
 - **This is a practice simulator, not a real job board.** Jobs, employers, posting dates, and salary ranges are sample content, not verified vacancies or live labor-market data.
-- **The current app does not yet use Supabase for sign-in or cloud sync.** The Supabase database migration in `supabase/migrations/` defines a private schema, but it must be applied to your Supabase project and the frontend auth/data integration must be completed before records sync to the cloud.
+- **Supabase sign-in and cloud sync require deployment configuration.** The account page uses Supabase Auth and the app syncs profile and practice data to the RLS-protected tables. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to the hosting build environment, rebuild, and test sign-up/sign-in before relying on cloud storage. Until configured, practice data remains browser-local.
 - **AI needs a configured server-side gateway key and available credits.** If AI is unavailable or the workspace is out of credits, application screening and interview coaching cannot complete. The app should show an error rather than fabricate an AI assessment.
 - **No real applications are submitted.** Simulated decisions are not actual employer decisions or guarantees of hiring outcomes.
 - **Do not enter sensitive personal data.** Never include Social Security numbers, financial account details, or other unnecessary sensitive information in a resume or practice answer.
@@ -38,7 +38,7 @@ bun run lint
 bun run build
 ```
 
-## Supabase setup (database foundation)
+## Supabase setup (accounts and cloud sync)
 
 1. Create or open the Supabase project you intend Workforce Prep to use.
 2. In the Supabase dashboard, open **SQL Editor**.
@@ -46,7 +46,10 @@ bun run build
 4. Confirm that `profiles` and `practice_data` appear in Table Editor and that row-level security (RLS) is enabled on both.
 5. The migration deliberately has no anonymous/public access policies. A signed-in user can access only rows whose `user_id` matches their Supabase Auth user ID.
 
-**Important:** this migration creates the database and access policies only. It does not, by itself, add sign-in or cloud sync to the current UI. Do not disable RLS to make testing easier, and never put a Supabase service-role/secret key in browser code. The public/anon (or publishable) key is designed for client use when RLS is configured correctly.
+6. In Project Settings → API (or the Connect panel), copy the Project URL and public publishable/anon key into the deployment platform’s build environment as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+7. Rebuild/redeploy, open `/account`, create an account, confirm your email if requested, and sign in. Test saving a resume and saved job, then sign in from a second browser to confirm sync.
+
+**Important:** never put a Supabase service-role/secret key in browser code. The public/anon (or publishable) key is designed for client use when RLS is configured correctly. Access tokens are stored in browser local storage, so protect the app from cross-site scripting and use strong unique passwords.
 
 ## AI gateway configuration
 
