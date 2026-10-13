@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useProgress } from "@/lib/progress";
 
 export const Route = createFileRoute("/profile")({
@@ -33,7 +33,7 @@ function Profile() {
     return () => window.removeEventListener("wp-sync-error", onSyncError);
   }, []);
 
-  function saveResume(event: React.FormEvent<HTMLFormElement>) {
+  function saveResume(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     update((current) => ({ ...current, resume }));
     setSaved(true);
