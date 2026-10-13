@@ -40,8 +40,8 @@ describe("career progress helpers", () => {
         },
       }],
     };
-    expect(xpFor(state)).toBe(355);
-    expect(levelFor(355)).toEqual({ level: 2, into: 105, next: 250 });
+    expect(xpFor(state)).toBe(360);
+    expect(levelFor(360)).toEqual({ level: 2, into: 110, next: 250 });
   });
 
   it("marks achievements only when their conditions are met", () => {
