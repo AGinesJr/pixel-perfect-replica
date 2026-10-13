@@ -9,9 +9,9 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 - Receive AI-generated practice screening when the configured AI gateway is available.
 - Practice an AI interview and receive rubric-based coaching feedback.
 - Use a hosted, browser-based voice interview prototype: spoken questions, microphone speech recognition, editable transcripts, and typed-answer fallback.
-- Maintain a career profile with full name, contact email, phone number, city, state, ZIP code, profile photo, and resume.
+- Manage full name, career contact email, phone number, city, state, ZIP code, and profile photo on **Account / Profile**; edit resume text separately on **Resume**.
 - Save resume text, profile details, applications, and progress in the current browser, with account cloud sync available after deployment configuration and verification.
-- Export or delete browser-local practice data from **My profile and resume**.
+- Export or delete browser-local practice data from **Account / Profile**.
 
 ## Important limitations
 
