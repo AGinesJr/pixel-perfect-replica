@@ -258,14 +258,15 @@ function Account() {
 
       <section className="mt-6 rounded-lg border bg-card p-6">
         <h2 className="text-xl font-semibold">Account access</h2>
-        {!isSupabaseConfigured ? (
+        {!isSupabaseConfigured && !userEmail && mode !== "choice" && (
           <div className="mt-4 rounded-md border p-4">
             <h3 className="font-semibold">Cloud account configuration needed</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Profile information can still be saved in this browser. To enable account sign-in and cross-device sync, configure VITE_SUPABASE_URL and either VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY in the hosting environment, then rebuild. Use only the public publishable/anon key, never a service-role or secret key.
             </p>
           </div>
-        ) : userEmail ? (
+        )}
+        {userEmail ? (
           <div className="mt-4">
             <p className="text-sm text-muted-foreground">Signed in with</p>
             <p className="mt-1 break-all font-semibold">{userEmail}</p>
