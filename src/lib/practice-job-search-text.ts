@@ -1,4 +1,4 @@
-import type { Job } from "@/lib/data";
+import type { Job } from "./data";
 
 /** Flatten the user-visible role content into one field for safe database keyword search. */
 export function buildPracticeJobSearchText(job: Pick<Job,
