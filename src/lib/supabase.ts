@@ -119,6 +119,8 @@ export function startOAuth(provider: OAuthProvider, redirectTo?: string): void {
   const target = redirectTo ?? (typeof window !== "undefined" ? `${window.location.origin}/account` : "");
   const authorize = new globalThis.URL(`${url}/auth/v1/authorize`);
   authorize.searchParams.set("provider", provider);
+  // Supabase requires Microsoft/Azure sign-in to request an email claim.
+  if (provider === "azure") authorize.searchParams.set("scopes", "email");
   authorize.searchParams.set("redirect_to", target);
   authorize.searchParams.set("apikey", key);
   window.location.assign(authorize.toString());
