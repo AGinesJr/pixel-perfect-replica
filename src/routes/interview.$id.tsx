@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { requestVoiceToken } from "@/lib/live-interview";
+import { formatLiveStartupError, logLiveDiagnostic, type LiveStartupStage } from "@/lib/live-interview-diagnostics";
 import { useServerFn } from "@tanstack/react-start";
 import { jobs } from "@/lib/data";
 import { useProgress } from "@/lib/progress";
@@ -85,6 +86,7 @@ function Interview() {
   const [liveError, setLiveError] = useState("");
   const [liveStarting, setLiveStarting] = useState(false);
   const [liveText, setLiveText] = useState("");
+  const liveStageRef = useRef<LiveStartupStage>("idle");
   const liveMessageKeys = useRef(new Set<string>());
   const turn = useServerFn(interviewTurn);
   const feedback = useServerFn(interviewFeedback);
@@ -102,11 +104,25 @@ function Interview() {
       });
     },
     onError: (error: unknown) => {
-      setLiveError(typeof error === "string" ? error : error instanceof Error ? error.message : "The live voice session encountered an error. You can retry or use manual mode.");
+      logLiveDiagnostic("sdk-error", { stage: liveStageRef.current, error });
+      setLiveError(formatLiveStartupError(error, liveStageRef.current));
       setLiveStarting(false);
     },
-    onConnect: () => setLiveStarting(false),
-    onDisconnect: () => setLiveStarting(false),
+    onConnect: () => {
+      logLiveDiagnostic("connected", { stage: liveStageRef.current, connectionType: "webrtc" });
+      liveStageRef.current = "idle";
+      setLiveStarting(false);
+    },
+    onDisconnect: () => {
+      logLiveDiagnostic("disconnected", { stage: liveStageRef.current });
+      setLiveStarting(false);
+    },
+    onStatusChange: (event) => {
+      logLiveDiagnostic("status-change", event);
+    },
+    onDebug: (event) => {
+      logLiveDiagnostic("sdk-debug", event);
+    },
     overrides: job ? {
       agent: {
         prompt: {
@@ -227,6 +243,7 @@ function Interview() {
     setErr("");
     setVoiceError("");
     setLiveStarting(true);
+    liveStageRef.current = "microphone";
     try {
       if (
         typeof window === "undefined" ||
@@ -240,6 +257,7 @@ function Interview() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
 
+      liveStageRef.current = "token";
       const { token, userId } = await requestVoiceToken();
 
       recognitionRef.current?.abort();
@@ -253,14 +271,18 @@ function Interview() {
 
       // These are WebRTC conversation tokens, so explicitly choose WebRTC and
       // await startup so SDK rejections are handled by this catch block.
+      liveStageRef.current = "connection";
+      logLiveDiagnostic("starting-webrtc", { stage: liveStageRef.current, connectionType: "webrtc" });
       await liveConversation.startSession({
         conversationToken: token,
         connectionType: "webrtc",
         userId,
       });
     } catch (error) {
+      logLiveDiagnostic("startup-failed", { stage: liveStageRef.current, error });
       setLiveStarting(false);
-      setLiveError(error instanceof Error ? error.message : "Unable to start the live voice interview.");
+      setLiveError(formatLiveStartupError(error, liveStageRef.current));
+      liveStageRef.current = "idle";
     }
   }
 
