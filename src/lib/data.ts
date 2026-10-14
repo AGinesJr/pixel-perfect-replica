@@ -5,7 +5,7 @@ export type Job = {
   industry: string;
   location: string;
   remote: "Remote" | "Hybrid" | "On-site";
-  type: "Full-time" | "Part-time" | "Contract";
+  type: "Full-time" | "Part-time" | "Contract" | "Temporary" | "Internship" | "Apprenticeship";
   level: "Entry" | "Junior" | "Mid" | "Senior" | "Lead" | "Manager" | "Director" | "Executive";
   sourceType?: "simulated";
   salary: [number, number];
