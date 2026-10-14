@@ -88,7 +88,7 @@ function Interview() {
   useEffect(() => {
     if (!voiceOutput || !speechOutputSupported || !history.length || typeof window === "undefined") return;
     const latest = history[history.length - 1];
-    if (latest.role !== "interviewer") return;
+    if (!latest || latest.role !== "interviewer") return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(latest.text);
     utterance.lang = "en-US";
