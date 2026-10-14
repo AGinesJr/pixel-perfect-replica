@@ -111,6 +111,47 @@ export async function signUp(email: string, password: string) {
   return { session: null, confirmationRequired: true };
 }
 
+
+export type OAuthProvider = "google" | "azure" | "apple" | "linkedin_oidc";
+
+export function startOAuth(provider: OAuthProvider, redirectTo?: string): never {
+  const { url, key } = config();
+  const target = redirectTo ?? (typeof window !== "undefined" ? `${window.location.origin}/account` : "");
+  const authorize = new URL(`${url}/auth/v1/authorize`);
+  authorize.searchParams.set("provider", provider);
+  authorize.searchParams.set("redirect_to", target);
+  authorize.searchParams.set("apikey", key);
+  window.location.assign(authorize.toString());
+  throw new Error("Redirecting to your identity provider.");
+}
+
+export async function completeOAuthCallback(): Promise<AuthSession | null> {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  if (!accessToken || !refreshToken) return null;
+
+  const { url, key } = config();
+  const response = await fetch(`${url}/auth/v1/user`, {
+    headers: { apikey: key, Authorization: `Bearer ${accessToken}` },
+  });
+  const user = (await response.json().catch(() => ({}))) as AuthUser & { message?: string };
+  if (!response.ok || !user.id) {
+    throw new Error(user.message || "Your provider sign-in could not be completed.");
+  }
+  const expiresIn = Number(params.get("expires_in") ?? 3600);
+  const session: AuthSession = {
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_at: Math.floor(Date.now() / 1000) + (Number.isFinite(expiresIn) ? expiresIn : 3600),
+    user: { id: user.id, email: user.email },
+  };
+  storeSession(session);
+  window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`);
+  return session;
+}
+
 export async function signOut() {
   const session = getStoredSession();
   try {
