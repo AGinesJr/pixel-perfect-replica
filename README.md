@@ -6,7 +6,7 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 
 - Browse a curated set of fictional practice jobs.
 - Submit a practice application with resume text and an optional cover letter.
-- Choose a practice mode: Training (default, supportive), Career Simulation (balanced), or optional advanced Market Reality (stricter simulated threshold only).
+- Choose a practice mode: Training (default, supportive), Career Simulation (balanced), or optional advanced Market Reality (stricter simulated threshold only). Outcomes distinguish missing required evidence from a candidate who appears qualified but falls below the simulated threshold.
 - Receive a three-step coaching plan with timelines after screening, regardless of outcome.
 - Receive AI-generated practice screening when the configured AI gateway is available.
 - Practice an AI interview and receive rubric-based coaching feedback.
