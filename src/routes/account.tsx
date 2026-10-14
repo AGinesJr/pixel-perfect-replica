@@ -147,7 +147,7 @@ function Account() {
     return [firstName.trim(), middleName.trim(), lastName.trim(), suffix].filter(Boolean).join(" ");
   }
 
-  function useProvider(provider: OAuthProvider | "indeed") {
+  function handleProvider(provider: OAuthProvider | "indeed") {
     setError("");
     setMessage("");
     if (mode === "signup") {
@@ -290,11 +290,11 @@ function Account() {
               </form>
               <div className="flex items-center gap-3 py-1 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" /><span>OR SIGN IN WITH</span><span className="h-px flex-1 bg-border" /></div>
               <div className="grid gap-2">
-                <button type="button" disabled={busy} onClick={() => useProvider("google")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Google</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("azure")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Outlook</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("apple")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with iCloud</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("linkedin_oidc")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with LinkedIn</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("indeed")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Indeed</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("google")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Google</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("azure")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Outlook</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("apple")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with iCloud</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("linkedin_oidc")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with LinkedIn</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("indeed")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Indeed</button>
               </div>
             </div>
           ) : (
@@ -318,11 +318,11 @@ function Account() {
               </div>
               <div className="flex items-center gap-3 py-1 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" /><span>CREATE WITH</span><span className="h-px flex-1 bg-border" /></div>
               <div className="grid gap-2">
-                <button type="button" disabled={busy} onClick={() => useProvider("google")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Google</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("azure")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Outlook</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("apple")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with iCloud</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("linkedin_oidc")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with LinkedIn</button>
-                <button type="button" disabled={busy} onClick={() => useProvider("indeed")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Indeed</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("google")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Google</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("azure")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Outlook</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("apple")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with iCloud</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("linkedin_oidc")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with LinkedIn</button>
+                <button type="button" disabled={busy} onClick={() => handleProvider("indeed")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Indeed</button>
               </div>
             </div>
         )}

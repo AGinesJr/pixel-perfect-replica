@@ -16,7 +16,7 @@ export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
 });
 
-const status = { interview: "Interview", more_info: "More info requested", reject: "Not selected" } as const;
+const status = { interview: "Interview", more_info: "More evidence needed", qualified_not_selected: "Qualified, below simulated threshold", reject: "Required qualification gap" } as const;
 
 function Dashboard() {
   const { state } = useProgress();

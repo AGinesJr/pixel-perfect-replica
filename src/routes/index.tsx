@@ -57,7 +57,7 @@ function Home() {
 
       <section className="mx-auto max-w-6xl px-4 pb-20">
         <div className="mb-6 flex items-end justify-between">
-          <h2 className="text-2xl font-bold">Recently posted</h2>
+          <div><h2 className="text-2xl font-bold">Practice roles</h2><p className="mt-1 text-sm text-muted-foreground">Sample listings for rehearsal — not live vacancies.</p></div>
           <Link to="/jobs" className="text-sm font-semibold text-primary">View all jobs →</Link>
         </div>
         <div className="grid gap-4 md:grid-cols-3">{jobs.slice(0, 6).map((j) => <JobCard key={j.id} job={j} />)}</div>
