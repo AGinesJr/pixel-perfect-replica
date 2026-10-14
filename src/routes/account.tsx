@@ -18,7 +18,7 @@ function downloadPracticeData(data: ProgressState) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = \`workforce-prep-data-\${new Date().toISOString().slice(0, 10)}.json\`;
+  anchor.download = `workforce-prep-data-${new Date().toISOString().slice(0, 10)}.json`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
@@ -104,7 +104,7 @@ function Account() {
   useEffect(() => {
     const onSyncError = (event: Event) => {
       const detail = (event as CustomEvent<string>).detail;
-      setProfileNotice(\`Cloud sync issue: \${detail} Your data remains in this browser.\`);
+      setProfileNotice(`Cloud sync issue: ${detail} Your data remains in this browser.`);
     };
     window.addEventListener("wp-sync-error", onSyncError);
     return () => window.removeEventListener("wp-sync-error", onSyncError);
@@ -246,8 +246,8 @@ function Account() {
         ) : (
           <form onSubmit={submit} className="mt-4 space-y-4">
             <div className="flex gap-2 rounded-md bg-muted p-1">
-              <button type="button" onClick={() => { setMode("signin"); setMessage(""); setError(""); }} className={\`flex-1 rounded px-3 py-2 text-sm font-semibold \${mode === "signin" ? "bg-background shadow-sm" : "text-muted-foreground"}\`}>Sign in</button>
-              <button type="button" onClick={() => { setMode("signup"); setMessage(""); setError(""); }} className={\`flex-1 rounded px-3 py-2 text-sm font-semibold \${mode === "signup" ? "bg-background shadow-sm" : "text-muted-foreground"}\`}>Create account</button>
+              <button type="button" onClick={() => { setMode("signin"); setMessage(""); setError(""); }} className={`flex-1 rounded px-3 py-2 text-sm font-semibold ${mode === "signin" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Sign in</button>
+              <button type="button" onClick={() => { setMode("signup"); setMessage(""); setError(""); }} className={`flex-1 rounded px-3 py-2 text-sm font-semibold ${mode === "signup" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Create account</button>
             </div>
             <label className="block text-sm font-semibold">Sign-in email
               <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
