@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
-import { getValidSession } from "@/lib/supabase";
+import { requestVoiceToken } from "@/lib/live-interview";
 import { useServerFn } from "@tanstack/react-start";
 import { jobs } from "@/lib/data";
 import { useProgress } from "@/lib/progress";
@@ -228,22 +228,20 @@ function Interview() {
     setVoiceError("");
     setLiveStarting(true);
     try {
-      const session = await getValidSession();
-      if (!session) throw new Error("Sign in again to start a live voice interview.");
-      const url = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined)?.replace(/\/$/, "");
-      const key = (import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? import.meta.env["VITE_SUPABASE_ANON_KEY"]) as string | undefined;
-      if (!url || !key) throw new Error("Supabase is not configured for this app. Check its VITE_SUPABASE_URL and public key settings.");
-      const response = await fetch(url + "/functions/v1/elevenlabs-session", {
-        method: "POST",
-        headers: { Authorization: "Bearer " + session.access_token, apikey: key, "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      const payload = await response.json().catch(() => ({})) as { token?: string; error?: string };
-      if (!response.ok) throw new Error(payload.error || "Could not start voice interview (HTTP " + response.status + ").");
-      if (!payload.token) throw new Error("Supabase did not return a voice session token.");
-      if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) throw new Error("This browser does not support microphone access for live interviews. Use manual interview mode instead.");
+      if (
+        typeof window === "undefined" ||
+        !navigator.mediaDevices?.getUserMedia ||
+        typeof RTCPeerConnection === "undefined"
+      ) {
+        throw new Error("This browser does not support live voice. Try the latest Chrome or Edge, or use manual interview mode.");
+      }
+
+      // Request microphone permission before fetching a short-lived session token.
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
+
+      const { token, userId } = await requestVoiceToken();
+
       recognitionRef.current?.abort();
       recognitionRef.current = null;
       setListening(false);
@@ -252,7 +250,14 @@ function Interview() {
       setHistory([]);
       setDone(false);
       setInterviewMode("live");
-      liveConversation.startSession({ conversationToken: payload.token, userId: session.user.id });
+
+      // These are WebRTC conversation tokens, so explicitly choose WebRTC and
+      // await startup so SDK rejections are handled by this catch block.
+      await liveConversation.startSession({
+        conversationToken: token,
+        connectionType: "webrtc",
+        userId,
+      });
     } catch (error) {
       setLiveStarting(false);
       setLiveError(error instanceof Error ? error.message : "Unable to start the live voice interview.");
