@@ -114,7 +114,7 @@ export async function signUp(email: string, password: string) {
 
 export type OAuthProvider = "google" | "azure" | "apple" | "linkedin_oidc";
 
-export function startOAuth(provider: OAuthProvider, redirectTo?: string): never {
+export function startOAuth(provider: OAuthProvider, redirectTo?: string): void {
   const { url, key } = config();
   const target = redirectTo ?? (typeof window !== "undefined" ? `${window.location.origin}/account` : "");
   const authorize = new URL(`${url}/auth/v1/authorize`);
@@ -122,7 +122,6 @@ export function startOAuth(provider: OAuthProvider, redirectTo?: string): never 
   authorize.searchParams.set("redirect_to", target);
   authorize.searchParams.set("apikey", key);
   window.location.assign(authorize.toString());
-  throw new Error("Redirecting to your identity provider.");
 }
 
 export async function completeOAuthCallback(): Promise<AuthSession | null> {
