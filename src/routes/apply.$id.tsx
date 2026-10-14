@@ -33,7 +33,18 @@ function Apply() {
   const [err, setErr] = useState("");
   const evaluate = useServerFn(evaluateApplication);
   const nav = useNavigate();
-  useEffect(() => { if (ready && !resume) setResume(state.resume); }, [ready]); // eslint-disable-line
+  useEffect(() => {
+    if (!ready) return;
+    // Reapplications are new records, prefilled from the latest attempt for this job.
+    const previous = state.applications.find((application) => application.jobId === job.id);
+    if (previous) {
+      setResume(previous.resume || state.resume);
+      setCover(previous.coverLetter || "");
+      setMode(previous.mode || "training");
+    } else if (!resume) {
+      setResume(state.resume);
+    }
+  }, [ready, job.id]); // eslint-disable-line
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +52,15 @@ function Apply() {
     try {
       const evaluation = await evaluate({ data: { job: jobPayload(job), resume, coverLetter: cover, mode } });
       const id = crypto.randomUUID();
-      update((s) => ({ ...s, resume: s.resume || resume, applications: [{ id, jobId: job.id, submittedAt: new Date().toISOString(), mode, resume, coverLetter: cover, evaluation }, ...s.applications] }));
+      update((s) => ({
+        ...s,
+        resume: s.resume || resume,
+        // Always append a distinct application ID. Earlier attempts and their scores remain untouched.
+        applications: [
+          { id, jobId: job.id, submittedAt: new Date().toISOString(), mode, resume, coverLetter: cover, evaluation },
+          ...s.applications,
+        ],
+      }));
       nav({ to: "/applications/$id", params: { id } });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Something went wrong.");

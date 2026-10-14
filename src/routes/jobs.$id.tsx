@@ -27,7 +27,8 @@ function JobPage() {
   const { job } = Route.useLoaderData();
   const emp = employers[job.employer]!;
   const { state } = useProgress();
-  const applied = state.applications.find((a) => a.jobId === job.id);
+  const jobApplications = state.applications.filter((a) => a.jobId === job.id);
+  const applied = jobApplications[0];
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-[1fr_300px]">
       <article className="rounded-lg border bg-card p-6 md:p-8">
@@ -40,10 +41,20 @@ function JobPage() {
           <span className="rounded bg-secondary px-2 py-1">{job.level} level</span>
         </div>
         <div className="mt-6">
-          {applied ? (
-            <Link to="/applications/$id" params={{ id: applied.id }} className="inline-flex h-11 items-center rounded-md border px-6 font-semibold">View your application</Link>
-          ) : (
-            <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90">Apply now</Link>
+          <div className="flex flex-wrap gap-3">
+            {applied ? (
+              <Link to="/applications/$id" params={{ id: applied.id }} className="inline-flex h-11 items-center rounded-md border px-6 font-semibold">View latest application</Link>
+            ) : (
+              <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90">Apply now</Link>
+            )}
+            <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90">
+              {applied ? "Reapply as new attempt" : "Start a new application"}
+            </Link>
+          </div>
+          {jobApplications.length > 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {jobApplications.length} saved {jobApplications.length === 1 ? "attempt" : "attempts"} for this role. Reapplying creates a new record; previous results stay in your dashboard.
+            </p>
           )}
         </div>
         <Section title="About the role"><p>{job.summary}</p></Section>
