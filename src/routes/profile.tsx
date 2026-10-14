@@ -27,7 +27,7 @@ function Profile() {
   useEffect(() => {
     const onSyncError = (event: Event) => {
       const detail = (event as CustomEvent<string>).detail;
-      setNotice(\`Cloud sync issue: \${detail} Your data remains in this browser.\`);
+      setNotice(`Cloud sync issue: ${detail} Your data remains in this browser.`);
     };
     window.addEventListener("wp-sync-error", onSyncError);
     return () => window.removeEventListener("wp-sync-error", onSyncError);
