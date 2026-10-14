@@ -25,7 +25,7 @@ export const Route = createFileRoute("/jobs/$id")({
 
 function JobPage() {
   const { job } = Route.useLoaderData();
-  const emp = employers[job.employer]!;
+  const emp = employers[job.employer] ?? { name: job.employer, tagline: "Fictional practice employer", size: "Practice scenario", hq: job.location, culture: "Simulated employer profile for interview rehearsal." };
   const { state } = useProgress();
   const jobApplications = state.applications.filter((a) => a.jobId === job.id);
   const applied = jobApplications[0];
