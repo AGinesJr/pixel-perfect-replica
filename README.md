@@ -6,6 +6,8 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 
 - Browse a curated set of fictional practice jobs.
 - Submit a practice application with resume text and an optional cover letter.
+- Choose a practice mode: Training (default, supportive), Career Simulation (balanced), or optional advanced Market Reality (stricter simulated threshold only).
+- Receive a three-step coaching plan with timelines after screening, regardless of outcome.
 - Receive AI-generated practice screening when the configured AI gateway is available.
 - Practice an AI interview and receive rubric-based coaching feedback.
 - Use a hosted, browser-based voice interview prototype: spoken questions, microphone speech recognition, editable transcripts, and typed-answer fallback.
@@ -15,7 +17,8 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 
 ## Important limitations
 
-- **This is a practice simulator, not a real job board.** Jobs, employers, posting dates, and salary ranges are sample content, not verified vacancies or live labor-market data.
+- **This is currently a practice simulator, not a live job board.** Jobs, employers, posting dates, and salary ranges are sample content, not verified vacancies or live labor-market data. The home page labels these as practice roles.
+- **Practice modes are simulations.** Training is the default and prioritizes constructive feedback; Career Simulation uses a balanced threshold; Market Reality uses a stricter simulated threshold. Market Reality does not use or expose other users’ activity and does not represent real competition.
 - **Profile contact email is separate from the Supabase sign-in email.** Updating the profile contact email does not change account credentials.
 - **Supabase sign-in and cloud sync require deployment configuration and live testing.** The account page uses Supabase Auth and the app syncs profile and practice data to the RLS-protected tables. Add the required Supabase URL and public key to the hosting build environment, run both database migrations, rebuild, and test sign-up/sign-in before relying on cloud storage. Until configured and verified, practice data remains browser-local.
 - **The profile photo is compressed in the browser and stored as a data URL** with the profile record. The image is resized to a square and compressed before saving. Avoid uploading sensitive images.
@@ -66,4 +69,4 @@ If deployed through Lovable, configure the secret in the platform's supported se
 
 The app currently exports and deletes browser-local practice data. **Account-level deletion of the Supabase cloud records and Auth account is not yet implemented.** Cloud sync is implemented in the code but must be configured and verified against the deployed app before relying on it.
 
-Before public production use, finish and test authentication, per-user database access, cloud persistence, account deletion, rate limiting/abuse controls, privacy and retention disclosures, accessible error handling, and verified labor-market data integrations with source and timestamp metadata. Do not claim these are implemented until they are configured and tested.
+Before public production use, finish and test authentication, per-user database access, cloud persistence, account deletion, rate limiting/abuse controls, privacy and retention disclosures, accessible error handling, and verified labor-market data integrations with source and timestamp metadata. An authenticated, role-protected AI operations console for monitoring and tuning recruiter behavior is also not yet implemented; do not expose gateway keys or admin controls in the browser. Do not claim these are implemented until they are configured and tested.
