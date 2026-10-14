@@ -71,7 +71,7 @@ function Account() {
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [suffix, setSuffix] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"choice" | "signin" | "signup">("choice");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -277,8 +277,19 @@ function Account() {
               <Link to="/profile" className="inline-flex h-10 items-center rounded-md border px-4 text-sm font-semibold">Open resume</Link>
             </div>
           </div>
+        ) : mode === "choice" ? (
+          <div className="mt-5 rounded-xl border bg-background p-6 text-center sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Your next step starts here</p>
+            <h3 className="mt-3 text-2xl font-bold">Welcome to Workforce Prep</h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Sign in to continue your career journey, or create an account to keep your progress available across devices.</p>
+            <div className="mx-auto mt-6 grid max-w-sm gap-3">
+              <button type="button" onClick={() => { setError(""); setMessage(""); setMode("signin"); }} className="h-12 rounded-md bg-primary px-5 font-semibold text-primary-foreground">Sign in</button>
+              <button type="button" onClick={() => { setError(""); setMessage(""); setMode("signup"); }} className="h-12 rounded-md border px-5 font-semibold hover:bg-muted">Create an account</button>
+            </div>
+          </div>
         ) : mode === "signin" ? (
             <div className="mt-4 space-y-4">
+              <button type="button" onClick={() => { setError(""); setMessage(""); setMode("choice"); }} className="text-sm font-semibold text-muted-foreground hover:text-foreground">← Back to account options</button>
               <form onSubmit={submit} className="space-y-4">
                 <label className="block text-sm font-semibold">Email
                   <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
@@ -299,6 +310,7 @@ function Account() {
             </div>
           ) : (
             <div className="mt-4 space-y-4">
+              <button type="button" onClick={() => { setError(""); setMessage(""); setMode("choice"); }} className="text-sm font-semibold text-muted-foreground hover:text-foreground">← Back to account options</button>
               <p className="text-sm text-muted-foreground">Enter your name, then choose a provider to create your account.</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block text-sm font-semibold">First Name
@@ -330,6 +342,8 @@ function Account() {
         {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
       </section>
 
+      {(userEmail || mode !== "choice") && (
+        <>
       <section className="mt-6 rounded-lg border bg-card p-6">
         <h2 className="text-xl font-semibold">Personal profile</h2>
         <p className="mt-1 text-sm text-muted-foreground">These details are for your career profile and are separate from the email and password used to sign in.</p>
@@ -393,6 +407,8 @@ function Account() {
           <button type="button" onClick={clearPracticeData} disabled={!ready} className="h-10 rounded-md border border-destructive/40 px-4 text-sm font-semibold text-destructive disabled:opacity-50">Delete all practice data</button>
         </div>
       </section>
+        </>
+      )}
     </div>
   );
 }
