@@ -115,11 +115,7 @@ function applyDatabaseFilters(query: PracticeJobsQuery, search: PracticeJobSearc
   if (q) {
     const pattern = `*${q}*`;
     filtered = filtered.or([
-      `title.ilike.${pattern}`,
-      `employer.ilike.${pattern}`,
-      `industry.ilike.${pattern}`,
-      `location.ilike.${pattern}`,
-      `summary.ilike.${pattern}`,
+      `search_text.ilike.${pattern}`,
     ].join(","));
   }
   if (loc) filtered = filtered.ilike("location", `*${loc}*`);
