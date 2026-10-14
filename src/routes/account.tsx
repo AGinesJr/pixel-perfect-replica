@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useProgress, type ProgressState } from "@/lib/progress";
-import { getStoredSession, isSupabaseConfigured, signIn, signOut, signUp } from "@/lib/supabase";
+import { completeOAuthCallback, getStoredSession, isSupabaseConfigured, signIn, signOut, startOAuth, type OAuthProvider } from "@/lib/supabase";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -67,6 +67,10 @@ function Account() {
   const { state, update, ready } = useProgress();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [suffix, setSuffix] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -84,10 +88,22 @@ function Account() {
   const [photoBusy, setPhotoBusy] = useState(false);
 
   useEffect(() => {
-    setUserEmail(getStoredSession()?.user.email ?? null);
+    let active = true;
     const updateAuth = () => setUserEmail(getStoredSession()?.user.email ?? null);
+    setUserEmail(getStoredSession()?.user.email ?? null);
+    void completeOAuthCallback().then((session) => {
+      if (!active || !session) return;
+      setUserEmail(session.user.email ?? null);
+      setMessage("You're signed in. Your cloud practice data is syncing.");
+      window.dispatchEvent(new Event("wp-progress"));
+    }).catch((cause) => {
+      if (active) setError(cause instanceof Error ? cause.message : "Provider sign-in could not be completed.");
+    });
     window.addEventListener("wp-auth", updateAuth);
-    return () => window.removeEventListener("wp-auth", updateAuth);
+    return () => {
+      active = false;
+      window.removeEventListener("wp-auth", updateAuth);
+    };
   }, []);
 
   useEffect(() => {
@@ -116,25 +132,43 @@ function Account() {
     setError("");
     setMessage("");
     try {
-      if (mode === "signin") {
-        await signIn(email.trim(), password);
-        setUserEmail(getStoredSession()?.user.email ?? email.trim());
-        setMessage("You're signed in. Your cloud practice data is syncing.");
-        window.dispatchEvent(new Event("wp-progress"));
-      } else {
-        const result = await signUp(email.trim(), password);
-        if (result.confirmationRequired) {
-          setMessage("Account request received. Check your email for a confirmation link, then return here and sign in.");
-        } else {
-          setUserEmail(getStoredSession()?.user.email ?? email.trim());
-          setMessage("Account created. Your practice data will now sync to this account.");
-          window.dispatchEvent(new Event("wp-progress"));
-        }
-      }
+      await signIn(email.trim(), password);
+      setUserEmail(getStoredSession()?.user.email ?? email.trim());
+      setMessage("You're signed in. Your cloud practice data is syncing.");
+      window.dispatchEvent(new Event("wp-progress"));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Something went wrong. Please try again.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  function providerName(): string {
+    return [firstName.trim(), middleName.trim(), lastName.trim(), suffix].filter(Boolean).join(" ");
+  }
+
+  function useProvider(provider: OAuthProvider | "indeed") {
+    setError("");
+    setMessage("");
+    if (mode === "signup") {
+      if (!firstName.trim() || !lastName.trim()) {
+        setError("Enter your first and last name before creating an account.");
+        return;
+      }
+      const fullName = providerName();
+      setName(fullName);
+      update((current) => ({ ...current, name: fullName }));
+    }
+    if (provider === "indeed") {
+      setMessage("Indeed sign-in isn't a built-in Supabase identity provider. This button needs a separate Indeed-approved OAuth integration before it can authenticate users.");
+      return;
+    }
+    try {
+      setBusy(true);
+      startOAuth(provider);
+    } catch (cause) {
+      setBusy(false);
+      setError(cause instanceof Error ? cause.message : "Could not start provider sign-in.");
     }
   }
 
@@ -244,22 +278,57 @@ function Account() {
             </div>
           </div>
         ) : (
-          <form onSubmit={submit} className="mt-4 space-y-4">
-            <div className="flex gap-2 rounded-md bg-muted p-1">
-              <button type="button" onClick={() => { setMode("signin"); setMessage(""); setError(""); }} className={`flex-1 rounded px-3 py-2 text-sm font-semibold ${mode === "signin" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Sign in</button>
-              <button type="button" onClick={() => { setMode("signup"); setMessage(""); setError(""); }} className={`flex-1 rounded px-3 py-2 text-sm font-semibold ${mode === "signup" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Create account</button>
+          {mode === "signin" ? (
+            <div className="mt-4 space-y-4">
+              <form onSubmit={submit} className="space-y-4">
+                <label className="block text-sm font-semibold">Email
+                  <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
+                </label>
+                <label className="block text-sm font-semibold">Password
+                  <input type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
+                </label>
+                <button disabled={busy} className="h-11 w-full rounded-md bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-50">{busy ? "Please wait…" : "Sign in"}</button>
+              </form>
+              <div className="flex items-center gap-3 py-1 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" /><span>OR SIGN IN WITH</span><span className="h-px flex-1 bg-border" /></div>
+              <div className="grid gap-2">
+                <button type="button" disabled={busy} onClick={() => useProvider("google")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Google</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("azure")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Outlook</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("apple")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with iCloud</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("linkedin_oidc")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with LinkedIn</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("indeed")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Sign in with Indeed</button>
+              </div>
             </div>
-            <label className="block text-sm font-semibold">Sign-in email
-              <input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
-            </label>
-            <label className="block text-sm font-semibold">Password
-              <input type="password" autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
-              {mode === "signup" && <span className="mt-1 block text-xs font-normal text-muted-foreground">Use at least 8 characters. Choose a unique password.</span>}
-            </label>
-            {message && <p role="status" className="text-sm">{message}</p>}
-            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-            <button disabled={busy} className="h-11 w-full rounded-md bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-50">{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</button>
-          </form>
+          ) : (
+            <div className="mt-4 space-y-4">
+              <p className="text-sm text-muted-foreground">Enter your name, then choose a provider to create your account.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block text-sm font-semibold">First Name
+                  <input required maxLength={80} autoComplete="given-name" value={firstName} onChange={(event) => setFirstName(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
+                </label>
+                <label className="block text-sm font-semibold">Middle (optional)
+                  <input maxLength={80} autoComplete="additional-name" value={middleName} onChange={(event) => setMiddleName(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
+                </label>
+                <label className="block text-sm font-semibold">Last Name
+                  <input required maxLength={80} autoComplete="family-name" value={lastName} onChange={(event) => setLastName(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal" />
+                </label>
+                <label className="block text-sm font-semibold">Suffix (optional)
+                  <select value={suffix} onChange={(event) => setSuffix(event.target.value)} className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal">
+                    <option value="">No suffix</option><option value="Jr.">Jr.</option><option value="Sr.">Sr.</option><option value="II">II</option><option value="III">III</option><option value="IV">IV</option><option value="V">V</option><option value="Esq.">Esq.</option>
+                  </select>
+                </label>
+              </div>
+              <div className="flex items-center gap-3 py-1 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" /><span>CREATE WITH</span><span className="h-px flex-1 bg-border" /></div>
+              <div className="grid gap-2">
+                <button type="button" disabled={busy} onClick={() => useProvider("google")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Google</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("azure")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Outlook</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("apple")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with iCloud</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("linkedin_oidc")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with LinkedIn</button>
+                <button type="button" disabled={busy} onClick={() => useProvider("indeed")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Indeed</button>
+              </div>
+            </div>
+          )}
+          {message && <p role="status" className="mt-3 text-sm text-muted-foreground">{message}</p>}
+          {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>
         )}
       </section>
 
