@@ -17,7 +17,8 @@ export const Route = createFileRoute("/applications/$id")({
 
 const label = {
   interview: { t: "Interview invitation", c: "bg-success/15 text-success border-success/30" },
-  more_info: { t: "More information requested", c: "bg-warning/15 text-foreground border-warning/40" },
+  more_info: { t: "More evidence would help", c: "bg-warning/15 text-foreground border-warning/40" },
+  qualified_not_selected: { t: "Qualified, but below this simulated threshold", c: "bg-warning/15 text-foreground border-warning/40" },
   reject: { t: "Does not yet meet listed requirements", c: "bg-destructive/10 text-destructive border-destructive/30" },
 };
 
@@ -34,6 +35,7 @@ function AppResult() {
   if (!app || !job || !app.evaluation) return <div className="p-10 text-center">Application not found. <Link to="/dashboard" className="text-primary">Go to dashboard</Link></div>;
   const ev = app.evaluation;
   const l = label[ev.decision];
+  const threshold = Math.max(40, Math.min(95, 55 + job.difficulty * 5 + (app.mode === "training" ? -10 : app.mode === "market-reality" ? 10 : 0)));
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <p className="text-sm text-muted-foreground">Application · {new Date(app.submittedAt).toLocaleDateString()}</p>
@@ -46,7 +48,7 @@ function AppResult() {
           <p className="font-display text-3xl font-bold">{ev.score}<span className="text-base">/100</span></p>
         </div>
         <p className="mt-2 text-foreground">{ev.summary}</p>
-        <p className="mt-2 text-xs text-muted-foreground">Interview threshold for this role: {55 + job.difficulty * 5}</p>
+        <p className="mt-2 text-xs text-muted-foreground">Simulated interview threshold for this mode: {threshold}</p>
       </div>
       {ev.decision === "interview" && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-5">
