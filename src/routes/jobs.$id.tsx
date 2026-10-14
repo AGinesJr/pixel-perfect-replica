@@ -25,7 +25,7 @@ export const Route = createFileRoute("/jobs/$id")({
 
 function JobPage() {
   const { job } = Route.useLoaderData();
-  const emp = employers[job.employer]!;
+  const emp = employers[job.employer] ?? { name: job.employer, tagline: "Fictional practice employer", size: "Practice scenario", hq: job.location, culture: "Simulated employer profile for interview rehearsal." };
   const { state } = useProgress();
   const jobApplications = state.applications.filter((a) => a.jobId === job.id);
   const applied = jobApplications[0];
@@ -33,6 +33,7 @@ function JobPage() {
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-[1fr_300px]">
       <article className="rounded-lg border bg-card p-6 md:p-8">
         <Link to="/jobs" className="text-sm text-muted-foreground">← All jobs</Link>
+        <div className="mt-3 inline-flex rounded-full border border-amber-600/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">Simulated practice listing · not a live vacancy</div>
         <h1 className="mt-3 text-3xl font-bold">{job.title}</h1>
         <p className="mt-1 text-muted-foreground">{job.employer} · <MapPin className="inline h-3.5 w-3.5" /> {job.location} · {job.remote}</p>
         <div className="mt-4 flex flex-wrap gap-2 text-sm">
@@ -76,7 +77,7 @@ function JobPage() {
         <div className="rounded-lg border bg-card p-5 text-sm">
           <p className="font-semibold">Recruiter strictness</p>
           <div className="mt-2 flex gap-1">{[1, 2, 3, 4, 5].map((n) => <span key={n} className={`h-2 flex-1 rounded ${n <= job.difficulty ? "bg-primary" : "bg-muted"}`} />)}</div>
-          <p className="mt-2 text-muted-foreground">Interview threshold: score {55 + job.difficulty * 5}/100. Fictional employer for practice.</p>
+          <p className="mt-2 text-muted-foreground">Practice interview threshold: score {55 + job.difficulty * 5}/100. Fictional employer and role for rehearsal only.</p>
         </div>
       </aside>
     </div>
