@@ -18,7 +18,7 @@ export const Route = createFileRoute("/applications/$id")({
 const label = {
   interview: { t: "Interview invitation", c: "bg-success/15 text-success border-success/30" },
   more_info: { t: "More information requested", c: "bg-warning/15 text-foreground border-warning/40" },
-  reject: { t: "Not moving forward", c: "bg-destructive/10 text-destructive border-destructive/30" },
+  reject: { t: "Does not yet meet listed requirements", c: "bg-destructive/10 text-destructive border-destructive/30" },
 };
 
 export function ScoreBar({ score }: { score: number }) {
@@ -39,6 +39,7 @@ function AppResult() {
       <p className="text-sm text-muted-foreground">Application · {new Date(app.submittedAt).toLocaleDateString()}</p>
       <h1 className="mt-1 text-3xl font-bold">{job.title}</h1>
       <p className="text-muted-foreground">{job.employer}</p>
+      <p className="mt-1 text-xs text-muted-foreground">Practice mode: {app.mode === "market-reality" ? "Market Reality (simulated)" : app.mode === "simulation" ? "Career simulation" : "Training"}</p>
       <div className={`mt-6 rounded-lg border p-5 ${l.c}`}>
         <div className="flex items-center justify-between gap-4">
           <p className="font-display text-xl font-bold">{l.t}</p>
@@ -63,6 +64,28 @@ function AppResult() {
           </div>
         ))}
       </div>
+      <section className="mt-8 rounded-lg border bg-card p-5">
+        <h2 className="text-xl font-semibold">Your next steps</h2>
+        <p className="mt-1 text-sm text-muted-foreground">This is coaching for practice, not a real employer decision. Use the plan to strengthen your evidence and retest.</p>
+        {ev.actionPlan?.length ? (
+          <ol className="mt-4 space-y-4">
+            {ev.actionPlan.map((item, index) => (
+              <li key={item.step + index} className="flex gap-3">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{index + 1}</span>
+                <div>
+                  <p className="font-semibold">{item.step}</p>
+                  <p className="text-xs font-medium text-primary">{item.timeline}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{item.action}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+            {ev.gaps.map((gap) => <li key={gap}>{gap}</li>)}
+          </ul>
+        )}
+      </section>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-5"><h3 className="font-semibold">Strengths</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{ev.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
         <div className="rounded-lg border bg-card p-5"><h3 className="font-semibold">Gaps to close</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{ev.gaps.map((s) => <li key={s}>{s}</li>)}</ul></div>
