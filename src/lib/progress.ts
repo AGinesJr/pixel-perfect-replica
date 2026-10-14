@@ -4,7 +4,7 @@ import { getStoredSession, loadCloudProgress, saveCloudProgress } from "@/lib/su
 export type PracticeMode = "training" | "simulation" | "market-reality";
 
 export type Evaluation = {
-  decision: "interview" | "more_info" | "reject";
+  decision: "interview" | "more_info" | "qualified_not_selected" | "reject";
   score: number;
   summary: string;
   strengths: string[];
