@@ -12,6 +12,7 @@ export function JobCard({ job }: { job: Job }) {
         <div>
           <Link to="/jobs/$id" params={{ id: job.id }} className="font-display text-lg font-semibold text-foreground after:absolute after:inset-0 group-hover:text-primary">{job.title}</Link>
           <p className="text-sm text-muted-foreground">{job.employer}</p>
+          <span className="mt-1 inline-flex rounded-full border border-amber-600/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">Simulated practice</span>
         </div>
         <button
           aria-label={saved ? "Unsave job" : "Save job"}
@@ -29,7 +30,7 @@ export function JobCard({ job }: { job: Job }) {
         <span className="rounded bg-secondary px-2 py-1 text-secondary-foreground">{job.level}</span>
       </div>
       <p className="mt-3 line-clamp-2 text-sm text-foreground/80">{job.summary}</p>
-      <p className="mt-3 text-xs text-muted-foreground">{job.posted}</p>
+      <p className="mt-3 text-xs text-muted-foreground">Sample listing · {job.posted}</p>
     </div>
   );
 }

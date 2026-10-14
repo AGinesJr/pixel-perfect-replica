@@ -4,7 +4,7 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 
 ## Current capabilities
 
-- Browse a curated set of fictional practice jobs.
+- Browse 10,010 deterministic fictional practice-job listings across 25 industries, 50 US locations, and eight experience levels.
 - Submit a practice application with resume text and an optional cover letter.
 - Choose a practice mode: Training (default, supportive), Career Simulation (balanced), or optional advanced Market Reality (stricter simulated threshold only). Outcomes distinguish missing required evidence from a candidate who appears qualified but falls below the simulated threshold.
 - Receive a three-step coaching plan with timelines after screening, regardless of outcome.
@@ -45,6 +45,12 @@ bun run test
 bun run lint
 bun run build
 ```
+
+## Simulated practice-job catalog
+
+The app includes 10,000 generated practice listings plus the original curated examples. All are fictional practice scenarios, not verified vacancies or live labor-market data. Catalog IDs and role details remain deterministic across builds. Search is filtered in the browser and paginated at 24 cards per page in this milestone.
+
+Apply `supabase/migrations/20261014000000_practice_job_catalog.sql` after the existing account migrations to create the corresponding Supabase table. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in a local shell and run `bun run seed:practice-jobs` to seed or refresh it. Never put the service-role key in a VITE_ variable or commit it. Seeding uses idempotent batches. The UI still reads the bundled catalog in this milestone; database-backed reads are a follow-up after the seed is verified.
 
 ## Supabase setup (accounts and cloud sync)
 
