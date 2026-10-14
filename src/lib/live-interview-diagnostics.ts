@@ -18,7 +18,7 @@ export function safeDiagnosticDetails(value: unknown): Record<string, string> {
   if (!value || typeof value !== "object") return { valueType: typeof value };
   const item = value as Record<string, unknown>;
   const details: Record<string, string> = {};
-  for (const key of ["name", "message", "code", "status", "type", "reason", "state", "stage", "connectionType"] as const) {
+  for (const key of ["name", "message", "code", "status", "type", "reason", "state", "stage", "connectionType", "event", "event_type", "level", "severity", "timestamp"] as const) {
     const text = safeText(item[key]);
     if (text) details[key] = text;
   }
@@ -46,7 +46,7 @@ export function formatLiveStartupError(error: unknown, stage: LiveStartupStage):
   const details = safeDiagnosticDetails(error);
   const name = details.name ?? "";
   const message = details.message ?? "";
-  const combined = name + " " + message.toLowerCase();
+  const combined = (name + " " + message).toLowerCase();
 
   if (stage === "microphone") {
     if (combined.includes("notallowederror") || combined.includes("permission denied") || combined.includes("not allowed")) {
