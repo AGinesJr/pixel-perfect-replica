@@ -277,8 +277,7 @@ function Account() {
               <Link to="/profile" className="inline-flex h-10 items-center rounded-md border px-4 text-sm font-semibold">Open resume</Link>
             </div>
           </div>
-        ) : (
-          {mode === "signin" ? (
+        ) : mode === "signin" ? (
             <div className="mt-4 space-y-4">
               <form onSubmit={submit} className="space-y-4">
                 <label className="block text-sm font-semibold">Email
@@ -326,10 +325,9 @@ function Account() {
                 <button type="button" disabled={busy} onClick={() => useProvider("indeed")} className="h-11 w-full rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">Create with Indeed</button>
               </div>
             </div>
-          )}
-          {message && <p role="status" className="mt-3 text-sm text-muted-foreground">{message}</p>}
-          {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
         )}
+        {message && <p role="status" className="mt-3 text-sm text-muted-foreground">{message}</p>}
+        {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
       </section>
 
       <section className="mt-6 rounded-lg border bg-card p-6">
