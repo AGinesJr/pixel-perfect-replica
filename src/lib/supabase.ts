@@ -117,7 +117,7 @@ export type OAuthProvider = "google" | "azure" | "apple" | "linkedin_oidc";
 export function startOAuth(provider: OAuthProvider, redirectTo?: string): void {
   const { url, key } = config();
   const target = redirectTo ?? (typeof window !== "undefined" ? `${window.location.origin}/account` : "");
-  const authorize = new URL(`${url}/auth/v1/authorize`);
+  const authorize = new globalThis.URL(`${url}/auth/v1/authorize`);
   authorize.searchParams.set("provider", provider);
   authorize.searchParams.set("redirect_to", target);
   authorize.searchParams.set("apikey", key);
@@ -142,7 +142,7 @@ export async function completeOAuthCallback(): Promise<AuthSession | null> {
     access_token: accessToken,
     refresh_token: refreshToken,
     expires_at: Math.floor(Date.now() / 1000) + (Number.isFinite(expiresIn) ? expiresIn : 3600),
-    user: { id: user.id, email: user.email },
+    user: { id: user.id, ...(user.email ? { email: user.email } : {}) },
   };
   storeSession(session);
   window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`);
