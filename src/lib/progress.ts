@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { getStoredSession, loadCloudProgress, saveCloudProgress } from "@/lib/supabase";
 
+export type PracticeMode = "training" | "simulation" | "market-reality";
+
 export type Evaluation = {
   decision: "interview" | "more_info" | "reject";
   score: number;
@@ -8,6 +10,7 @@ export type Evaluation = {
   strengths: string[];
   gaps: string[];
   criteria: { name: string; score: number; note: string }[];
+  actionPlan?: { step: string; timeline: string; action: string }[];
 };
 
 export type InterviewResult = {
@@ -21,6 +24,7 @@ export type Application = {
   id: string;
   jobId: string;
   submittedAt: string;
+  mode?: PracticeMode;
   resume: string;
   coverLetter: string;
   evaluation?: Evaluation;
