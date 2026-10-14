@@ -328,7 +328,7 @@ function Account() {
             </div>
           )}
           {message && <p role="status" className="mt-3 text-sm text-muted-foreground">{message}</p>}
-          {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>
+          {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
         )}
       </section>
 
