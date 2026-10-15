@@ -37,31 +37,35 @@ function Jobs() {
   const nav = Route.useNavigate();
   const result = Route.useLoaderData();
   const [queryText, setQueryText] = useState(s.q ?? "");
+  const [locationText, setLocationText] = useState(s.loc ?? "");
   const list = result.jobs;
   const totalPages = Math.max(1, Math.ceil(result.total / result.pageSize));
   const page = result.page;
 
-  // Keep typing local and only update route search after the user pauses.
+  // Keep text inputs local and update route search only after the user pauses.
   useEffect(() => {
     setQueryText(s.q ?? "");
-  }, [s.q]);
+    setLocationText(s.loc ?? "");
+  }, [s.q, s.loc]);
 
   useEffect(() => {
     const currentQuery = s.q ?? "";
-    if (queryText === currentQuery) return;
+    const currentLocation = s.loc ?? "";
+    if (queryText === currentQuery && locationText === currentLocation) return;
 
     const timeout = window.setTimeout(() => {
       void nav({
         search: (previous) => ({
           ...previous,
           q: queryText || undefined,
+          loc: locationText || undefined,
           page: undefined,
         }),
       });
     }, SEARCH_DEBOUNCE_MS);
 
     return () => window.clearTimeout(timeout);
-  }, [nav, queryText, s.q]);
+  }, [nav, queryText, locationText, s.q, s.loc]);
 
   const set = (key: string, value: string) => nav({
     search: (previous) => ({ ...previous, [key]: value || undefined, ...(key === "page" ? {} : { page: undefined }) }),
@@ -76,13 +80,13 @@ function Jobs() {
     </div>
     <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       <input value={queryText} onChange={(e) => setQueryText(e.target.value)} placeholder="Job title, skill, company, or keyword" aria-label="Search jobs" className={sel + " min-w-0"} />
-      <input value={s.loc ?? ""} onChange={(e) => set("loc", e.target.value)} placeholder="City or state" aria-label="Filter by location" className={sel} />
+      <input value={locationText} onChange={(e) => setLocationText(e.target.value)} placeholder="City or state" aria-label="Filter by location" className={sel + " min-w-0"} />
       <select value={s.industry ?? ""} onChange={(e) => set("industry", e.target.value)} aria-label="Filter by industry" className={sel}><option value="">All {industries.length} industries</option>{industries.map((industry) => <option key={industry} value={industry}>{industry}</option>)}</select>
       <select value={s.level ?? ""} onChange={(e) => set("level", e.target.value)} aria-label="Filter by experience level" className={sel}><option value="">All experience levels</option>{levels.map((level) => <option key={level} value={level}>{level} level</option>)}</select>
       <select value={s.remote ?? ""} onChange={(e) => set("remote", e.target.value)} aria-label="Filter by work arrangement" className={sel}><option value="">Any work arrangement</option><option value="Remote">Remote</option><option value="Hybrid">Hybrid</option><option value="On-site">On-site</option></select>
       <select value={s.type ?? ""} onChange={(e) => set("type", e.target.value)} aria-label="Filter by employment type" className={sel}><option value="">Any employment type</option>{employmentTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select>
       <select value={s.sort ?? "relevance"} onChange={(e) => set("sort", e.target.value)} aria-label="Sort jobs" className={sel}><option value="relevance">Default order</option><option value="salary-desc">Highest salary</option><option value="salary-asc">Lowest salary</option><option value="title">Job title A–Z</option></select>
-      <button type="button" onClick={() => { setQueryText(""); void nav({ search: {} }); }} className={sel + " font-medium hover:bg-muted"}>Clear filters</button>
+      <button type="button" onClick={() => { setQueryText(""); setLocationText(""); void nav({ search: {} }); }} className={sel + " font-medium hover:bg-muted"}>Clear filters</button>
     </div>
     <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground" aria-live="polite">
       <p>{result.total.toLocaleString()} matching simulated listings · showing {result.total ? (page - 1) * result.pageSize + 1 : 0}–{Math.min(page * result.pageSize, result.total)}</p><p>Page {page} of {totalPages}</p>
