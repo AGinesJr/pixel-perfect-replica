@@ -54,7 +54,7 @@ function Profile() {
     try {
       const extracted = await extractResumeText(file);
       const normalized = extracted
-        .replace(/\u0000/g, "")
+        .split(String.fromCharCode(0)).join("")
         .replace(/\r/g, "\n")
         .replace(/[ \t]+\n/g, "\n")
         .replace(/\n{3,}/g, "\n\n")
