@@ -32,7 +32,6 @@ function JobPrep() {
   const [description, setDescription] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [stage, setStage] = useState<"setup" | "interview">("setup");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -87,9 +86,7 @@ function JobPrep() {
         ? text.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/\s+/g, " ")
         : text;
       setDescription(normalized);
-      setHistory([]);
       setFeedback(null);
-      setDone(false);
       setStage("setup");
     } catch {
       setError("We couldn't read that file. Try a plain-text file or paste the description instead.");
@@ -103,7 +100,6 @@ function JobPrep() {
     }
     setError("");
     setFeedback(null);
-    setDone(false);
     setStage("interview");
   }
 
@@ -113,7 +109,6 @@ function JobPrep() {
     try {
       const result = await getFeedback({ data: { job, history: transcript.map((message) => ({ role: message.role, text: message.text })) } });
       setFeedback(result);
-      setDone(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't generate feedback. Please try again.");
     } finally {
