@@ -3,7 +3,7 @@ import { Briefcase, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 const nav = [
-  { to: "/jobs", label: "Find jobs" },
+  { to: "/jobs", label: "Job Market Simulator" },
   { to: "/insights", label: "Market insights" },
   { to: "/job-prep", label: "Interview Prep" },
 ] as const;
