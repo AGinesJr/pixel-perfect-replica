@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { FileText, UploadCloud } from "lucide-react";
+import { extractResumeText } from "@/lib/resume-file-parser";
 import { useProgress } from "@/lib/progress";
 import { scoreResume, type ResumeScoreResult } from "@/lib/resume-ats-scoring";
 import { jobs } from "@/lib/data";
@@ -26,6 +28,10 @@ function Profile() {
   const [scoreResult, setScoreResult] = useState<ResumeScoreResult | null>(null);
   const [analyzedResume, setAnalyzedResume] = useState("");
   const [matchError, setMatchError] = useState("");
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const resumeFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (ready) setResume(state.resume);
@@ -39,6 +45,47 @@ function Profile() {
     window.addEventListener("wp-sync-error", onSyncError);
     return () => window.removeEventListener("wp-sync-error", onSyncError);
   }, []);
+
+  async function handleResumeUpload(file?: File) {
+    setUploadError("");
+    if (!file) return;
+
+    setUploadBusy(true);
+    try {
+      const extracted = await extractResumeText(file);
+      const normalized = extracted
+        .replace(/\u0000/g, "")
+        .replace(/\r/g, "\n")
+        .replace(/[ \t]+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+      if (normalized.length < 40) {
+        throw new Error(
+          "We couldn't find enough selectable text in this file. If it's a scanned PDF, run OCR on it first or paste the resume text below.",
+        );
+      }
+
+      setResume(normalized.slice(0, 15000));
+      setSelectedFileName(file.name);
+      setSaved(false);
+      setScoreResult(null);
+      setAnalyzedResume("");
+      setMatchError("");
+      setNotice(
+        normalized.length > 15000
+          ? "Resume imported. Only the first 15,000 characters were added; review and trim the text below."
+          : "Resume imported from your file. Review the extracted text below before scoring or saving.",
+      );
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "We couldn't read that file. Try another PDF or Word .docx file.",
+      );
+    } finally {
+      setUploadBusy(false);
+      if (resumeFileRef.current) resumeFileRef.current.value = "";
+    }
+  }
 
   function saveResume(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -96,6 +143,32 @@ function Profile() {
             Add work history, education, skills, certifications, and achievements. Avoid including Social Security numbers, account numbers, or other sensitive information.
           </p>
         </div>
+        <div className="rounded-lg border border-dashed p-4 md:p-5">
+          <input
+            ref={resumeFileRef}
+            type="file"
+            accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+            onChange={(event) => void handleResumeUpload(event.target.files?.[0])}
+            className="sr-only"
+            id="resume-file-upload"
+            aria-label="Upload resume as PDF or Word document"
+          />
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+            <span className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><UploadCloud className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">Upload a resume for review</p>
+              <p className="mt-1 text-xs text-muted-foreground">PDF or Word .docx · up to 10 MB · file text is extracted in your browser</p>
+              {selectedFileName && <p className="mt-1 truncate text-xs text-muted-foreground">Last imported: {selectedFileName}</p>}
+            </div>
+            <button type="button" onClick={() => resumeFileRef.current?.click()} disabled={uploadBusy} className="inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50">
+              <FileText className="h-4 w-4" /> {uploadBusy ? "Reading file…" : "Choose file"}
+            </button>
+          </div>
+          {uploadBusy && <p className="mt-3 text-sm text-muted-foreground" role="status">Extracting resume text… larger PDFs may take a moment.</p>}
+          {uploadError && <p role="alert" className="mt-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{uploadError}</p>}
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground">Or paste or write your resume below</p>
         <label className="block">
           <span className="sr-only">Resume text</span>
           <textarea
@@ -104,13 +177,13 @@ function Profile() {
             onChange={(event) => { setResume(event.target.value); setSaved(false); setScoreResult(null); setAnalyzedResume(""); setMatchError(""); }}
             rows={18}
             className="w-full rounded-md border bg-background p-3 text-sm"
-            placeholder="Paste or write your resume here…"
+            placeholder="Your extracted resume text will appear here. You can edit it before review…"
           />
         </label>
         <p className="text-right text-xs text-muted-foreground">{resume.length.toLocaleString()} / 15,000 characters</p>
         {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">Your resume is stored locally and syncs to your account when cloud sync is configured.</p>
+          <p className="text-sm text-muted-foreground">Imported files are read in your browser and are not stored as files. The extracted text can be edited, scored, matched, and saved like pasted text.</p>
           <button disabled={!ready} className="h-11 rounded-md bg-primary px-6 font-semibold text-primary-foreground disabled:opacity-50">{saved ? "Resume saved ✓" : "Save resume"}</button>
         </div>
       </form>
