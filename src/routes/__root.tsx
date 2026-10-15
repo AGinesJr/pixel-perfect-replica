@@ -9,7 +9,7 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import React, { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -120,8 +120,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (router) => router.location.pathname });
-  const [session, setSession] = React.useState<AuthSession | null>(null);
-  const [authChecked, setAuthChecked] = React.useState(false);
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const isAccountRoute = pathname === "/account";
 
   useEffect(() => {
