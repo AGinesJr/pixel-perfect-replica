@@ -6,10 +6,10 @@ type PdfDocument = {
   destroy?: () => Promise<void>;
 };
 type PdfJsModule = {
+  GlobalWorkerOptions: { workerSrc: string };
   getDocument(options: {
     data: Uint8Array;
     isEvalSupported: boolean;
-    disableWorker?: boolean;
   }): { promise: Promise<PdfDocument> };
 };
 type MammothModule = {
@@ -51,10 +51,11 @@ export async function extractResumeText(file: File): Promise<string> {
     const pdfjs = await importFromCdn<PdfJsModule>(
       "https://esm.sh/pdfjs-dist@4.10.38/legacy/build/pdf.mjs?bundle",
     );
+    pdfjs.GlobalWorkerOptions.workerSrc =
+      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.mjs";
     const document = await pdfjs.getDocument({
       data: new Uint8Array(await file.arrayBuffer()),
       isEvalSupported: false,
-      disableWorker: true,
     }).promise;
 
     try {
