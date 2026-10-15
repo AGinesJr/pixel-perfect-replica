@@ -100,7 +100,7 @@ const jobInput = z.object({
   title: z.string().min(1).max(160),
   employer: z.string().min(1).max(160),
   level: z.string().max(80),
-  summary: z.string().max(5000),
+  summary: z.string(),
   responsibilities: z.array(z.string().max(500)).max(30),
   required: z.array(z.string().max(500)).max(30),
   preferred: z.array(z.string().max(500)).max(30),
