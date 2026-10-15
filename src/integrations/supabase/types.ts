@@ -40,25 +40,43 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_data_url: string
+          city: string
+          contact_email: string
           created_at: string
           display_name: string
+          phone: string
           resume_text: string
+          state: string
           updated_at: string
           user_id: string
+          zip_code: string
         }
         Insert: {
+          avatar_data_url?: string
+          city?: string
+          contact_email?: string
           created_at?: string
           display_name?: string
+          phone?: string
           resume_text?: string
+          state?: string
           updated_at?: string
           user_id: string
+          zip_code?: string
         }
         Update: {
+          avatar_data_url?: string
+          city?: string
+          contact_email?: string
           created_at?: string
           display_name?: string
+          phone?: string
           resume_text?: string
+          state?: string
           updated_at?: string
           user_id?: string
+          zip_code?: string
         }
         Relationships: []
       }
