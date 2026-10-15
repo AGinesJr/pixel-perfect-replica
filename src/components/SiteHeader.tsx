@@ -3,7 +3,6 @@ import { Briefcase } from "lucide-react";
 
 const nav = [
   { to: "/jobs", label: "Find jobs" },
-  { to: "/resume-match", label: "Resume match" },
   { to: "/dashboard", label: "My career" },
   { to: "/insights", label: "Market insights" },
   { to: "/profile", label: "Resume" },
