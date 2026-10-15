@@ -114,9 +114,7 @@ function applyDatabaseFilters(query: PracticeJobsQuery, search: PracticeJobSearc
   let filtered = query.eq("is_active", true).eq("source_type", "simulated");
   if (q) {
     const pattern = `*${q}*`;
-    filtered = filtered.or([
-      `search_text.ilike.${pattern}`,
-    ].join(","));
+    filtered = filtered.or(`search_text.ilike.${pattern}`);
   }
   if (loc) filtered = filtered.ilike("location", `*${loc}*`);
   if (search.industry) filtered = filtered.eq("industry", search.industry);
@@ -140,6 +138,24 @@ function fallback(search: PracticeJobSearch): PracticeJobResults {
   };
 }
 
+// Cache catalog readiness so the whole-table count is not repeated for every search.
+let catalogAvailability: Promise<boolean | null> | undefined;
+
+async function hasActiveCatalog(supabase: SupabaseClient): Promise<boolean | null> {
+  if (!catalogAvailability) {
+    catalogAvailability = supabase.from("practice_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
+      .eq("source_type", "simulated")
+      .then(({ count, error }) => error ? null : Boolean(count))
+      .catch(() => null);
+  }
+
+  const available = await catalogAvailability;
+  if (available === null) catalogAvailability = undefined;
+  return available;
+}
+
 /**
  * Query the public, RLS-protected catalog. Only the public Supabase key is used here.
  * If Supabase is unconfigured, the table/migration is unavailable, or the table has
@@ -150,18 +166,14 @@ export async function searchPracticeJobs(search: PracticeJobSearch): Promise<Pra
   if (!supabase) return fallback(search);
 
   try {
+    const catalogAvailable = await hasActiveCatalog(supabase);
+    if (!catalogAvailable) return fallback(search);
+
     const countResult = await applyDatabaseFilters(
       supabase.from("practice_jobs").select("id", { count: "exact", head: true }),
       search,
     );
     if (countResult.error || countResult.count === null) return fallback(search);
-
-    // An empty table means the migration may be applied but the seed has not run yet.
-    const catalogCount = await supabase.from("practice_jobs")
-      .select("id", { count: "exact", head: true })
-      .eq("is_active", true)
-      .eq("source_type", "simulated");
-    if (catalogCount.error || !catalogCount.count) return fallback(search);
 
     const total = countResult.count;
     const pageSize = PAGE_SIZE;
