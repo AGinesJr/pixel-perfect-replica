@@ -25,44 +25,6 @@ function downloadPracticeData(data: ProgressState) {
   URL.revokeObjectURL(url);
 }
 
-function compressAvatar(file: File): Promise<string> {
-  if (!file.type.startsWith("image/")) return Promise.reject(new Error("Choose an image file."));
-  if (file.size > 8 * 1024 * 1024) return Promise.reject(new Error("Choose an image smaller than 8 MB."));
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("The image could not be read."));
-    reader.onload = () => {
-      const image = new Image();
-      image.onerror = () => reject(new Error("The selected file is not a readable image."));
-      image.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 256;
-        canvas.height = 256;
-        const context = canvas.getContext("2d");
-        if (!context) {
-          reject(new Error("Your browser could not process this image."));
-          return;
-        }
-        const crop = Math.min(image.width, image.height);
-        context.drawImage(image, (image.width - crop) / 2, (image.height - crop) / 2, crop, crop, 0, 0, 256, 256);
-        let quality = 0.78;
-        let dataUrl = canvas.toDataURL("image/jpeg", quality);
-        while (dataUrl.length > 240_000 && quality > 0.38) {
-          quality -= 0.1;
-          dataUrl = canvas.toDataURL("image/jpeg", quality);
-        }
-        if (dataUrl.length > 400_000) {
-          reject(new Error("That image could not be compressed enough. Try another photo."));
-          return;
-        }
-        resolve(dataUrl);
-      };
-      image.src = String(reader.result);
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 function Account() {
   const { state, update, ready } = useProgress();
   const [email, setEmail] = useState("");
