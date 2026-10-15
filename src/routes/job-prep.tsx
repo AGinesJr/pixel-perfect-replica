@@ -49,14 +49,27 @@ function JobPrep() {
   const preferred = lines.filter((line) => /preferred|nice to have|bonus|desired|plus/i.test(line)).slice(0, 8);
   const responsibilities = lines.filter((line) => /responsibilit|duties|you will|manage|support|coordinate|develop|maintain|perform|responsible|oversee|deliver/i.test(line)).slice(0, 12);
 
+  // The server's shared job schema limits each extracted bullet to 500 chars.
+  // Split long pasted paragraphs into bounded chunks and cap the number of bullets
+  // so a normal full job description cannot fail request validation.
+  const toSchemaBullets = (items: string[], fallback: string[]) =>
+    (items.length ? items : fallback)
+      .flatMap((item) => {
+        const normalized = item.trim();
+        if (!normalized) return [];
+        const chunks = normalized.match(/[\\s\\S]{1,450}/g) ?? [];
+        return chunks;
+      })
+      .slice(0, 12);
+
   const job = {
     title: title.trim() || "Role described in uploaded job description",
     employer: employer.trim() || "Target employer",
     level: "",
     summary: cleanDescription.slice(0, MAX_DESCRIPTION),
-    responsibilities: responsibilities.length ? responsibilities : lines.slice(0, 8),
-    required: required.length ? required : lines.slice(0, 8),
-    preferred,
+    responsibilities: toSchemaBullets(responsibilities, lines.slice(0, 8)),
+    required: toSchemaBullets(required, lines.slice(0, 8)),
+    preferred: toSchemaBullets(preferred, []),
     difficulty: 3,
     culture: "Use only the supplied job description. This is a simulated practice interview, not a real employer interview.",
   };
