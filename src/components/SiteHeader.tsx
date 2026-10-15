@@ -6,8 +6,8 @@ const nav = [
   { to: "/dashboard", label: "My career" },
   { to: "/insights", label: "Market insights" },
   { to: "/profile", label: "Resume" },
-  { to: "/job-prep", label: "Job Prep" },
-  { to: "/account", label: "Account / Profile" },
+  { to: "/job-prep", label: "Interview Prep" },
+  { to: "/account", label: "My Profile" },
 ] as const;
 
 export function SiteHeader() {
