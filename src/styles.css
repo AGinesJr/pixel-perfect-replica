@@ -103,3 +103,12 @@
 }
 
 @utility bg-hero { background-image: var(--gradient-hero); }
+
+
+/* Hide the optional Lovable editor badge if the preview/runtime injects it. */
+lovable-badge,
+#lovable-badge,
+[data-lovable-badge],
+iframe[src*="lovable.dev"][title*="badge" i] {
+  display: none !important;
+}
