@@ -283,6 +283,7 @@ function Account() {
       <section className="mt-6 rounded-lg border bg-card p-6">
         <h2 className="text-lg font-semibold">Your data</h2>
         <p className="mt-1 text-sm text-muted-foreground">Export a private backup before clearing data. It includes your profile photo, contact details, resume, saved jobs, and practice applications.</p>
+        {profileNotice && <p role="status" className="mt-3 text-sm text-muted-foreground">{profileNotice}</p>}
         <div className="mt-4 flex flex-wrap gap-3">
           <button type="button" onClick={() => { downloadPracticeData(state); setProfileNotice("Your practice data export was prepared."); }} disabled={!ready} className="h-10 rounded-md border px-4 text-sm font-semibold disabled:opacity-50">Export practice data</button>
           <button type="button" onClick={clearPracticeData} disabled={!ready} className="h-10 rounded-md border border-destructive/40 px-4 text-sm font-semibold text-destructive disabled:opacity-50">Delete all practice data</button>
