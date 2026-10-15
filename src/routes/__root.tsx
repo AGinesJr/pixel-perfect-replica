@@ -4,15 +4,17 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "../components/SiteHeader";
+import { getStoredSession, getValidSession, type AuthSession } from "../lib/supabase";
 
 function NotFoundComponent() {
   return (
@@ -117,12 +119,65 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (router) => router.location.pathname });
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const isAccountRoute = pathname === "/account";
+
+  useEffect(() => {
+    let active = true;
+    const checkSession = async () => {
+      const valid = await getValidSession();
+      if (!active) return;
+      setSession(valid);
+      setAuthChecked(true);
+    };
+    void checkSession();
+
+    const onAuthChange = () => {
+      setSession(getStoredSession());
+      setAuthChecked(true);
+    };
+    window.addEventListener("wp-auth", onAuthChange);
+    return () => {
+      active = false;
+      window.removeEventListener("wp-auth", onAuthChange);
+    };
+  }, []);
+
+  const hasAccess = Boolean(session);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SiteHeader />
-      <main className="min-h-[70vh]"><Outlet /></main>
-      <footer className="border-t bg-card py-8 text-center text-xs text-muted-foreground">Workforce Prep · A career practice simulator. Employers and listings are fictional.</footer>
+      {hasAccess ? <SiteHeader /> : (
+        <header className="border-b bg-card px-4 py-4">
+          <div className="mx-auto max-w-6xl font-display text-lg font-bold">Workforce Prep</div>
+        </header>
+      )}
+      <main className="min-h-[70vh]">
+        {isAccountRoute ? <Outlet /> : !authChecked ? (
+          <div className="mx-auto flex min-h-[50vh] max-w-xl items-center justify-center px-4 text-center">
+            <p className="text-sm text-muted-foreground">Checking your sign-in…</p>
+          </div>
+        ) : hasAccess ? <Outlet /> : (
+          <section className="mx-auto flex min-h-[65vh] max-w-2xl flex-col items-center justify-center px-4 py-12 text-center">
+            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <rect x="4" y="10" width="16" height="11" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              </svg>
+            </div>
+            <p className="mt-6 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Account required</p>
+            <h1 className="mt-2 text-3xl font-bold md:text-4xl">Your career journey starts with an account.</h1>
+            <p className="mt-4 max-w-xl text-muted-foreground">Sign in or create a free Workforce Prep account to search practice jobs, use resume tools, practice interviews, and access your career dashboard. Your progress can sync with your account.</p>
+            <Link to="/account" className="mt-7 inline-flex h-12 items-center justify-center rounded-md bg-primary px-6 font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
+              Sign in or create an account
+            </Link>
+            <p className="mt-3 text-xs text-muted-foreground">You’ll be able to choose sign-in or account creation on the next screen.</p>
+          </section>
+        )}
+      </main>
+      {(hasAccess || isAccountRoute) && <footer className="border-t bg-card py-8 text-center text-xs text-muted-foreground">Workforce Prep · A career practice simulator. Employers and listings are fictional.</footer>}
     </QueryClientProvider>
   );
 }
