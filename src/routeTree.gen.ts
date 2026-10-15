@@ -14,6 +14,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MyProfileRouteImport } from './routes/my-profile'
 import { Route as ApplicationsIdRouteImport } from './routes/applications.$id'
 import { Route as ApplyIdRouteImport } from './routes/apply.$id'
 import { Route as InterviewIdRouteImport } from './routes/interview.$id'
@@ -43,6 +44,11 @@ const InsightsRoute = InsightsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyProfileRoute = MyProfileRouteImport.update({
+  id: '/my-profile',
+  path: '/my-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApplicationsIdRoute = ApplicationsIdRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/insights': typeof InsightsRoute
   '/profile': typeof ProfileRoute
+  '/my-profile': typeof MyProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
   '/apply/$id': typeof ApplyIdRoute
   '/interview/$id': typeof InterviewIdRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/insights': typeof InsightsRoute
   '/profile': typeof ProfileRoute
+  '/my-profile': typeof MyProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
   '/apply/$id': typeof ApplyIdRoute
   '/interview/$id': typeof InterviewIdRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/insights': typeof InsightsRoute
   '/profile': typeof ProfileRoute
+  '/my-profile': typeof MyProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
   '/apply/$id': typeof ApplyIdRoute
   '/interview/$id': typeof InterviewIdRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/insights'
     | '/profile'
+    | '/my-profile'
     | '/applications/$id'
     | '/apply/$id'
     | '/interview/$id'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/insights'
     | '/profile'
+    | '/my-profile'
     | '/applications/$id'
     | '/apply/$id'
     | '/interview/$id'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/insights'
     | '/profile'
+    | '/my-profile'
     | '/applications/$id'
     | '/apply/$id'
     | '/interview/$id'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   InsightsRoute: typeof InsightsRoute
   ProfileRoute: typeof ProfileRoute
+  MyProfileRoute: typeof MyProfileRoute
   ApplicationsIdRoute: typeof ApplicationsIdRoute
   ApplyIdRoute: typeof ApplyIdRoute
   InterviewIdRoute: typeof InterviewIdRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-profile': {
+      id: '/my-profile'
+      path: '/my-profile'
+      fullPath: '/my-profile'
+      preLoaderRoute: typeof MyProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/applications/$id': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   InsightsRoute: InsightsRoute,
   ProfileRoute: ProfileRoute,
+  MyProfileRoute: MyProfileRoute,
   ApplicationsIdRoute: ApplicationsIdRoute,
   ApplyIdRoute: ApplyIdRoute,
   InterviewIdRoute: InterviewIdRoute,
