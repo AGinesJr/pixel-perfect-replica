@@ -79,28 +79,42 @@ export function mapPracticeJobRow(row: PracticeJobRow): Job {
   };
 }
 
+type BundledSearchRecord = { job: Job; searchable: string; location: string };
+let bundledSearchIndex: BundledSearchRecord[] | undefined;
+
+// Build each job's searchable text once instead of rebuilding 10,010 strings per query.
+function getBundledSearchIndex(): BundledSearchRecord[] {
+  if (!bundledSearchIndex) {
+    bundledSearchIndex = bundledJobs.map((job) => ({
+      job,
+      searchable: [
+        job.title,
+        job.employer,
+        job.industry,
+        job.location,
+        job.summary,
+        ...job.required,
+        ...job.preferred,
+        ...job.responsibilities,
+      ].join(" ").toLowerCase(),
+      location: job.location.toLowerCase(),
+    }));
+  }
+  return bundledSearchIndex;
+}
+
 function locallyFilter(search: PracticeJobSearch): Job[] {
   const q = safeFilterText(search.q).toLowerCase();
   const loc = safeFilterText(search.loc).toLowerCase();
-  const filtered = bundledJobs.filter((job) => {
-    const searchable = [
-      job.title,
-      job.employer,
-      job.industry,
-      job.location,
-      job.summary,
-      ...job.required,
-      ...job.preferred,
-      ...job.responsibilities,
-    ].join(" ").toLowerCase();
+  const filtered = getBundledSearchIndex().filter(({ job, searchable, location }) => {
     if (q && !searchable.includes(q)) return false;
-    if (loc && !job.location.toLowerCase().includes(loc)) return false;
+    if (loc && !location.includes(loc)) return false;
     if (search.industry && job.industry !== search.industry) return false;
     if (search.remote && job.remote !== search.remote) return false;
     if (search.level && job.level !== search.level) return false;
     if (search.type && job.type !== search.type) return false;
     return true;
-  });
+  }).map(({ job }) => job);
 
   if (search.sort === "salary-desc") filtered.sort((a, b) => b.salary[1] - a.salary[1]);
   else if (search.sort === "salary-asc") filtered.sort((a, b) => a.salary[0] - b.salary[0]);
