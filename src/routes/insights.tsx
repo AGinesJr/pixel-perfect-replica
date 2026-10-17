@@ -201,7 +201,7 @@ function Insights() {
           <span className="inline-flex w-fit items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground"><span className="h-2 w-2 rounded-full bg-primary" /> BLS outlook · {outlookPeriod}</span>
         </div>
         <div className="grid gap-5 xl:grid-cols-2" aria-label="High-demand jobs and industries">
-          <section className="min-w-0 rounded-2xl border bg-gradient-to-br from-card via-card to-primary/[0.04] p-4 shadow-sm transition-shadow hover:shadow-md md:p-6" aria-labelledby="high-demand-jobs-title">
+          <section className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md md:p-6" aria-labelledby="high-demand-jobs-title">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Ranked by growth rate</p>
@@ -221,7 +221,7 @@ function Insights() {
                         <span className="text-sm font-bold tabular-nums text-primary">+{job.growthPercent.toFixed(1)}%</span>
                       </div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label={job.title + ": " + job.growthPercent.toFixed(1) + " percent projected growth"}>
-                        <div className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-500 transition-[width] duration-700 ease-out" style={{ width: (job.growthPercent / highDemandJobs[0].growthPercent * 100) + "%" }} />
+                        <div className="h-full rounded-full bg-primary transition-[width] duration-700 ease-out" style={{ width: (job.growthPercent / highDemandJobs[0].growthPercent * 100) + "%" }} />
                       </div>
                       <p className="mt-1.5 text-xs text-muted-foreground">{job.category} <span className="mx-1.5">·</span> {formatCount(job.jobsAdded)} projected additional jobs</p>
                     </div>
@@ -237,7 +237,7 @@ function Insights() {
             </div>
           </section>
 
-          <section className="min-w-0 rounded-2xl border bg-gradient-to-br from-card via-card to-cyan-500/[0.04] p-4 shadow-sm transition-shadow hover:shadow-md md:p-6" aria-labelledby="high-demand-industries-title">
+          <section className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md md:p-6" aria-labelledby="high-demand-industries-title">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Ranked by projected job gains</p>
@@ -257,7 +257,7 @@ function Insights() {
                         <span className="text-sm font-bold tabular-nums text-primary">{formatCount(industry.jobsAdded)}</span>
                       </div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label={industry.title + ": " + industry.jobsAdded.toLocaleString("en-US") + " projected additional jobs"}>
-                        <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-primary transition-[width] duration-700 ease-out" style={{ width: (industry.jobsAdded / highDemandIndustries[0].jobsAdded * 100) + "%" }} />
+                        <div className="h-full rounded-full bg-success transition-[width] duration-700 ease-out" style={{ width: (industry.jobsAdded / highDemandIndustries[0].jobsAdded * 100) + "%" }} />
                       </div>
                       <p className="mt-1.5 text-xs text-muted-foreground">Projected growth <span className="font-semibold text-foreground">+{industry.growthPercent.toFixed(1)}%</span> <span className="mx-1.5">·</span> 2024–2034</p>
                     </div>
@@ -276,7 +276,7 @@ function Insights() {
         <p className="mt-3 rounded-xl border bg-muted/30 px-4 py-3 text-xs leading-5 text-muted-foreground">These are national employment projections, not current vacancies or hiring guarantees. Job rankings compare growth rates; industry rankings compare total jobs added. Figures may differ from the selected local area. <a href="https://www.bls.gov/opub/mlr/2026/article/industry-and-occupational-employment-projections-overview.htm" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-4">Source: US Bureau of Labor Statistics</a></p>
       </section>
 
-      <section className="mt-8 rounded-2xl border bg-gradient-to-br from-card to-muted/30 p-4 shadow-sm md:p-6" aria-labelledby="geography-filters-title">
+      <section className="mt-8 rounded-2xl border bg-card p-4 shadow-sm md:p-6" aria-labelledby="geography-filters-title">
         <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-primary" aria-hidden="true" />
           <div><h2 id="geography-filters-title" className="text-lg font-bold">Explore your local market</h2><p className="mt-0.5 text-sm text-muted-foreground">Compare local labor-force conditions with the national picture.</p></div>
@@ -366,7 +366,7 @@ function Insights() {
             {cards.map((card) => {
               const Icon = card.icon;
               return (
-                <section key={card.label} className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-card to-muted/30 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:p-5">
+                <section key={card.label} className="group relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:p-5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
                     <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -379,7 +379,7 @@ function Insights() {
           </div>
 
           <div className="mt-6 grid gap-5 xl:grid-cols-2">
-            <section className="min-w-0 rounded-2xl border bg-gradient-to-br from-card to-muted/20 p-4 shadow-sm md:p-6">
+            <section className="min-w-0 rounded-2xl border bg-card p-4 shadow-sm md:p-6">
               <div className="mb-4">
                 <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary"><Activity className="h-4 w-4" aria-hidden="true" /></span><h3 className="font-semibold">Unemployment rate over time</h3></div>
                 <p className="mt-1 text-sm text-muted-foreground">{selectedLocation ? "Selected area compared with the US rate" : "Seasonally adjusted US unemployment rate"}</p>
