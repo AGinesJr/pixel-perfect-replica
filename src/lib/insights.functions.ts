@@ -48,6 +48,7 @@ export type MarketInsightsDashboard = {
   refreshedAt: string;
   latestPeriod: string;
   apiKeyConfigured: boolean;
+  localSeasonalAdjustment: "S" | "U" | null;
   national: {
     unemploymentRate: Metric;
     laborForceParticipation: Metric;
@@ -291,6 +292,7 @@ export const getMarketInsights = createServerFn({ method: "GET" })
       refreshedAt: new Date().toISOString(),
       latestPeriod: national.unemploymentRate ? national.unemploymentRate.periodName + " " + national.unemploymentRate.year : "Latest available release",
       apiKeyConfigured: Boolean(process.env.BLS_API_KEY),
+      localSeasonalAdjustment: selectedArea?.seasonalAdjustment ?? null,
       national,
       local,
       trends,
