@@ -168,81 +168,118 @@ function Insights() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 md:py-10">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">Official labor-market data</p>
-          <h1 className="mt-2 text-3xl font-bold md:text-4xl">US Market Insights</h1>
-          <p className="mt-3 leading-6 text-muted-foreground">Explore unemployment, employment, labor-force participation, payrolls, and wage trends. Filter local labor-market measures by geography and compare them with the national benchmark.</p>
+      <section className="relative isolate overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-muted/40 p-5 shadow-sm md:p-8">
+        <div className="pointer-events-none absolute -right-16 -top-20 -z-10 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border bg-background/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-primary shadow-sm">
+              <Activity className="h-3.5 w-3.5" aria-hidden="true" />
+              Official labor-market data
+            </div>
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight md:text-5xl">US Market Insights</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">Make your next career move with confidence. Explore labor-market trends, compare local areas with national benchmarks, and discover where employment demand is projected to grow.</p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-full border bg-background/70 px-3 py-1.5"><Activity className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Employment & wages</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border bg-background/70 px-3 py-1.5"><MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Local comparisons</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border bg-background/70 px-3 py-1.5"><TrendingUp className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Future demand</span>
+            </div>
+          </div>
+          <button type="button" onClick={() => void loadDashboard(selectedLocation?.areaCode ?? "")} disabled={loading} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-lg border bg-background/80 px-4 text-sm font-semibold shadow-sm transition-all hover:bg-background hover:shadow-md disabled:opacity-60 sm:self-auto">
+            <RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} aria-hidden="true" />
+            {loading ? "Updating…" : "Refresh data"}
+          </button>
         </div>
-        <button type="button" onClick={() => void loadDashboard(selectedLocation?.areaCode ?? "")} disabled={loading} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md border bg-card px-4 text-sm font-semibold transition-colors hover:bg-accent disabled:opacity-60">
-          <RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} aria-hidden="true" />
-          {loading ? "Updating…" : "Refresh data"}
-        </button>
-      </div>
-
-      <section className="mt-7 grid gap-5 xl:grid-cols-2" aria-label="High-demand jobs and industries">
-        <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6" aria-labelledby="high-demand-jobs-title">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Projected occupational growth</p>
-              <h2 id="high-demand-jobs-title" className="mt-1 text-xl font-bold">High-Demand Jobs</h2>
-              <p className="mt-1 text-sm leading-5 text-muted-foreground">Occupations projected to grow fastest across the US in {outlookPeriod}.</p>
-            </div>
-            <BriefcaseBusiness className="mt-1 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-          </div>
-          <div className="mt-4 divide-y">
-            {highDemandJobs.map((job, index) => (
-              <article key={job.title} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-muted text-xs font-bold tabular-nums">{index + 1}</span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold leading-5">{job.title}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{job.category} · {job.jobsAdded.toLocaleString("en-US")} projected additional jobs</p>
-                </div>
-                <span className="shrink-0 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">+{job.growthPercent.toFixed(1)}%</span>
-              </article>
-            ))}
-          </div>
-          <Link to="/search-jobs" className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition-colors hover:bg-accent">
-            Search current openings <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </section>
-
-        <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6" aria-labelledby="high-demand-industries-title">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Projected industry job gains</p>
-              <h2 id="high-demand-industries-title" className="mt-1 text-xl font-bold">High-Demand Industries</h2>
-              <p className="mt-1 text-sm leading-5 text-muted-foreground">Industries expected to add the most jobs nationally in {outlookPeriod}.</p>
-            </div>
-            <Building2 className="mt-1 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-          </div>
-          <div className="mt-4 divide-y">
-            {highDemandIndustries.map((industry, index) => (
-              <article key={industry.title} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-muted text-xs font-bold tabular-nums">{index + 1}</span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold leading-5">{industry.title}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{industry.jobsAdded.toLocaleString("en-US")} projected additional jobs</p>
-                </div>
-                <span className="shrink-0 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">+{industry.growthPercent.toFixed(1)}%</span>
-              </article>
-            ))}
-          </div>
-          <Link to="/search-jobs" className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition-colors hover:bg-accent">
-            Explore live job listings <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </section>
       </section>
 
-      <section className="mt-4 rounded-lg border bg-muted/30 p-4 text-xs leading-5 text-muted-foreground">
-        <p><strong className="text-foreground">How to interpret this outlook:</strong> Job rankings use projected occupational growth rates; industry rankings use projected total jobs added. These are national forecasts, not current vacancies or guarantees of hiring. Figures cover {outlookPeriod} and may differ from the selected local area above.</p>
-        <p className="mt-2">Source: <a href="https://www.bls.gov/opub/mlr/2026/article/industry-and-occupational-employment-projections-overview.htm" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-4">US Bureau of Labor Statistics · Employment Projections</a></p>
+      <section className="mt-7" aria-labelledby="demand-outlook-heading">
+        <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Plan for what's next</p>
+            <h2 id="demand-outlook-heading" className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">Where opportunity is growing</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Explore the fastest-growing occupations and the industries expected to add the most jobs nationwide.</p>
+          </div>
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground"><span className="h-2 w-2 rounded-full bg-primary" /> BLS outlook · {outlookPeriod}</span>
+        </div>
+        <div className="grid gap-5 xl:grid-cols-2" aria-label="High-demand jobs and industries">
+          <section className="min-w-0 rounded-2xl border bg-gradient-to-br from-card via-card to-primary/[0.04] p-4 shadow-sm transition-shadow hover:shadow-md md:p-6" aria-labelledby="high-demand-jobs-title">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Ranked by growth rate</p>
+                <h3 id="high-demand-jobs-title" className="mt-1 text-xl font-bold">High-Demand Jobs</h3>
+                <p className="mt-1 text-sm leading-5 text-muted-foreground">Occupations projected to grow fastest in the US.</p>
+              </div>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border bg-primary/10 text-primary"><BriefcaseBusiness className="h-5 w-5" aria-hidden="true" /></span>
+            </div>
+            <div className="mt-6 space-y-4">
+              {highDemandJobs.map((job, index) => (
+                <article key={job.title} className="group/job">
+                  <div className="flex items-start gap-3">
+                    <span className={"grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold tabular-nums " + (index === 0 ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground")}>{String(index + 1).padStart(2, "0")}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                        <h4 className="text-sm font-semibold leading-5">{job.title}</h4>
+                        <span className="text-sm font-bold tabular-nums text-primary">+{job.growthPercent.toFixed(1)}%</span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label={job.title + ": " + job.growthPercent.toFixed(1) + " percent projected growth"}>
+                        <div className="h-full rounded-full bg-gradient-to-r from-primary to-cyan-500 transition-[width] duration-700 ease-out" style={{ width: (job.growthPercent / highDemandJobs[0].growthPercent * 100) + "%" }} />
+                      </div>
+                      <p className="mt-1.5 text-xs text-muted-foreground">{job.category} <span className="mx-1.5">·</span> {formatCount(job.jobsAdded)} projected additional jobs</p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-col justify-between gap-3 rounded-xl border bg-background/70 p-3 sm:flex-row sm:items-center">
+              <p className="text-xs leading-5 text-muted-foreground">Bars compare projected employment growth rates over the decade.</p>
+              <Link to="/search-jobs" className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90">
+                Find openings <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </section>
+
+          <section className="min-w-0 rounded-2xl border bg-gradient-to-br from-card via-card to-cyan-500/[0.04] p-4 shadow-sm transition-shadow hover:shadow-md md:p-6" aria-labelledby="high-demand-industries-title">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Ranked by projected job gains</p>
+                <h3 id="high-demand-industries-title" className="mt-1 text-xl font-bold">High-Demand Industries</h3>
+                <p className="mt-1 text-sm leading-5 text-muted-foreground">Sectors expected to create the most additional jobs.</p>
+              </div>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border bg-primary/10 text-primary"><Building2 className="h-5 w-5" aria-hidden="true" /></span>
+            </div>
+            <div className="mt-6 space-y-4">
+              {highDemandIndustries.map((industry, index) => (
+                <article key={industry.title} className="group/industry">
+                  <div className="flex items-start gap-3">
+                    <span className={"grid h-7 w-7 shrink-0 place-items-center rounded-lg text-xs font-bold tabular-nums " + (index === 0 ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground")}>{String(index + 1).padStart(2, "0")}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                        <h4 className="text-sm font-semibold leading-5">{industry.title}</h4>
+                        <span className="text-sm font-bold tabular-nums text-primary">{formatCount(industry.jobsAdded)}</span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label={industry.title + ": " + industry.jobsAdded.toLocaleString("en-US") + " projected additional jobs"}>
+                        <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-primary transition-[width] duration-700 ease-out" style={{ width: (industry.jobsAdded / highDemandIndustries[0].jobsAdded * 100) + "%" }} />
+                      </div>
+                      <p className="mt-1.5 text-xs text-muted-foreground">Projected growth <span className="font-semibold text-foreground">+{industry.growthPercent.toFixed(1)}%</span> <span className="mx-1.5">·</span> 2024–2034</p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-col justify-between gap-3 rounded-xl border bg-background/70 p-3 sm:flex-row sm:items-center">
+              <p className="text-xs leading-5 text-muted-foreground">Bars compare total projected jobs added by industry.</p>
+              <Link to="/search-jobs" className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90">
+                Explore job listings <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </section>
+        </div>
+        <p className="mt-3 rounded-xl border bg-muted/30 px-4 py-3 text-xs leading-5 text-muted-foreground">These are national employment projections, not current vacancies or hiring guarantees. Job rankings compare growth rates; industry rankings compare total jobs added. Figures may differ from the selected local area. <a href="https://www.bls.gov/opub/mlr/2026/article/industry-and-occupational-employment-projections-overview.htm" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-4">Source: US Bureau of Labor Statistics</a></p>
       </section>
 
-      <section className="mt-7 rounded-xl border bg-card p-4 md:p-6" aria-labelledby="geography-filters-title">
+      <section className="mt-8 rounded-2xl border bg-gradient-to-br from-card to-muted/30 p-4 shadow-sm md:p-6" aria-labelledby="geography-filters-title">
         <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-primary" aria-hidden="true" />
-          <h2 id="geography-filters-title" className="text-lg font-semibold">Choose a location</h2>
+          <div><h2 id="geography-filters-title" className="text-lg font-bold">Explore your local market</h2><p className="mt-0.5 text-sm text-muted-foreground">Compare local labor-force conditions with the national picture.</p></div>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-[minmax(190px,0.7fr)_minmax(0,1.5fr)]">
           <label className="text-sm font-medium">
@@ -310,9 +347,9 @@ function Insights() {
 
       {dashboard && !error && (
         <>
-          <div className="mt-7 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+          <div className="mt-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <h2 className="text-xl font-bold">{selectedLocation ? selectedLabel : "United States"} overview</h2>
+              <h2 className="text-2xl font-bold tracking-tight">{selectedLocation ? selectedLabel : "United States"} overview</h2>
               <p className="mt-1 text-sm text-muted-foreground">Latest available BLS release: {dashboard.latestPeriod}. Data is released monthly and can be revised.</p>
             </div>
             <label className="flex items-center gap-2 text-sm font-medium">
@@ -329,12 +366,12 @@ function Insights() {
             {cards.map((card) => {
               const Icon = card.icon;
               return (
-                <section key={card.label} className="rounded-xl border bg-card p-4 md:p-5">
+                <section key={card.label} className="group relative overflow-hidden rounded-xl border bg-gradient-to-br from-card to-muted/30 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:p-5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
                     <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                   </div>
-                  <p className="mt-3 text-2xl font-bold tabular-nums">{card.value}</p>
+                  <p className="mt-3 text-3xl font-extrabold tracking-tight tabular-nums">{card.value}</p>
                   <p className="mt-2 text-xs text-muted-foreground">{card.note}</p>
                 </section>
               );
@@ -342,9 +379,9 @@ function Insights() {
           </div>
 
           <div className="mt-6 grid gap-5 xl:grid-cols-2">
-            <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6">
+            <section className="min-w-0 rounded-2xl border bg-gradient-to-br from-card to-muted/20 p-4 shadow-sm md:p-6">
               <div className="mb-4">
-                <h3 className="font-semibold">Unemployment rate over time</h3>
+                <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary"><Activity className="h-4 w-4" aria-hidden="true" /></span><h3 className="font-semibold">Unemployment rate over time</h3></div>
                 <p className="mt-1 text-sm text-muted-foreground">{selectedLocation ? "Selected area compared with the US rate" : "Seasonally adjusted US unemployment rate"}</p>
               </div>
               <div className="h-72 w-full">
@@ -364,7 +401,7 @@ function Insights() {
 
             <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6">
               <div className="mb-4">
-                <h3 className="font-semibold">Nonfarm payroll employment</h3>
+                <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary"><BarChart3 className="h-4 w-4" aria-hidden="true" /></span><h3 className="font-semibold">Nonfarm payroll employment</h3></div>
                 <p className="mt-1 text-sm text-muted-foreground">US payroll jobs, in millions</p>
               </div>
               <div className="h-72 w-full">
@@ -382,7 +419,7 @@ function Insights() {
 
             <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6">
               <div className="mb-4">
-                <h3 className="font-semibold">Average hourly earnings</h3>
+                <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary"><TrendingUp className="h-4 w-4" aria-hidden="true" /></span><h3 className="font-semibold">Average hourly earnings</h3></div>
                 <p className="mt-1 text-sm text-muted-foreground">US private-sector employees, dollars per hour</p>
               </div>
               <div className="h-72 w-full">
@@ -400,7 +437,7 @@ function Insights() {
 
             <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6">
               <div className="mb-4">
-                <h3 className="font-semibold">{selectedLocation ? selectedLocation.name + " employment" : "US employment"}</h3>
+                <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary"><Activity className="h-4 w-4" aria-hidden="true" /></span><h3 className="font-semibold">{selectedLocation ? selectedLocation.name + " employment" : "US employment"}</h3></div>
                 <p className="mt-1 text-sm text-muted-foreground">People employed, in millions</p>
               </div>
               <div className="h-72 w-full">
