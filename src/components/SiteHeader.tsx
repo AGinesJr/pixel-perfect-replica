@@ -6,9 +6,9 @@ import {
   FileText,
   Gauge,
   MessageSquare,
+  Monitor,
   Search,
   UserRound,
-  Wrench,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -44,9 +44,9 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border/80 bg-card/95 shadow-sm shadow-black/10 backdrop-blur">
-        <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-3 px-3 sm:gap-4 sm:px-6">
-          <Link to="/dashboard" onClick={closeMenus} className="flex shrink-0 items-center gap-2.5 rounded-md font-display text-lg font-bold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+        <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-2 px-2 sm:gap-4 sm:px-6">
+          <Link to="/dashboard" onClick={closeMenus} className="flex shrink-0 items-center gap-2 rounded-md font-display text-sm font-bold tracking-tight sm:gap-2.5 sm:text-lg text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary sm:h-9 sm:w-9 text-primary-foreground shadow-sm">
               <Briefcase className="h-4 w-4" aria-hidden="true" />
             </span>
             <span>Workforce <span className="text-primary">Prep</span></span>
@@ -67,8 +67,8 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <div className="relative flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <Link to="/search-jobs" onClick={closeMenus} aria-label="Live listings" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted sm:px-3">
+          <div className="relative flex shrink-0 items-center gap-1 sm:gap-2">
+            <Link to="/search-jobs" onClick={closeMenus} aria-label="Live listings" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted sm:px-3">
               <Search className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Live listings</span>
             </Link>
@@ -85,9 +85,9 @@ export function SiteHeader() {
                 aria-label="Practice Tools"
                 className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/70 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-2 sm:px-3"
               >
-                <Wrench className="h-4 w-4" aria-hidden="true" />
-                <span>Practice Tools</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${practiceOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+                <Monitor className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only sm:not-sr-only">Practice Tools</span>
+                <ChevronDown className={`hidden h-4 w-4 transition-transform sm:block ${practiceOpen ? "rotate-180" : ""}`} aria-hidden="true" />
               </button>
               {practiceOpen && (
                 <div role="menu" aria-label="Practice Tools" className="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-xl border border-border bg-card p-1.5 shadow-xl shadow-black/20">
@@ -117,11 +117,11 @@ export function SiteHeader() {
                 aria-expanded={profileOpen}
                 aria-haspopup="menu"
                 aria-label="Open account menu"
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-border px-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-2 sm:px-3"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-border px-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-2 sm:px-3"
               >
                 <UserRound className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">My account</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${profileOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+                <ChevronDown className={`hidden h-4 w-4 transition-transform sm:block ${profileOpen ? "rotate-180" : ""}`} aria-hidden="true" />
               </button>
               {profileOpen && (
                 <div role="menu" aria-label="My account" className="absolute right-0 top-full z-50 mt-2 min-w-52 rounded-xl border border-border bg-card p-1.5 shadow-xl shadow-black/20">
