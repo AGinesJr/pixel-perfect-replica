@@ -20,7 +20,7 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 
 ## Important limitations
 
-- **This is currently a practice simulator, not a live job board.** Jobs, employers, posting dates, and salary ranges are sample content, not verified vacancies or live labor-market data. The home page labels these as practice roles.
+- **The practice catalog remains simulated; Search Jobs is a separate live feed.** Practice listings, employers, posting dates, and salary ranges are sample content, not verified vacancies. The live feed currently combines remote roles from Himalayas with federal announcements from USAJOBS when configured.
 - **Practice modes are simulations.** Training is the default and prioritizes constructive feedback; Career Simulation uses a balanced threshold; Market Reality uses a stricter simulated threshold. Market Reality does not use or expose other users’ activity and does not represent real competition.
 - **Profile contact email is separate from the Supabase sign-in email.** Updating the profile contact email does not change account credentials.
 - **Supabase sign-in and cloud sync require deployment configuration and live testing.** The account page uses Supabase Auth and the app syncs profile and practice data to the RLS-protected tables. Add the required Supabase URL and public key to the hosting build environment, run both database migrations, rebuild, and test sign-up/sign-in before relying on cloud storage. Until configured and verified, practice data remains browser-local.
