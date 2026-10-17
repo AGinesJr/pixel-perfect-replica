@@ -52,9 +52,53 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --radius: 0.75rem;
-  /* Brand foundations: midnight navy, electric cyan, achievement lime. */
+  /* Light is the first-visit default; the toggle applies .dark when selected. */
+  --background: #F8FAFC;
+  --foreground: #172033;
+  --card: #FFFFFF;
+  --card-foreground: #172033;
+  --popover: #FFFFFF;
+  --popover-foreground: #172033;
+  --primary: #087E91;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8EEF4;
+  --secondary-foreground: #263449;
+  --muted: #EEF2F7;
+  --muted-foreground: #596579;
+  --accent: #DFF7FA;
+  --accent-foreground: #12313A;
+  --destructive: #B42318;
+  --destructive-foreground: #FFFFFF;
+  --success: #287A3D;
+  --warning: #A85D08;
+  --ink: #172033;
+  --ink-foreground: #FFFFFF;
+  --border: #D7E0EA;
+  --input: #CBD5E1;
+  --ring: #087E91;
+  --chart-1: #087E91;
+  --chart-2: #4B8B35;
+  --chart-3: #4777C7;
+  --chart-4: #B86B13;
+  --chart-5: #8765B8;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #172033;
+  --sidebar-primary: #087E91;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EEF2F7;
+  --sidebar-accent-foreground: #263449;
+  --sidebar-border: #D7E0EA;
+  --sidebar-ring: #087E91;
+  --gradient-hero: linear-gradient(135deg, #F8FAFC 0%, #EAF4F8 58%, #DDF4F6 100%);
+  --motion-fast: 160ms;
+  --motion-standard: 220ms;
+  --space-page-gutter: clamp(1rem, 3vw, 2rem);
+}
+
+.dark {
+  color-scheme: dark;
   --background: #0B1220;
   --foreground: #F4F7FC;
   --card: #151F32;
@@ -92,11 +136,7 @@
   --sidebar-border: #2A3950;
   --sidebar-ring: #24D7E8;
   --gradient-hero: linear-gradient(135deg, #0B1220 0%, #13233A 58%, #17334A 100%);
-  --motion-fast: 160ms;
-  --motion-standard: 220ms;
-  --space-page-gutter: clamp(1rem, 3vw, 2rem);
 }
-
 @layer base {
   * {
     border-color: var(--color-border);
