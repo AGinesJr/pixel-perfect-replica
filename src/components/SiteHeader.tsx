@@ -5,6 +5,7 @@ import { useState } from "react";
 const nav = [
   { to: "/jobs", label: "Job Market Simulator" },
   { to: "/insights", label: "Market insights" },
+  { to: "/search-jobs", label: "Search Jobs" },
   { to: "/job-prep", label: "Interview Prep" },
 ] as const;
 
