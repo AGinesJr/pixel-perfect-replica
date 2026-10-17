@@ -6,31 +6,48 @@ import { useProgress } from "@/lib/progress";
 export function JobCard({ job }: { job: Job }) {
   const { state, update } = useProgress();
   const saved = state.saved.includes(job.id);
+
   return (
-    <div className="group relative rounded-lg border bg-card p-5 transition hover:border-primary/50 hover:shadow-md">
+    <article className="group relative rounded-xl border border-border bg-card p-5 transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg hover:shadow-black/10">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <Link to="/jobs/$id" params={{ id: job.id }} className="font-display text-lg font-semibold text-foreground after:absolute after:inset-0 group-hover:text-primary">{job.title}</Link>
-          <p className="text-sm text-muted-foreground">{job.employer}</p>
-          <span className="mt-1 inline-flex rounded-full border border-amber-600/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">Simulated practice</span>
+        <div className="min-w-0">
+          <Link
+            to="/jobs/$id"
+            params={{ id: job.id }}
+            className="font-display text-lg font-semibold leading-snug text-foreground after:absolute after:inset-0 group-hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {job.title}
+          </Link>
+          <p className="mt-1 text-sm text-muted-foreground">{job.employer}</p>
+          <span className="mt-2 inline-flex items-center rounded-full border border-warning/35 bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
+            Practice scenario
+          </span>
         </div>
         <button
-          aria-label={saved ? "Unsave job" : "Save job"}
+          type="button"
+          aria-label={saved ? `Remove ${job.title} from saved jobs` : `Save ${job.title}`}
+          aria-pressed={saved}
           onClick={() => update((s) => ({ ...s, saved: saved ? s.saved.filter((x) => x !== job.id) : [...s.saved, job.id] }))}
-          className="relative z-10 rounded-md p-2 text-muted-foreground hover:bg-muted"
+          className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${saved ? "border-success/40 bg-success/10 text-success" : "border-border text-muted-foreground hover:border-primary/50 hover:bg-muted hover:text-foreground"}`}
         >
-          <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
+          <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} aria-hidden="true" />
         </button>
       </div>
-      <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5" />{job.location}</p>
+
+      <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
+        <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+        {job.location}
+      </p>
+
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        <span className="rounded bg-secondary px-2 py-1 font-medium text-secondary-foreground">{fmtSalary(job.salary)}</span>
-        <span className="rounded bg-secondary px-2 py-1 text-secondary-foreground">{job.type}</span>
-        <span className="rounded bg-secondary px-2 py-1 text-secondary-foreground">{job.remote}</span>
-        <span className="rounded bg-secondary px-2 py-1 text-secondary-foreground">{job.level}</span>
+        <span className="rounded-md bg-secondary px-2.5 py-1.5 font-semibold tabular-nums text-secondary-foreground">{fmtSalary(job.salary)}</span>
+        <span className="rounded-md bg-secondary px-2.5 py-1.5 text-secondary-foreground">{job.type}</span>
+        <span className="rounded-md bg-secondary px-2.5 py-1.5 text-secondary-foreground">{job.remote}</span>
+        <span className="rounded-md bg-secondary px-2.5 py-1.5 text-secondary-foreground">{job.level}</span>
       </div>
-      <p className="mt-3 line-clamp-2 text-sm text-foreground/80">{job.summary}</p>
-      <p className="mt-3 text-xs text-muted-foreground">Sample listing · {job.posted}</p>
-    </div>
+
+      <p className="mt-3 line-clamp-3 text-sm leading-6 text-foreground/85">{job.summary}</p>
+      <p className="mt-4 border-t border-border/70 pt-3 text-xs text-muted-foreground">Simulated posting · {job.posted}</p>
+    </article>
   );
 }

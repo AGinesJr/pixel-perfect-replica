@@ -208,20 +208,20 @@ function Profile() {
         {scoreResult && <div className="mt-6 space-y-5" aria-live="polite">
           <div className="flex flex-col gap-4 rounded-lg border bg-muted/40 p-5 sm:flex-row sm:items-center">
             <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full border-4 border-primary text-center">
-              <div><p className="text-3xl font-bold leading-none">{scoreResult.score}</p><p className="mt-1 text-xs text-muted-foreground">out of 100</p></div>
+              <div><p className="metric-value font-display text-3xl font-bold leading-none">{scoreResult.score}</p><p className="mt-1 text-xs text-muted-foreground">out of 100</p></div>
             </div>
             <div><h3 className="text-xl font-bold">{scoreResult.label}</h3><p className="mt-1 text-sm text-muted-foreground">Estimated ATS readiness checklist score</p><p className="mt-2 text-sm">Use the category breakdown below to improve clarity and role relevance—not to game an automated filter.</p></div>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {scoreResult.categories.map((item) => <article key={item.name} className="rounded-lg border p-4">
-              <div className="flex items-start justify-between gap-3"><h3 className="font-semibold">{item.name}</h3><span className="shrink-0 text-lg font-bold">{item.score}%</span></div>
+              <div className="flex items-start justify-between gap-3"><h3 className="font-semibold">{item.name}</h3><span className="metric-value shrink-0 text-lg font-bold">{item.score}%</span></div>
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: item.score + "%" }} /></div>
               <p className="mt-2 text-sm text-muted-foreground">{item.summary}</p>
               {item.recommendations.length > 0 ? <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">{item.recommendations.map((recommendation) => <li key={recommendation}>{recommendation}</li>)}</ul> : <p className="mt-3 text-sm">No checklist gaps detected in this category. Review for accuracy before applying.</p>}
             </article>)}
           </div>
           {scoreResult.keywordMatch && <article className="rounded-lg border p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-semibold">Target-job keyword overlap</h3><p className="mt-1 text-sm text-muted-foreground">A simple word-overlap estimate, not a semantic or employer ATS analysis.</p></div><span className="text-xl font-bold">{scoreResult.keywordMatch.score}%</span></div>
+            <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-semibold">Target-job keyword overlap</h3><p className="mt-1 text-sm text-muted-foreground">A simple word-overlap estimate, not a semantic or employer ATS analysis.</p></div><span className="metric-value text-xl font-bold">{scoreResult.keywordMatch.score}%</span></div>
             {scoreResult.keywordMatch.matched.length > 0 && <div className="mt-4"><h4 className="text-sm font-semibold">Terms found</h4><div className="mt-2 flex flex-wrap gap-2">{scoreResult.keywordMatch.matched.map((term) => <span key={term} className="rounded-full border px-2.5 py-1 text-xs">{term}</span>)}</div></div>}
             {scoreResult.keywordMatch.missing.length > 0 && <div className="mt-4"><h4 className="text-sm font-semibold">Terms to review</h4><p className="mt-1 text-xs text-muted-foreground">Add a term only if it truthfully reflects your skills or experience.</p><div className="mt-2 flex flex-wrap gap-2">{scoreResult.keywordMatch.missing.map((term) => <span key={term} className="rounded-full border border-dashed px-2.5 py-1 text-xs">{term}</span>)}</div></div>}
           </article>}

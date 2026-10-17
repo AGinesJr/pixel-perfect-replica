@@ -176,7 +176,7 @@ function Insights() {
               <Activity className="h-3.5 w-3.5" aria-hidden="true" />
               Official labor-market data
             </div>
-            <h1 className="mt-4 text-3xl font-extrabold tracking-tight md:text-5xl">US Market Insights</h1>
+            <h1 className="mt-4 font-display text-3xl font-bold tracking-tight md:text-5xl">US Market Insights</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">Make your next career move with confidence. Explore labor-market trends, compare local areas with national benchmarks, and discover where employment demand is projected to grow.</p>
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 rounded-full border bg-background/70 px-3 py-1.5"><Activity className="h-3.5 w-3.5 text-primary" aria-hidden="true" /> Employment & wages</span>
@@ -195,7 +195,7 @@ function Insights() {
         <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Plan for what's next</p>
-            <h2 id="demand-outlook-heading" className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">Where opportunity is growing</h2>
+            <h2 id="demand-outlook-heading" className="mt-1 font-display text-2xl font-semibold tracking-tight md:text-3xl">Where opportunity is growing</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Explore the fastest-growing occupations and the industries expected to add the most jobs nationwide.</p>
           </div>
           <span className="inline-flex w-fit items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground"><span className="h-2 w-2 rounded-full bg-primary" /> BLS outlook · {outlookPeriod}</span>
@@ -392,8 +392,8 @@ function Insights() {
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(value: number) => value + "%"} width={46} />
                     <Tooltip formatter={(value) => typeof value === "number" ? value.toFixed(1) + "%" : "—"} />
                     <Legend />
-                    <Line type="monotone" dataKey="national" name="United States" stroke="#64748b" strokeWidth={2} dot={false} connectNulls />
-                    {selectedLocation && <Line type="monotone" dataKey="selected" name={selectedLocation.name} stroke="#0d9488" strokeWidth={2.5} dot={false} connectNulls />}
+                    <Line type="monotone" dataKey="national" name="United States" stroke="var(--muted-foreground)" strokeWidth={2} dot={false} connectNulls />
+                    {selectedLocation && <Line type="monotone" dataKey="selected" name={selectedLocation.name} stroke="var(--primary)" strokeWidth={2.5} dot={false} connectNulls />}
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -411,7 +411,7 @@ function Insights() {
                     <XAxis dataKey="label" tick={{ fontSize: 11 }} minTickGap={20} />
                     <YAxis tick={{ fontSize: 11 }} width={54} />
                     <Tooltip formatter={(value) => typeof value === "number" ? value.toFixed(1) + " million" : "—"} />
-                    <Line type="monotone" dataKey="value" name="Payroll jobs" stroke="#2563eb" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="value" name="Payroll jobs" stroke="var(--primary)" strokeWidth={2.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -429,7 +429,7 @@ function Insights() {
                     <XAxis dataKey="label" tick={{ fontSize: 11 }} minTickGap={20} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(value: number) => "$" + value} width={54} />
                     <Tooltip formatter={(value) => typeof value === "number" ? "$" + value.toFixed(2) : "—"} />
-                    <Line type="monotone" dataKey="value" name="Average hourly earnings" stroke="#7c3aed" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="value" name="Average hourly earnings" stroke="var(--success)" strokeWidth={2.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -447,7 +447,7 @@ function Insights() {
                     <XAxis dataKey="label" tick={{ fontSize: 11 }} minTickGap={20} />
                     <YAxis tick={{ fontSize: 11 }} width={54} />
                     <Tooltip formatter={(value) => typeof value === "number" ? value.toFixed(2) + " million" : "—"} />
-                    <Line type="monotone" dataKey="value" name="People employed" stroke="#ea580c" strokeWidth={2.5} dot={false} />
+                    <Line type="monotone" dataKey="value" name="People employed" stroke="var(--chart-3)" strokeWidth={2.5} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
