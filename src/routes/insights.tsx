@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, BarChart3, MapPin, RefreshCw, Search, TrendingUp } from "lucide-react";
+import { Activity, ArrowUpRight, BarChart3, BriefcaseBusiness, Building2, MapPin, RefreshCw, Search, TrendingUp } from "lucide-react";
+import { highDemandIndustries, highDemandJobs, outlookPeriod } from "@/data/high-demand-outlook";
 import { useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -178,6 +179,65 @@ function Insights() {
           {loading ? "Updating…" : "Refresh data"}
         </button>
       </div>
+
+      <section className="mt-7 grid gap-5 xl:grid-cols-2" aria-label="High-demand jobs and industries">
+        <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6" aria-labelledby="high-demand-jobs-title">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Projected occupational growth</p>
+              <h2 id="high-demand-jobs-title" className="mt-1 text-xl font-bold">High-Demand Jobs</h2>
+              <p className="mt-1 text-sm leading-5 text-muted-foreground">Occupations projected to grow fastest across the US in {outlookPeriod}.</p>
+            </div>
+            <BriefcaseBusiness className="mt-1 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+          </div>
+          <div className="mt-4 divide-y">
+            {highDemandJobs.map((job, index) => (
+              <article key={job.title} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-muted text-xs font-bold tabular-nums">{index + 1}</span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold leading-5">{job.title}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{job.category} · {job.jobsAdded.toLocaleString("en-US")} projected additional jobs</p>
+                </div>
+                <span className="shrink-0 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">+{job.growthPercent.toFixed(1)}%</span>
+              </article>
+            ))}
+          </div>
+          <Link to="/search-jobs" className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition-colors hover:bg-accent">
+            Search current openings <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </section>
+
+        <section className="min-w-0 rounded-xl border bg-card p-4 md:p-6" aria-labelledby="high-demand-industries-title">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Projected industry job gains</p>
+              <h2 id="high-demand-industries-title" className="mt-1 text-xl font-bold">High-Demand Industries</h2>
+              <p className="mt-1 text-sm leading-5 text-muted-foreground">Industries expected to add the most jobs nationally in {outlookPeriod}.</p>
+            </div>
+            <Building2 className="mt-1 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+          </div>
+          <div className="mt-4 divide-y">
+            {highDemandIndustries.map((industry, index) => (
+              <article key={industry.title} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-muted text-xs font-bold tabular-nums">{index + 1}</span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold leading-5">{industry.title}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{industry.jobsAdded.toLocaleString("en-US")} projected additional jobs</p>
+                </div>
+                <span className="shrink-0 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">+{industry.growthPercent.toFixed(1)}%</span>
+              </article>
+            ))}
+          </div>
+          <Link to="/search-jobs" className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition-colors hover:bg-accent">
+            Explore live job listings <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </section>
+      </section>
+
+      <section className="mt-4 rounded-lg border bg-muted/30 p-4 text-xs leading-5 text-muted-foreground">
+        <p><strong className="text-foreground">How to interpret this outlook:</strong> Job rankings use projected occupational growth rates; industry rankings use projected total jobs added. These are national forecasts, not current vacancies or guarantees of hiring. Figures cover {outlookPeriod} and may differ from the selected local area above.</p>
+        <p className="mt-2">Source: <a href="https://www.bls.gov/opub/mlr/2026/article/industry-and-occupational-employment-projections-overview.htm" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-4">US Bureau of Labor Statistics · Employment Projections</a></p>
+      </section>
 
       <section className="mt-7 rounded-xl border bg-card p-4 md:p-6" aria-labelledby="geography-filters-title">
         <div className="flex items-center gap-2">
