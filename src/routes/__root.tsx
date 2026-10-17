@@ -120,9 +120,36 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (router) => router.location.pathname });
+  const locationHref = useRouterState({ select: (router) => router.location.href });
   const [session, setSession] = useState<AuthSession | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const isAccountRoute = pathname === "/account";
+
+  // Every route change starts at the top instead of restoring an old scroll position.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [locationHref]);
+
+  // Pagination and step-by-step flows often update in place without changing routes.
+  // Bring those "Next" actions back to the top as well.
+  useEffect(() => {
+    const scrollToTopForNextAction = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const control = target.closest("button, a, [role='button'], input[type='button'], input[type='submit']");
+      if (!control) return;
+      const label = [
+        control.getAttribute("aria-label"),
+        control.getAttribute("title"),
+        control.textContent,
+        control instanceof HTMLInputElement ? control.value : "",
+      ].filter(Boolean).join(" ").trim();
+      if (!/^next(?:\b|$)/i.test(label) && !/\bnext page\b/i.test(label)) return;
+      window.requestAnimationFrame(() => window.scrollTo(0, 0));
+    };
+    document.addEventListener("click", scrollToTopForNextAction);
+    return () => document.removeEventListener("click", scrollToTopForNextAction);
+  }, []);
 
   useEffect(() => {
     let active = true;
