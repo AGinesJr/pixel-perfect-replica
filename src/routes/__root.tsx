@@ -81,19 +81,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Workforce Prep" },
-      { name: "description", content: "Practice the job search with an AI recruiter and interviewer." },
+      { name: "theme-color", content: "#0B1220" },
+      { title: "Workforce Prep | Career Practice & Interview Simulator" },
+      {
+        name: "description",
+        content:
+          "Prepare for your next opportunity with a career practice simulator. Rehearse job applications, improve your resume, practice interviews, and explore labor-market insights.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:site_name", content: "Workforce Prep" },
+      { property: "og:title", content: "Workforce Prep | Career Practice & Interview Simulator" },
+      {
+        property: "og:description",
+        content:
+          "Practice the job search, strengthen your resume, and build interview confidence with explainable feedback.",
+      },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Workforce Prep | Career Practice & Interview Simulator" },
+      {
+        name: "twitter:description",
+        content:
+          "Practice the job search, strengthen your resume, and build interview confidence with explainable feedback.",
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&family=Urbanist:wght@600;700;800&display=swap" },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap",
       },
+      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
@@ -124,14 +142,13 @@ function RootComponent() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const isAccountRoute = pathname === "/account";
+  // Keep the marketing homepage crawlable; product tools still require authentication.
+  const isPublicMarketingRoute = pathname === "/";
 
-  // Every route change starts at the top instead of restoring an old scroll position.
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [locationHref]);
 
-  // Pagination and step-by-step flows often update in place without changing routes.
-  // Bring those "Next" actions back to the top as well.
   useEffect(() => {
     const scrollToTopForNextAction = (event: MouseEvent) => {
       const target = event.target;
@@ -173,20 +190,37 @@ function RootComponent() {
   }, []);
 
   const hasAccess = Boolean(session);
+  const canViewWithoutSession = isAccountRoute || isPublicMarketingRoute;
 
   return (
     <QueryClientProvider client={queryClient}>
-      {hasAccess ? <SiteHeader /> : (
-        <header className="border-b bg-card px-4 py-4">
-          <div className="mx-auto max-w-6xl font-display text-lg font-bold">Workforce Prep</div>
+      {hasAccess ? (
+        <SiteHeader />
+      ) : (
+        <header className="border-b border-white/10 bg-[#0B1220] px-4 py-4 text-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+            <Link to="/" className="font-display text-lg font-bold tracking-tight text-white">
+              Workforce <span className="text-[#24D7E8]">Prep</span>
+            </Link>
+            <Link
+              to="/account"
+              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-white/20 px-4 text-sm font-semibold text-white transition-colors hover:border-[#24D7E8] hover:text-[#24D7E8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#24D7E8]"
+            >
+              Sign in
+            </Link>
+          </div>
         </header>
       )}
       <main className="min-h-[70vh]">
-        {isAccountRoute ? <Outlet /> : !authChecked ? (
+        {canViewWithoutSession ? (
+          <Outlet />
+        ) : !authChecked ? (
           <div className="mx-auto flex min-h-[50vh] max-w-xl items-center justify-center px-4 text-center">
             <p className="text-sm text-muted-foreground">Checking your sign-in…</p>
           </div>
-        ) : hasAccess ? <Outlet /> : (
+        ) : hasAccess ? (
+          <Outlet />
+        ) : (
           <section className="mx-auto flex min-h-[65vh] max-w-2xl flex-col items-center justify-center px-4 py-12 text-center">
             <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary">
               <svg viewBox="0 0 24 24" aria-hidden="true" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -196,15 +230,25 @@ function RootComponent() {
             </div>
             <p className="mt-6 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Account required</p>
             <h1 className="mt-2 text-3xl font-bold md:text-4xl">Your career journey starts with an account.</h1>
-            <p className="mt-4 max-w-xl text-muted-foreground">Sign in or create a free Workforce Prep account to search practice jobs, use resume tools, practice interviews, and access your career dashboard. Your progress can sync with your account.</p>
-            <Link to="/account" className="mt-7 inline-flex h-12 items-center justify-center rounded-md bg-primary px-6 font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
+            <p className="mt-4 max-w-xl text-muted-foreground">
+              Sign in or create a free Workforce Prep account to search practice jobs, use resume tools,
+              practice interviews, and access your career dashboard. Your progress can sync with your account.
+            </p>
+            <Link
+              to="/account"
+              className="mt-7 inline-flex h-12 items-center justify-center rounded-lg bg-primary px-6 font-semibold text-primary-foreground transition-colors hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               Sign in or create an account
             </Link>
             <p className="mt-3 text-xs text-muted-foreground">You’ll be able to choose sign-in or account creation on the next screen.</p>
           </section>
         )}
       </main>
-      {(hasAccess || isAccountRoute) && <footer className="border-t bg-card py-8 text-center text-xs text-muted-foreground">Workforce Prep · A career practice simulator. Employers and listings are fictional.</footer>}
+      {(hasAccess || isAccountRoute || isPublicMarketingRoute) && (
+        <footer className="border-t border-white/10 bg-[#0B1220] px-4 py-8 text-center text-xs text-slate-400">
+          Workforce Prep · A career practice simulator. Practice roles and employers are fictional, not live vacancies.
+        </footer>
+      )}
     </QueryClientProvider>
   );
 }
