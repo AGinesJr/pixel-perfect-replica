@@ -131,7 +131,7 @@ export const searchLiveJobs = createServerFn({ method: "GET" })
     const result: SearchResult = {
       jobs: deduplicated, totalCount: (federal?.totalCount ?? 0) + (remote?.totalCount ?? 0),
       expiresAt: Date.now() + CACHE_MS, locationSearchAvailable: usaJobsConfigured,
-      sources: [...(federal ? ["USAJOBS"] : []), ...(remote ? ["Himalayas"] : [])],
+      sources: [...(usaJobsConfigured && federal ? ["USAJOBS"] : []), ...(remote ? ["Himalayas"] : [])],
     };
     cache.set(cacheKey, result);
     return result;
