@@ -11,6 +11,7 @@ const nationalSeries = {
   laborForceParticipation: "LNS11300000",
   employment: "LNS12000000",
   unemployed: "LNS13000000",
+  unemploymentRateNotSeasonallyAdjusted: "LNU04000000",
   payrollEmployment: "CES0000000001",
   averageHourlyEarnings: "CES0500000003",
 } as const;
@@ -35,6 +36,8 @@ type Area = {
   areaTypeCode: string;
   areaType: string;
   seriesByMeasure: Record<string, string>;
+  seasonalityByMeasure: Record<string, "S" | "U">;
+  seasonalAdjustment: "S" | "U";
 };
 export type InsightLocation = Pick<Area, "areaCode" | "name" | "areaTypeCode" | "areaType">;
 type Metric = { value: number; year: string; period: string; periodName: string; footnotes: string[] } | null;
@@ -118,7 +121,7 @@ async function getAreaCatalog(): Promise<Area[]> {
       const columns = line.split("\t").map((column) => column.trim());
       if (columns.length < 7) continue;
       const [seriesId, areaTypeCode, areaCode, measureCode, seasonal, , seriesTitle] = columns;
-      if (!seriesId || !areaTypeCode || !areaCode || seasonal !== "S" || !["03", "04", "05", "06", "07", "08"].includes(measureCode || "")) continue;
+      if (!seriesId || !areaTypeCode || !areaCode || (seasonal !== "S" && seasonal !== "U") || !["03", "04", "05", "06", "07", "08"].includes(measureCode || "")) continue;
 
       let area = byArea.get(areaCode);
       if (!area) {
@@ -128,6 +131,8 @@ async function getAreaCatalog(): Promise<Area[]> {
           areaTypeCode,
           areaType: typeLabels[areaTypeCode] || "Local area",
           seriesByMeasure: {},
+          seasonalityByMeasure: {},
+          seasonalAdjustment: seasonal as "S" | "U",
         };
         byArea.set(areaCode, area);
       }
@@ -258,7 +263,8 @@ export const getMarketInsights = createServerFn({ method: "GET" })
       laborForceParticipation: latestMetric(selectedArea.seriesByMeasure["08"] ? seriesMap.get(selectedArea.seriesByMeasure["08"]) : undefined),
     } : null;
 
-    const nationalUnemployment = trend(seriesMap.get(nationalSeries.unemploymentRate));
+    const nationalTrendSeries = selectedArea?.seasonalAdjustment === "U" ? nationalSeries.unemploymentRateNotSeasonallyAdjusted : nationalSeries.unemploymentRate;
+    const nationalUnemployment = trend(seriesMap.get(nationalTrendSeries));
     const localUnemployment = selectedArea ? trend(selectedArea.seriesByMeasure["03"] ? seriesMap.get(selectedArea.seriesByMeasure["03"]) : undefined) : [];
     const unemploymentMap = new Map(nationalUnemployment.map((point) => [point.key, point]));
     const localUnemploymentMap = new Map(localUnemployment.map((point) => [point.key, point]));
