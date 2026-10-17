@@ -5,6 +5,7 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 ## Current capabilities
 
 - Browse 10,010 deterministic fictional practice-job listings across 25 industries, 50 US locations, and eight experience levels.
+- Explore the interactive **Market Insights** dashboard, powered by official BLS time-series data, with location search for Census regions/divisions, states, metropolitan areas/divisions, cities, and counties; trend charts cover unemployment, employment, payroll jobs, and average hourly earnings.
 - Search a combined live feed of remote roles from Himalayas and U.S. federal openings from USAJOBS. USAJOBS supports keyword, city/state/ZIP, and radius search when its API credentials are configured.
 - Search and filter the Supabase practice catalog with database-side filtering, sorting, counts, and 24-item pagination after the catalog is seeded.
 - Automatically use the bundled catalog when Supabase is not configured, the database table is unavailable, or the table has not been seeded yet.
@@ -21,6 +22,7 @@ Workforce Prep is a career-practice simulator for rehearsing job applications an
 ## Important limitations
 
 - **The practice catalog remains simulated; Search Jobs is a separate live feed.** Practice listings, employers, posting dates, and salary ranges are sample content, not verified vacancies. The live feed currently combines remote roles from Himalayas with federal announcements from USAJOBS when configured.
+- **Market Insights uses official BLS labor-market statistics, not the practice-job catalog.** National indicators and local LAUS measures have different definitions and release schedules. BLS publishes monthly data and may revise preliminary estimates; local areas may not have every measure or seasonally adjusted series available. The dashboard labels the latest data period and retrieval time and does not present these figures as real-time job postings.
 - **Practice modes are simulations.** Training is the default and prioritizes constructive feedback; Career Simulation uses a balanced threshold; Market Reality uses a stricter simulated threshold. Market Reality does not use or expose other users’ activity and does not represent real competition.
 - **Profile contact email is separate from the Supabase sign-in email.** Updating the profile contact email does not change account credentials.
 - **Supabase sign-in and cloud sync require deployment configuration and live testing.** The account page uses Supabase Auth and the app syncs profile and practice data to the RLS-protected tables. Add the required Supabase URL and public key to the hosting build environment, run both database migrations, rebuild, and test sign-up/sign-in before relying on cloud storage. Until configured and verified, practice data remains browser-local.
@@ -59,6 +61,22 @@ bun run build
 5. Himalayas remains the no-key remote feed. Its location fields are not treated as geographic filters; actual local matching comes from USAJOBS.
 
 USAJOBS uses the official https://data.usajobs.gov/api/search endpoint and requires the Host, User-Agent, and Authorization-Key request headers. Search results link users to the source posting; Workforce Prep does not submit applications.
+
+## Market Insights BLS data setup
+
+Market Insights reads official statistics from the U.S. Bureau of Labor Statistics (BLS) Public Data API and the LAUS series directory. The dashboard searches the official LAUS directory for supported region, state, metropolitan area/division, city, and county series. It retrieves national unemployment, labor-force participation, employment, payroll employment, and average hourly earnings, plus available local unemployment and labor-force measures. The app caches fetched statistics for six hours and the LAUS location directory for 24 hours.
+
+1. Register for a free BLS Public Data API key at https://data.bls.gov/registrationEngine/.
+2. In Lovable's server-side secrets/environment settings, add the secret `BLS_API_KEY` with the key issued by BLS.
+3. Keep the key server-side only. Never prefix it with `VITE_`, expose it in browser code, or commit it to GitHub.
+4. Rebuild/redeploy after adding the secret. In the deployed preview, test the national view and search for a region, state, metro area, city, and county. Confirm the charts, data period, source links, refresh action, and 12-month/24-month/5-year range selector.
+5. The dashboard can attempt unregistered BLS API access without a key, but BLS limits unregistered access to 25 queries per day. Registered access supports up to 500 queries per day. Configure the key before public launch to avoid exhausting the unregistered quota.
+6. The LAUS data directory is maintained by BLS and some local series are not seasonally adjusted or do not publish every measure. The dashboard uses the official series available for the selected area and shows a dash when a measure is unavailable.
+
+Primary sources:
+- BLS Public Data API: https://www.bls.gov/developers/
+- Local Area Unemployment Statistics: https://www.bls.gov/lau/
+- LAUS series directory: https://download.bls.gov/pub/time.series/la/la.series
 
 ## Simulated practice-job catalog
 
