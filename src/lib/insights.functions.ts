@@ -116,7 +116,7 @@ function getAreaCatalog(): Area[] {
   // Bundle the public LAUS area catalog with the app. Runtime requests to
   // download.bls.gov can return HTTP 403 from hosted environments, which made
   // location search fail before any statistics could be requested.
-  const areas: Area[] = blsLausAreas.areas
+  const areas: Area[] = blsLausAreas
     .filter((entry) => entry.selectable && typeLabels[entry.areaTypeCode])
     .map((entry) => {
       const seriesCandidatesByMeasure: Area["seriesCandidatesByMeasure"] = {};
