@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import blsLausAreas from "../data/bls-laus-areas.json";
+import { blsLausAreas } from "../data/bls-laus-areas";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
 const CACHE_MS = 6 * 60 * 60 * 1000;
