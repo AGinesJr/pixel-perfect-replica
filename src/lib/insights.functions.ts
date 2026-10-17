@@ -1,13 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import blsLausAreas from "../data/bls-laus-areas.json";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
-const BLS_AREA_CATALOG_URLS = [
-  // Try the alternate BLS download host first; some hosting providers block download.bls.gov.
-  "https://downloadt.bls.gov/pub/time.series/la/la.area",
-  "https://download.bls.gov/pub/time.series/la/la.area",
-  "https://download.bls.gov/pub/time.series/LA/la.area",
-];
 const CACHE_MS = 6 * 60 * 60 * 1000;
 const CATALOG_CACHE_MS = 24 * 60 * 60 * 1000;
 
@@ -81,7 +76,6 @@ export type MarketInsightsDashboard = {
 
 const resultCache = new Map<string, { expiresAt: number; data: MarketInsightsDashboard }>();
 let catalogCache: { expiresAt: number; areas: Area[] } | undefined;
-let catalogPromise: Promise<Area[]> | undefined;
 
 const locationInput = z.object({
   query: z.string().trim().min(2).max(80),
@@ -116,90 +110,40 @@ function supportedAreaType(type: LocationType, code: string) {
   return code === "F";
 }
 
-async function getAreaCatalog(): Promise<Area[]> {
-  if (catalogCache && catalogCache.expiresAt > Date.now()) return catalogCache.areas;
-  if (catalogPromise) return catalogPromise;
+function getAreaCatalog(): Area[] {
+  if (catalogCache) return catalogCache.areas;
 
-  catalogPromise = (async () => {
-    let text: string | undefined;
-    let lastStatus: number | undefined;
-    for (const url of BLS_AREA_CATALOG_URLS) {
-      for (const userAgent of [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
-        undefined,
-      ]) {
-        try {
-          const headers: Record<string, string> = {
-            Accept: "text/plain, */*",
-            Referer: "https://www.bls.gov/",
-          };
-          if (userAgent) headers["User-Agent"] = userAgent;
-          const response = await fetch(url, {
-            headers,
-            signal: AbortSignal.timeout(15000),
-          });
-          if (!response.ok) {
-            lastStatus = response.status;
-            continue;
-          }
-          const candidate = await response.text();
-          if (candidate.includes("area_type_code") && candidate.includes("area_text")) {
-            text = candidate;
-            break;
-          }
-        } catch {
-          // Try the other official directory path / request header combination.
-        }
-      }
-      if (text) break;
-    }
-    if (!text) {
-      throw new Error(
-        lastStatus
-          ? `The BLS location directory could not be retrieved (HTTP ${lastStatus}). The hosting server may be blocking the BLS download. Please try again later.`
-          : "The BLS location directory could not be reached from the hosting server. Please try again later.",
-      );
-    }
-
-    const areas: Area[] = [];
-    for (const line of text.split(/\r?\n/).slice(1)) {
-      if (!line.trim()) continue;
-      const columns = line.split("\t").map((column) => column.trim());
-      if (columns.length < 5) continue;
-      const [areaTypeCode, areaCode, name, , selectable] = columns;
-      if (!areaTypeCode || !areaCode || !name || selectable !== "T" || !typeLabels[areaTypeCode]) continue;
+  // Bundle the public LAUS area catalog with the app. Runtime requests to
+  // download.bls.gov can return HTTP 403 from hosted environments, which made
+  // location search fail before any statistics could be requested.
+  const areas: Area[] = blsLausAreas.areas
+    .filter((entry) => entry.selectable && typeLabels[entry.areaTypeCode])
+    .map((entry) => {
       const seriesCandidatesByMeasure: Area["seriesCandidatesByMeasure"] = {};
       const seriesByMeasure: Record<string, string> = {};
       const seasonalityByMeasure: Record<string, "S" | "U"> = {};
       for (const measure of ["03", "04", "05", "06", "07", "08"]) {
         seriesCandidatesByMeasure[measure] = {
-          S: `LAS${areaCode}${measure}`,
-          U: `LAU${areaCode}${measure}`,
+          S: `LAS${entry.areaCode}${measure}`,
+          U: `LAU${entry.areaCode}${measure}`,
         };
-        // Prefer seasonally adjusted data; availability is resolved after the BLS API response.
         seriesByMeasure[measure] = seriesCandidatesByMeasure[measure]!.S;
         seasonalityByMeasure[measure] = "S";
       }
-      areas.push({
-        areaCode,
-        name,
-        areaTypeCode,
-        areaType: typeLabels[areaTypeCode] || "Local area",
+      return {
+        areaCode: entry.areaCode,
+        name: entry.name,
+        areaTypeCode: entry.areaTypeCode,
+        areaType: typeLabels[entry.areaTypeCode]!,
         seriesByMeasure,
         seriesCandidatesByMeasure,
         seasonalityByMeasure,
-        seasonalAdjustment: "S",
-      });
-    }
-    catalogCache = { expiresAt: Date.now() + CATALOG_CACHE_MS, areas };
-    return areas;
-  })();
+        seasonalAdjustment: "S" as const,
+      };
+    });
 
-  try {
-    return await catalogPromise;
-  } finally {
-    catalogPromise = undefined;
-  }
+  catalogCache = { expiresAt: Number.POSITIVE_INFINITY, areas };
+  return areas;
 }
 
 function toSeriesMap(payload: BLSResponse): Map<string, BLSPoint[]> {
