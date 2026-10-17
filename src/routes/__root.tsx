@@ -10,6 +10,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
+import { Moon, Sun } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -81,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0B1220" },
+      { name: "theme-color", content: "#F8FAFC" },
       { title: "Workforce Prep | Career Practice & Interview Simulator" },
       {
         name: "description",
@@ -132,6 +133,44 @@ function RootShell({ children }: { children: ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("workforce-prep-theme");
+    const dark = savedTheme === "dark";
+    setIsDark(dark);
+    document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.style.colorScheme = dark ? "dark" : "light";
+  }, []);
+
+  const toggleTheme = () => {
+    const nextIsDark = !isDark;
+    setIsDark(nextIsDark);
+    document.documentElement.classList.toggle("dark", nextIsDark);
+    document.documentElement.style.colorScheme = nextIsDark ? "dark" : "light";
+    window.localStorage.setItem("workforce-prep-theme", nextIsDark ? "dark" : "light");
+  };
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      onClick={toggleTheme}
+      className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background px-2.5 py-1.5 text-foreground shadow-sm transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Sun className={`h-4 w-4 transition-colors ${isDark ? "text-muted-foreground" : "text-amber-500"}`} aria-hidden="true" />
+      <span className={`relative h-6 w-11 rounded-full p-0.5 transition-colors ${isDark ? "bg-primary" : "bg-slate-300"}`}>
+        <span className={`block h-5 w-5 rounded-full bg-white shadow-md transition-transform ${isDark ? "translate-x-5" : "translate-x-0"}`} />
+      </span>
+      <Moon className={`h-4 w-4 transition-colors ${isDark ? "text-primary" : "text-muted-foreground"}`} aria-hidden="true" />
+      <span className="sr-only">{isDark ? "Dark theme enabled" : "Light theme enabled"}</span>
+    </button>
   );
 }
 
@@ -197,14 +236,14 @@ function RootComponent() {
       {hasAccess ? (
         <SiteHeader />
       ) : (
-        <header className="border-b border-white/10 bg-[#0B1220] px-4 py-4 text-white">
+        <header className="border-b border-border bg-card px-4 py-4 text-foreground">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-            <Link to="/" className="font-display text-lg font-bold tracking-tight text-white">
-              Workforce <span className="text-[#24D7E8]">Prep</span>
+            <Link to="/" className="font-display text-lg font-bold tracking-tight text-foreground">
+              Workforce <span className="text-primary">Prep</span>
             </Link>
             <Link
               to="/account"
-              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-white/20 px-4 text-sm font-semibold text-white transition-colors hover:border-[#24D7E8] hover:text-[#24D7E8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#24D7E8]"
+              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Sign in
             </Link>
