@@ -102,6 +102,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/dashboard': typeof DashboardRoute
   '/insights': typeof InsightsRoute
+  '/search-jobs': typeof SearchJobsRoute
   '/profile': typeof ProfileRoute
   '/my-profile': typeof MyProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
@@ -116,6 +117,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/dashboard': typeof DashboardRoute
   '/insights': typeof InsightsRoute
+  '/search-jobs': typeof SearchJobsRoute
   '/profile': typeof ProfileRoute
   '/my-profile': typeof MyProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
@@ -145,6 +147,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/dashboard'
     | '/insights'
+    | '/search-jobs'
     | '/profile'
     | '/my-profile'
     | '/applications/$id'
@@ -158,6 +161,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/dashboard'
     | '/insights'
+    | '/search-jobs'
     | '/profile'
     | '/my-profile'
     | '/applications/$id'
