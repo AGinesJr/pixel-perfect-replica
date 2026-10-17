@@ -13,9 +13,9 @@ import { useState } from "react";
 
 const primaryNav = [
   { to: "/dashboard", label: "Dashboard", icon: Gauge },
-  { to: "/jobs", label: "Find jobs", icon: Briefcase },
-  { to: "/profile", label: "Resume Studio", icon: FileText },
-  { to: "/job-prep", label: "Interview simulator", icon: MessageSquare },
+  { to: "/jobs", label: "Job Market Simulator", icon: Briefcase },
+  { to: "/profile", label: "Resume Match", icon: FileText },
+  { to: "/job-prep", label: "Interview Prep", icon: MessageSquare },
 ] as const;
 
 const desktopNav = [
@@ -104,7 +104,7 @@ export function SiteHeader() {
             activeProps={{ className: "flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg border border-primary/20 bg-primary/10 px-1 pb-1 text-[11px] font-semibold leading-tight text-foreground" }}
           >
             <Icon className="h-4 w-4" aria-hidden="true" />
-            <span>{label === "Interview simulator" ? "Practice" : label === "Resume Studio" ? "Resume" : label}</span>
+            <span>{label === "Job Market Simulator" ? "Job Market" : label === "Resume Match" ? "Resume Match" : label === "Interview Prep" ? "Interview Prep" : label}</span>
           </Link>
         ))}
       </nav>
