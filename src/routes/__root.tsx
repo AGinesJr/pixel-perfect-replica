@@ -284,8 +284,16 @@ function RootComponent() {
         )}
       </main>
       {(hasAccess || isAccountRoute || isPublicMarketingRoute) && (
-        <footer className="border-t border-white/10 bg-[#0B1220] px-4 py-8 text-center text-xs text-slate-400">
-          Workforce Prep · Career practice and job-search tools. Simulator roles are fictional; live listings are sourced separately and may change.
+        <footer className="border-t border-border bg-card px-4 py-5 text-xs text-muted-foreground">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
+            <p className="max-w-3xl text-center sm:text-left">
+              Workforce Prep · Career practice and job-search tools. Simulator roles are fictional; live listings are sourced separately and may change.
+            </p>
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="font-medium text-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
+          </div>
         </footer>
       )}
     </QueryClientProvider>
