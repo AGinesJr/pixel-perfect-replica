@@ -253,7 +253,7 @@ function SearchJobs() {
         <div className="mt-7 flex items-center justify-between gap-3">
           <button type="button" onClick={() => void loadJobs(page - 1)} disabled={page <= 1 || loading} className="h-10 rounded-md border px-4 text-sm font-semibold disabled:opacity-40 hover:bg-muted">Previous</button>
           <span className="text-sm text-muted-foreground">Page {page}</span>
-          <button type="button" onClick={() => void loadJobs(page + 1)} disabled={loading || result.jobs.length < 10} className="h-10 rounded-md border px-4 text-sm font-semibold disabled:opacity-40 hover:bg-muted">Next</button>
+          <button type="button" onClick={() => void loadJobs(page + 1)} disabled={loading || result.jobs.length < 20} className="h-10 rounded-md border px-4 text-sm font-semibold disabled:opacity-40 hover:bg-muted">Next</button>
         </div>
       )}
 
