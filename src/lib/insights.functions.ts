@@ -115,32 +115,43 @@ async function getAreaCatalog(): Promise<Area[]> {
 
   catalogPromise = (async () => {
     let text: string | undefined;
+    const userAgents = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
+      undefined,
+    ];
     let lastStatus: number | undefined;
     for (const url of BLS_SERIES_CATALOG_URLS) {
-      try {
-        const response = await fetch(url, {
-          headers: {
-            Accept: "text/plain",
-            "User-Agent": "WorkforcePrep/1.0 (https://github.com/AGinesJr/pixel-perfect-replica; labor market insights)",
-          },
-          signal: AbortSignal.timeout(20000),
-        });
-        if (!response.ok) {
-          lastStatus = response.status;
-          continue;
+      for (const userAgent of userAgents) {
+        try {
+          const headers: Record<string, string> = {
+            Accept: "text/plain, */*",
+            Referer: "https://www.bls.gov/",
+          };
+          if (userAgent) headers["User-Agent"] = userAgent;
+          const response = await fetch(url, {
+            headers,
+            signal: AbortSignal.timeout(20000),
+          });
+          if (!response.ok) {
+            lastStatus = response.status;
+            continue;
+          }
+          const candidate = await response.text();
+          if (candidate.includes("series_id") && candidate.includes("series_title")) {
+            text = candidate;
+            break;
+          }
+        } catch {
+          // Try another official BLS download host / request header combination.
         }
-        text = await response.text();
-        if (text.includes("series_id") && text.includes("series_title")) break;
-        text = undefined;
-      } catch {
-        // Try the alternate official path before returning an availability error.
       }
+      if (text) break;
     }
     if (!text) {
       throw new Error(
         lastStatus
-          ? `The BLS location directory could not be retrieved (HTTP ${lastStatus}). Please try again later.`
-          : "The BLS location directory could not be reached. Please try again later.",
+          ? `The BLS location directory could not be retrieved (HTTP ${lastStatus}). The hosting server may be blocking the BLS download. Please try again later.`
+          : "The BLS location directory could not be reached from the hosting server. Please try again later.",
       );
     }
     const byArea = new Map<string, Area>();
