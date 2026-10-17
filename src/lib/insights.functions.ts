@@ -3,8 +3,10 @@ import { z } from "zod";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
 const BLS_SERIES_CATALOG_URLS = [
-  "https://download.bls.gov/pub/time.series/LA/la.series",
+  // The alternate BLS download host can work when the primary host is unavailable to a server runtime.
+  "https://downloadt.bls.gov/pub/time.series/la/la.series",
   "https://download.bls.gov/pub/time.series/la/la.series",
+  "https://download.bls.gov/pub/time.series/LA/la.series",
 ];
 const CACHE_MS = 6 * 60 * 60 * 1000;
 const CATALOG_CACHE_MS = 24 * 60 * 60 * 1000;
