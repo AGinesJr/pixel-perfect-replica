@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as SearchJobsRouteImport } from './routes/search-jobs'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MyProfileRouteImport } from './routes/my-profile'
 import { Route as ApplicationsIdRouteImport } from './routes/applications.$id'
@@ -39,6 +40,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchJobsRoute = SearchJobsRouteImport.update({
+  id: '/search-jobs',
+  path: '/search-jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/dashboard': typeof DashboardRoute
   '/insights': typeof InsightsRoute
+  '/search-jobs': typeof SearchJobsRoute
   '/profile': typeof ProfileRoute
   '/my-profile': typeof MyProfileRoute
   '/applications/$id': typeof ApplicationsIdRoute
@@ -124,6 +131,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/dashboard'
     | '/insights'
+    | '/search-jobs'
     | '/profile'
     | '/my-profile'
     | '/applications/$id'
@@ -164,6 +172,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   DashboardRoute: typeof DashboardRoute
   InsightsRoute: typeof InsightsRoute
+  SearchJobsRoute: typeof SearchJobsRoute
   ProfileRoute: typeof ProfileRoute
   MyProfileRoute: typeof MyProfileRoute
   ApplicationsIdRoute: typeof ApplicationsIdRoute
@@ -201,6 +210,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search-jobs': {
+      id: '/search-jobs'
+      path: '/search-jobs'
+      fullPath: '/search-jobs'
+      preLoaderRoute: typeof SearchJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -260,6 +276,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   DashboardRoute: DashboardRoute,
   InsightsRoute: InsightsRoute,
+  SearchJobsRoute: SearchJobsRoute,
   ProfileRoute: ProfileRoute,
   MyProfileRoute: MyProfileRoute,
   ApplicationsIdRoute: ApplicationsIdRoute,
