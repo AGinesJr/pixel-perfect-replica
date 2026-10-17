@@ -34,7 +34,7 @@ const searchInput = z.object({
   query: z.string().trim().max(120).default(""),
   city: z.string().trim().max(80).default(""),
   state: z.string().trim().max(40).default(""),
-  zip: z.string().trim().max(10).regex(/^$|^\\d{5}(-\\d{4})?$/).default(""),
+  zip: z.string().trim().max(10).regex(/^$|^\d{5}(-\d{4})?$/).default(""),
   seniority: z.enum(["", "Entry-level", "Mid-level", "Senior", "Manager", "Director", "Executive"]).default(""),
   employmentType: z.enum(["", "Full Time", "Part Time", "Contractor", "Temporary", "Intern", "Volunteer", "Other"]).default(""),
   page: z.number().int().min(1).max(100).default(1),
@@ -49,9 +49,9 @@ export const searchLiveJobs = createServerFn({ method: "GET" })
 
     const url = new URL("https://himalayas.app/jobs/api/search");
     url.searchParams.set("country", "US");
-    url.searchParams.set("sort", data.query ? "relevant" : "recent");
-    url.searchParams.set("page", String(data.page));
     const searchTerms = [data.query, data.city, data.state, data.zip].filter(Boolean).join(" ").trim();
+    url.searchParams.set("sort", searchTerms ? "relevant" : "recent");
+    url.searchParams.set("page", String(data.page));
     if (searchTerms) url.searchParams.set("q", searchTerms);
     if (data.seniority) url.searchParams.set("seniority", data.seniority);
     if (data.employmentType) url.searchParams.set("employment_type", data.employmentType);
