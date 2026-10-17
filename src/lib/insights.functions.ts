@@ -2,7 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
-const BLS_SERIES_CATALOG_URL = "https://download.bls.gov/pub/time.series/la/la.series";
+const BLS_SERIES_CATALOG_URLS = [
+  "https://download.bls.gov/pub/time.series/LA/la.series",
+  "https://download.bls.gov/pub/time.series/la/la.series",
+];
 const CACHE_MS = 6 * 60 * 60 * 1000;
 const CATALOG_CACHE_MS = 24 * 60 * 60 * 1000;
 
@@ -109,12 +112,35 @@ async function getAreaCatalog(): Promise<Area[]> {
   if (catalogPromise) return catalogPromise;
 
   catalogPromise = (async () => {
-    const response = await fetch(BLS_SERIES_CATALOG_URL, {
-      headers: { Accept: "text/plain", "User-Agent": "WorkforcePrep/1.0 (labor market insights)" },
-      signal: AbortSignal.timeout(20000),
-    });
-    if (!response.ok) throw new Error("The BLS location directory is temporarily unavailable. Please try again.");
-    const text = await response.text();
+    let text: string | undefined;
+    let lastStatus: number | undefined;
+    for (const url of BLS_SERIES_CATALOG_URLS) {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Accept: "text/plain",
+            "User-Agent": "WorkforcePrep/1.0 (https://github.com/AGinesJr/pixel-perfect-replica; labor market insights)",
+          },
+          signal: AbortSignal.timeout(20000),
+        });
+        if (!response.ok) {
+          lastStatus = response.status;
+          continue;
+        }
+        text = await response.text();
+        if (text.includes("series_id") && text.includes("series_title")) break;
+        text = undefined;
+      } catch {
+        // Try the alternate official path before returning an availability error.
+      }
+    }
+    if (!text) {
+      throw new Error(
+        lastStatus
+          ? `The BLS location directory could not be retrieved (HTTP ${lastStatus}). Please try again later.`
+          : "The BLS location directory could not be reached. Please try again later.",
+      );
+    }
     const byArea = new Map<string, Area>();
 
     for (const line of text.split(/\r?\n/).slice(1)) {
