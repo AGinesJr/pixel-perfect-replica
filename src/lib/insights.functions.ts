@@ -163,7 +163,14 @@ async function getAreaCatalog(): Promise<Area[]> {
 function toSeriesMap(payload: BLSResponse): Map<string, BLSPoint[]> {
   const result = payload.Results;
   const series = Array.isArray(result) ? result.flatMap((item) => item.series ?? []) : result?.series ?? [];
-  return new Map(series.map((item) => [item.seriesID, (item.data ?? []).filter((point) => /^M(0[1-9]|1[0-2])$/.test(point.period) && Number.isFinite(Number(point.value))).sort((a, b) => (a.year + a.period).localeCompare(b.year + b.period))]));
+  const output = new Map<string, BLSPoint[]>();
+  for (const item of series) {
+    const points = (item.data ?? [])
+      .filter((point) => /^M(0[1-9]|1[0-2])$/.test(point.period) && Number.isFinite(Number(point.value)))
+      .sort((a, b) => (a.year + a.period).localeCompare(b.year + b.period));
+    output.set(item.seriesID, points);
+  }
+  return output;
 }
 
 function latestMetric(points: BLSPoint[] | undefined): Metric {
