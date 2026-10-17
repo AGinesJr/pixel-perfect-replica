@@ -108,6 +108,8 @@ function Insights() {
     setGeography(next);
     setLocationOptions([]);
     setSelectedLocation(null);
+    setDashboard(null);
+    setError("");
     setLocationSearchError("");
     setLocationQuery("");
     if (next === "national") void loadDashboard("");
@@ -115,6 +117,8 @@ function Insights() {
 
   function chooseLocation(location: InsightLocation) {
     setSelectedLocation(location);
+    setDashboard(null);
+    setError("");
     setGeography(location.areaTypeCode === "M" || location.areaTypeCode === "N"
       ? "region"
       : location.areaTypeCode === "A"
@@ -356,7 +360,7 @@ function Insights() {
           <section className="mt-6 rounded-xl border bg-card p-4 md:p-6">
             <h3 className="font-semibold">How to read these statistics</h3>
             <div className="mt-3 grid gap-4 text-sm leading-6 text-muted-foreground md:grid-cols-2">
-              <p>Local unemployment, employment, and labor-force measures come from BLS Local Area Unemployment Statistics (LAUS). Local data is reported by place of residence and may have a different release schedule from national indicators.</p>
+              <p>Local unemployment, employment, and labor-force measures come from BLS Local Area Unemployment Statistics (LAUS). Local data is reported by place of residence and may have a different release schedule from national indicators. {dashboard.localSeasonalAdjustment === "U" ? "This location does not provide a seasonally adjusted unemployment series, so the trend compares unadjusted local and national estimates." : "Seasonally adjusted local estimates are used where BLS publishes them."}</p>
               <p>National unemployment and labor-force participation use the Current Population Survey. Payroll employment and hourly earnings use the Current Employment Statistics survey. These are different measures and should not be treated as interchangeable.</p>
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4 text-xs text-muted-foreground">
