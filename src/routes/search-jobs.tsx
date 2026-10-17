@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { BriefcaseBusiness, Building2, CalendarDays, ExternalLink, Globe2, Search, SlidersHorizontal } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ExternalLink, Globe2, MapPin, Search, SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { searchLiveJobs } from "@/lib/jobs.functions";
 
@@ -33,12 +33,16 @@ type Job = {
   parentCategories?: string[];
   locationRestrictions?: string[];
   timezoneRestrictions?: string[];
+  location?: string;
+  source?: "Himalayas" | "USAJOBS";
+  isRemote?: boolean;
 };
 
-type SearchResult = { jobs: Job[]; totalCount: number };
+type SearchResult = { jobs: Job[]; totalCount: number; locationSearchAvailable: boolean; sources: string[] };
 
 const seniorityOptions = ["", "Entry-level", "Mid-level", "Senior", "Manager", "Director", "Executive"];
 const employmentOptions = ["", "Full Time", "Part Time", "Contractor", "Temporary", "Intern", "Volunteer", "Other"];
+const radiusOptions = [10, 25, 50, 100];
 
 function formatSalary(job: Job) {
   if (job.minSalary == null && job.maxSalary == null) return "";
@@ -74,10 +78,11 @@ function SearchJobs() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
+  const [radius, setRadius] = useState(25);
   const [seniority, setSeniority] = useState("");
   const [employmentType, setEmploymentType] = useState("");
   const [page, setPage] = useState(1);
-  const [result, setResult] = useState<SearchResult>({ jobs: [], totalCount: 0 });
+  const [result, setResult] = useState<SearchResult>({ jobs: [], totalCount: 0, locationSearchAvailable: false, sources: [] });
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState("");
@@ -92,6 +97,7 @@ function SearchJobs() {
           city: city.trim(),
           state: state.trim(),
           zip: zip.trim(),
+          radius,
           seniority: seniority as "" | "Entry-level" | "Mid-level" | "Senior" | "Manager" | "Director" | "Executive",
           employmentType: employmentType as "" | "Full Time" | "Part Time" | "Contractor" | "Temporary" | "Intern" | "Volunteer" | "Other",
           page: nextPage,
@@ -123,12 +129,13 @@ function SearchJobs() {
     setCity("");
     setState("");
     setZip("");
+    setRadius(25);
     setSeniority("");
     setEmploymentType("");
     setPage(1);
     setLoading(true);
     setError("");
-    void getLiveJobs({ data: { query: "", city: "", state: "", zip: "", seniority: "", employmentType: "", page: 1 } })
+    void getLiveJobs({ data: { query: "", city: "", state: "", zip: "", radius: 25, seniority: "", employmentType: "", page: 1 } })
       .then((data) => {
         setResult(data);
         setSearched(true);
@@ -143,7 +150,7 @@ function SearchJobs() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Live opportunities</p>
         <h1 className="mt-2 text-3xl font-bold md:text-4xl">Search Jobs</h1>
         <p className="mt-3 leading-6 text-muted-foreground">
-          Explore current remote jobs that are open to candidates in the United States. Search by role, company, or skill, then open the original listing to review requirements and apply.
+          Search federal jobs near your location alongside remote opportunities open to US-based candidates. Local radius matching is available for federal listings when the USAJOBS connection is configured.
         </p>
       </div>
 
@@ -181,6 +188,12 @@ function SearchJobs() {
               <input value={zip} onChange={(event) => setZip(event.target.value.replace(/[^0-9-]/g, "").slice(0, 10))} inputMode="numeric" autoComplete="postal-code" maxLength={10} pattern="\\d{5}(-\\d{4})?" placeholder="e.g. 32801" className="h-11 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
             </label>
             <label className="text-sm font-medium">
+              <span className="mb-2 block"><MapPin className="mr-1 inline h-4 w-4 text-muted-foreground" aria-hidden="true" /> Distance</span>
+              <select value={radius} onChange={(event) => setRadius(Number(event.target.value))} className="h-11 w-full rounded-md border bg-background px-3 text-sm">
+                {radiusOptions.map((option) => <option key={option} value={option}>{option} miles</option>)}
+              </select>
+            </label>
+            <label className="text-sm font-medium">
               <span className="mb-2 flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> Career level</span>
               <select value={seniority} onChange={(event) => setSeniority(event.target.value)} className="h-11 w-full rounded-md border bg-background px-3 text-sm">
                 {seniorityOptions.map((option) => <option key={option || "all"} value={option}>{option || "All levels"}</option>)}
@@ -197,16 +210,16 @@ function SearchJobs() {
             <p className="text-xs text-muted-foreground"><Globe2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />Remote positions · open to US-based candidates</p>
             <button type="button" onClick={clearFilters} className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground">Clear filters</button>
           </div>
-          <p className="mt-3 text-xs leading-5 text-muted-foreground">Location fields are included in the search terms for this free remote-job feed. They do not provide ZIP-radius matching or guarantee onsite/hybrid jobs in that area.</p>
+          {!result.locationSearchAvailable && <p className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-xs leading-5 text-muted-foreground">Local federal search is not connected yet. To enable city, state, ZIP, and distance matching, the app administrator must add <code>USAJOBS_API_KEY</code> and <code>USAJOBS_USER_AGENT</code> as server-side environment secrets. Remote listings remain available in the meantime.</p>}
         </form>
       </section>
 
       <div className="mt-7 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold">Current openings</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{loading ? "Getting the latest listings…" : result.totalCount > 0 ? `${result.totalCount.toLocaleString()} matching listings reported by the source` : "Listings update from the live job feed."}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{loading ? "Getting the latest listings…" : result.totalCount > 0 ? `${result.totalCount.toLocaleString()} matching listings reported by the connected sources` : "Listings update from connected live job feeds."}</p>
         </div>
-        <p className="text-xs text-muted-foreground">Source: <a href="https://himalayas.app/" target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-4 hover:text-foreground">Himalayas</a></p>
+        <p className="text-xs text-muted-foreground">Sources: {result.sources.length ? result.sources.join(" + ") : "connecting…"}</p>
       </div>
 
       {error && (
@@ -250,7 +263,8 @@ function SearchJobs() {
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Remote · US eligible</span>
+                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{job.isRemote ? "Remote · US eligible" : "Federal government"}</span>
+                {job.location && <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-medium"><MapPin className="h-3 w-3" aria-hidden="true" />{job.location}</span>}
                 {job.employmentType && <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">{job.employmentType}</span>}
                 {salary && <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">{salary}</span>}
               </div>
@@ -284,7 +298,7 @@ function SearchJobs() {
         <p className="mt-1 text-sm leading-6 text-muted-foreground">Open the original posting first, then bring its description into Interview Prep to practice role-specific questions. Job listings are supplied by an independent third-party source; availability and requirements can change.</p>
         <Link to="/job-prep" className="mt-3 inline-flex h-10 items-center rounded-md border bg-background px-4 text-sm font-semibold hover:bg-muted">Go to Interview Prep</Link>
       </section>
-      <p className="mt-5 text-xs leading-5 text-muted-foreground">Listing source: Himalayas. Workforce Prep is not affiliated with the listed employers or the job source. Job data refreshes on the source's schedule and is cached briefly to respect its free API allowance.</p>
+      <p className="mt-5 text-xs leading-5 text-muted-foreground">Listing sources: USAJOBS (federal listings) and Himalayas (remote listings). Workforce Prep is not affiliated with listed employers or job sources. Job data refreshes on the source's schedule and is cached briefly to respect free API allowances.</p>
     </main>
   );
 }
