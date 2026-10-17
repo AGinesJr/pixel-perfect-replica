@@ -3,7 +3,8 @@ import { z } from "zod";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
 const BLS_AREA_CATALOG_URLS = [
-  // The compact area directory is much smaller than la.series and lists the official names and area codes.
+  // Try the alternate BLS download host first; some hosting providers block download.bls.gov.
+  "https://downloadt.bls.gov/pub/time.series/la/la.area",
   "https://download.bls.gov/pub/time.series/la/la.area",
   "https://download.bls.gov/pub/time.series/LA/la.area",
 ];
