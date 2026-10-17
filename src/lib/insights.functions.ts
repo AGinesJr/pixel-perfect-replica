@@ -136,9 +136,14 @@ async function getAreaCatalog(): Promise<Area[]> {
         };
         byArea.set(areaCode, area);
       }
-      area.seriesByMeasure[measureCode!] = seriesId;
-      if (measureCode === "03" && seriesTitle?.startsWith("Unemployment Rate:")) {
-        area.name = seriesTitle.replace(/^Unemployment Rate:\s*/, "").replace(/\s+\(S\)$/, "").trim();
+      const currentSeasonality = area.seasonalityByMeasure[measureCode!];
+      if (!currentSeasonality || seasonal === "S" || currentSeasonality !== "S") {
+        area.seriesByMeasure[measureCode!] = seriesId;
+        area.seasonalityByMeasure[measureCode!] = seasonal as "S" | "U";
+      }
+      if (measureCode === "03" && seriesTitle?.startsWith("Unemployment Rate:") && (!area.name || seasonal === "S" || area.seasonalAdjustment !== "S")) {
+        area.name = seriesTitle.replace(/^Unemployment Rate:\s*/, "").replace(/\s+\([SU]\)$/, "").trim();
+        area.seasonalAdjustment = seasonal as "S" | "U";
       }
     }
 
