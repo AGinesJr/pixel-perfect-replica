@@ -2,11 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
-const BLS_SERIES_CATALOG_URLS = [
-  // The alternate BLS download host can work when the primary host is unavailable to a server runtime.
-  "https://downloadt.bls.gov/pub/time.series/la/la.series",
-  "https://download.bls.gov/pub/time.series/la/la.series",
-  "https://download.bls.gov/pub/time.series/LA/la.series",
+const BLS_AREA_CATALOG_URLS = [
+  // The compact area directory is much smaller than la.series and lists the official names and area codes.
+  "https://download.bls.gov/pub/time.series/la/la.area",
+  "https://download.bls.gov/pub/time.series/LA/la.area",
 ];
 const CACHE_MS = 6 * 60 * 60 * 1000;
 const CATALOG_CACHE_MS = 24 * 60 * 60 * 1000;
@@ -41,6 +40,7 @@ type Area = {
   areaTypeCode: string;
   areaType: string;
   seriesByMeasure: Record<string, string>;
+  seriesCandidatesByMeasure: Record<string, { S: string; U: string }>;
   seasonalityByMeasure: Record<string, "S" | "U">;
   seasonalAdjustment: "S" | "U";
 };
@@ -96,8 +96,14 @@ const typeLabels: Record<string, string> = {
   A: "State",
   B: "Metropolitan area",
   C: "Metropolitan division",
+  D: "Micropolitan area",
+  E: "Combined statistical area",
   F: "County",
   G: "City",
+  H: "Part of city",
+  I: "Small labor market area",
+  J: "New England city or town area",
+  K: "New England city or town division",
 };
 
 function supportedAreaType(type: LocationType, code: string) {
@@ -115,13 +121,12 @@ async function getAreaCatalog(): Promise<Area[]> {
 
   catalogPromise = (async () => {
     let text: string | undefined;
-    const userAgents = [
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
-      undefined,
-    ];
     let lastStatus: number | undefined;
-    for (const url of BLS_SERIES_CATALOG_URLS) {
-      for (const userAgent of userAgents) {
+    for (const url of BLS_AREA_CATALOG_URLS) {
+      for (const userAgent of [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
+        undefined,
+      ]) {
         try {
           const headers: Record<string, string> = {
             Accept: "text/plain, */*",
@@ -130,19 +135,19 @@ async function getAreaCatalog(): Promise<Area[]> {
           if (userAgent) headers["User-Agent"] = userAgent;
           const response = await fetch(url, {
             headers,
-            signal: AbortSignal.timeout(20000),
+            signal: AbortSignal.timeout(15000),
           });
           if (!response.ok) {
             lastStatus = response.status;
             continue;
           }
           const candidate = await response.text();
-          if (candidate.includes("series_id") && candidate.includes("series_title")) {
+          if (candidate.includes("area_type_code") && candidate.includes("area_text")) {
             text = candidate;
             break;
           }
         } catch {
-          // Try another official BLS download host / request header combination.
+          // Try the other official directory path / request header combination.
         }
       }
       if (text) break;
@@ -154,40 +159,37 @@ async function getAreaCatalog(): Promise<Area[]> {
           : "The BLS location directory could not be reached from the hosting server. Please try again later.",
       );
     }
-    const byArea = new Map<string, Area>();
 
+    const areas: Area[] = [];
     for (const line of text.split(/\r?\n/).slice(1)) {
       if (!line.trim()) continue;
       const columns = line.split("\t").map((column) => column.trim());
-      if (columns.length < 7) continue;
-      const [seriesId, areaTypeCode, areaCode, measureCode, seasonal, , seriesTitle] = columns;
-      if (!seriesId || !areaTypeCode || !areaCode || (seasonal !== "S" && seasonal !== "U") || !["03", "04", "05", "06", "07", "08"].includes(measureCode || "")) continue;
-
-      let area = byArea.get(areaCode);
-      if (!area) {
-        area = {
-          areaCode,
-          name: "",
-          areaTypeCode,
-          areaType: typeLabels[areaTypeCode] || "Local area",
-          seriesByMeasure: {},
-          seasonalityByMeasure: {},
-          seasonalAdjustment: seasonal as "S" | "U",
+      if (columns.length < 5) continue;
+      const [areaTypeCode, areaCode, name, , selectable] = columns;
+      if (!areaTypeCode || !areaCode || !name || selectable !== "T" || !typeLabels[areaTypeCode]) continue;
+      const seriesCandidatesByMeasure: Area["seriesCandidatesByMeasure"] = {};
+      const seriesByMeasure: Record<string, string> = {};
+      const seasonalityByMeasure: Record<string, "S" | "U"> = {};
+      for (const measure of ["03", "04", "05", "06", "07", "08"]) {
+        seriesCandidatesByMeasure[measure] = {
+          S: `LAS${areaCode}${measure}`,
+          U: `LAU${areaCode}${measure}`,
         };
-        byArea.set(areaCode, area);
+        // Prefer seasonally adjusted data; availability is resolved after the BLS API response.
+        seriesByMeasure[measure] = seriesCandidatesByMeasure[measure]!.S;
+        seasonalityByMeasure[measure] = "S";
       }
-      const currentSeasonality = area.seasonalityByMeasure[measureCode!];
-      if (!currentSeasonality || seasonal === "S" || currentSeasonality !== "S") {
-        area.seriesByMeasure[measureCode!] = seriesId;
-        area.seasonalityByMeasure[measureCode!] = seasonal as "S" | "U";
-      }
-      if (measureCode === "03" && seriesTitle?.startsWith("Unemployment Rate:") && (!area.name || seasonal === "S" || area.seasonalAdjustment !== "S")) {
-        area.name = seriesTitle.replace(/^Unemployment Rate:\s*/, "").replace(/\s+\([SU]\)$/, "").trim();
-        area.seasonalAdjustment = seasonal as "S" | "U";
-      }
+      areas.push({
+        areaCode,
+        name,
+        areaTypeCode,
+        areaType: typeLabels[areaTypeCode] || "Local area",
+        seriesByMeasure,
+        seriesCandidatesByMeasure,
+        seasonalityByMeasure,
+        seasonalAdjustment: "S",
+      });
     }
-
-    const areas = [...byArea.values()].filter((area) => area.name && area.seriesByMeasure["03"] && typeLabels[area.areaTypeCode]);
     catalogCache = { expiresAt: Date.now() + CATALOG_CACHE_MS, areas };
     return areas;
   })();
@@ -296,8 +298,29 @@ export const getMarketInsights = createServerFn({ method: "GET" })
     }
 
     const localMeasures = selectedArea ? ["03", "04", "05", "06", "07", "08"] : [];
-    const localIds = localMeasures.map((measure) => selectedArea?.seriesByMeasure[measure]).filter((id): id is string => Boolean(id));
+    const localIds = selectedArea
+      ? localMeasures.flatMap((measure) => {
+          const candidates = selectedArea!.seriesCandidatesByMeasure[measure];
+          return candidates ? [candidates.S, candidates.U] : [];
+        })
+      : [];
     const seriesMap = await fetchBLS([...nationalIds, ...localIds], startYear, currentYear);
+    if (selectedArea) {
+      for (const measure of localMeasures) {
+        const candidates = selectedArea.seriesCandidatesByMeasure[measure];
+        if (!candidates) continue;
+        const seasonalPoints = seriesMap.get(candidates.S);
+        const unadjustedPoints = seriesMap.get(candidates.U);
+        const chosen = seasonalPoints?.length ? "S" : unadjustedPoints?.length ? "U" : null;
+        if (chosen) {
+          selectedArea.seriesByMeasure[measure] = candidates[chosen];
+          selectedArea.seasonalityByMeasure[measure] = chosen;
+          if (measure === "03") selectedArea.seasonalAdjustment = chosen;
+        } else {
+          delete selectedArea.seriesByMeasure[measure];
+        }
+      }
+    }
     const national = {
       unemploymentRate: latestMetric(seriesMap.get(nationalSeries.unemploymentRate)),
       laborForceParticipation: latestMetric(seriesMap.get(nationalSeries.laborForceParticipation)),
