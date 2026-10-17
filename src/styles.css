@@ -66,7 +66,7 @@
   --secondary: #1B2940;
   --secondary-foreground: #E7EEF8;
   --muted: #1B2940;
-  --muted-foreground: #AAB8CC;
+  --muted-foreground: #9BAAC0;
   --accent: #20334A;
   --accent-foreground: #F4F7FC;
   --destructive: #F87171;
@@ -92,6 +92,9 @@
   --sidebar-border: #2A3950;
   --sidebar-ring: #24D7E8;
   --gradient-hero: linear-gradient(135deg, #0B1220 0%, #13233A 58%, #17334A 100%);
+  --motion-fast: 160ms;
+  --motion-standard: 220ms;
+  --space-page-gutter: clamp(1rem, 3vw, 2rem);
 }
 
 @layer base {
@@ -132,6 +135,46 @@
 
   a, button, input, select, textarea {
     touch-action: manipulation;
+  }
+
+  button, [role="button"], a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input, select, textarea {
+    color: var(--foreground);
+    accent-color: var(--primary);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+  }
+
+  .metric-value {
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: -0.035em;
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  @media (max-width: 1279px) {
+    body:has(.mobile-bottom-nav) main {
+      padding-bottom: 5.5rem;
+    }
+
+    body:has(.mobile-bottom-nav) footer {
+      padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a, button, [role="button"] {
+      transition-duration: var(--motion-fast);
+      transition-timing-function: ease-out;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

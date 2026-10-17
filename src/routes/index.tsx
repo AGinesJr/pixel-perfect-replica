@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, CheckCircle2, FileCheck, MessagesSquare, Search, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
-import { jobs } from "@/lib/data";
-import { JobCard } from "@/components/JobCard";
+import { fmtSalary, jobs } from "@/lib/data";
 import heroImg from "@/assets/hero.jpg";
 
 const faqs = [
@@ -106,45 +105,45 @@ function Home() {
           fetchPriority="high"
           className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20 mix-blend-luminosity"
         />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-[#0B1220]/95 via-[#0B1220]/80 to-[#0B1220]/45" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-background/95 via-background/80 to-background/45" />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:py-28">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-[#24D7E8]/30 bg-[#24D7E8]/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#8CF3FA]">
+            <p className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Career practice platform
             </p>
             <h1 className="mt-5 max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
               Turn your potential into your next opportunity.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg sm:leading-8">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-foreground/85 sm:text-lg sm:leading-8">
               Rehearse the whole job search before it counts. Practice applications, strengthen your resume,
               and build interview confidence with clear, actionable feedback.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/account"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#24D7E8] px-6 font-semibold text-[#07111E] shadow-lg shadow-cyan-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1220]"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-semibold text-primary-foreground shadow-lg shadow-cyan-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Start building career confidence <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <a
                 href="#how-it-works"
-                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-6 font-semibold text-white transition-colors hover:border-[#24D7E8] hover:text-[#8CF3FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#24D7E8]"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-6 font-semibold text-white transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Explore the platform
               </a>
             </div>
-            <p className="mt-4 text-xs text-slate-300">
+            <p className="mt-4 text-xs text-muted-foreground">
               Low-stakes practice. Transparent feedback. No promise of hiring outcomes.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/15 bg-[#111D30]/90 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-6">
+          <div className="rounded-2xl border border-white/15 bg-card/90 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Your career toolkit</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Your career toolkit</p>
                 <h2 className="mt-2 text-xl font-semibold text-white">Practice with a plan</h2>
               </div>
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#24D7E8]/10 text-[#24D7E8]">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                 <TrendingUp className="h-5 w-5" aria-hidden="true" />
               </span>
             </div>
@@ -156,15 +155,60 @@ function Home() {
                 { icon: CheckCircle2, title: "Progress tracking", detail: "Review milestones and practice history" },
               ].map(({ icon: Icon, title, detail }) => (
                 <div key={title} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
-                  <Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#24D7E8]" aria-hidden="true" />
+                  <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                   <div>
                     <h3 className="text-sm font-semibold text-white">{title}</h3>
-                    <p className="mt-1 text-sm leading-5 text-slate-300">{detail}</p>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">{detail}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="career-start-heading" className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-lg shadow-black/10 sm:p-7">
+          <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Start where you are</p>
+              <h2 id="career-start-heading" className="mt-2 text-2xl font-bold sm:text-3xl">What are you working toward?</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose a target role or location to find a practice scenario that fits your next step.</p>
+            </div>
+            <form onSubmit={(event) => { event.preventDefault(); void nav({ to: "/jobs", search: { q: q.trim() || undefined, loc: loc.trim() || undefined } }); }} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <div>
+                <label htmlFor="career-target-role" className="mb-1.5 block text-sm font-semibold">Target role or skill</label>
+                <input id="career-target-role" value={q} onChange={(event) => setQ(event.target.value)} placeholder="e.g. project coordinator" className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+              </div>
+              <div>
+                <label htmlFor="career-target-location" className="mb-1.5 block text-sm font-semibold">Location</label>
+                <input id="career-target-location" value={loc} onChange={(event) => setLoc(event.target.value)} placeholder="City, state, or remote" className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+              </div>
+              <button type="submit" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                Explore roles <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </form>
+          </div>
+          <p className="mt-4 text-xs leading-5 text-muted-foreground">Practice roles are fictional training scenarios, not live vacancies. For current openings, visit <Link to="/search-jobs" className="font-semibold text-primary hover:underline">Live job listings</Link>.</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="featured-practice-heading" className="mx-auto max-w-6xl px-4 pb-12 sm:pb-16">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-xs font-semibold uppercase tracking-wide text-primary">Try the simulator</p><h2 id="featured-practice-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Featured practice scenarios</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Explore sample roles, compare requirements, and rehearse an application before pursuing a real opening.</p></div>
+          <Link to="/jobs" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold hover:border-primary/50 hover:bg-muted">View all practice roles <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          {jobs.slice(0, 3).map((job) => (
+            <article key={job.id} className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/50">
+              <span className="inline-flex rounded-full border border-warning/35 bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">Practice scenario</span>
+              <h3 className="mt-3 font-display text-lg font-semibold leading-snug"><Link to="/jobs/$id" params={{ id: job.id }} className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{job.title}</Link></h3>
+              <p className="mt-1 text-sm text-muted-foreground">{job.employer}</p>
+              <p className="mt-3 text-sm font-semibold tabular-nums text-foreground">{job.salary ? `Salary example: ${fmtSalary(job.salary)}` : "Salary information not listed"}</p>
+              <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{job.summary}</p>
+              <Link to="/jobs/$id" params={{ id: job.id }} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">Explore scenario <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -214,18 +258,18 @@ function Home() {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#111D30]">
+      <section className="border-y border-border bg-card">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 md:grid-cols-[0.8fr_1.2fr] md:items-center sm:py-16">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8CF3FA]">Insight with context</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Insight with context</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-white">Understand the labor market—not just the job listing.</h2>
           </div>
           <div>
-            <p className="leading-7 text-slate-300">
+            <p className="leading-7 text-muted-foreground">
               Explore labor-market indicators, employment trends, and high-demand occupations with clear definitions and source context.
               Use market information as one input to your career decisions, not as a guarantee of future openings.
             </p>
-            <Link to="/insights" className="mt-5 inline-flex items-center gap-2 font-semibold text-[#24D7E8] hover:underline">
+            <Link to="/insights" className="mt-5 inline-flex items-center gap-2 font-semibold text-primary hover:underline">
               Explore Market Insights <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
@@ -245,7 +289,7 @@ function Home() {
             { title: "Honest by design", detail: "Practice scores are learning aids, not employer ATS results, hiring predictions, or guarantees of employment." },
           ].map((item) => (
             <article key={item.title} className="flex items-start gap-3 rounded-xl border bg-card p-5">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#A5E65A]" aria-hidden="true" />
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden="true" />
               <div>
                 <h3 className="font-semibold">{item.title}</h3>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.detail}</p>
@@ -280,7 +324,7 @@ function Home() {
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Your next opportunity starts with preparation.</h2>
               <p className="mt-3 leading-7 text-ink-foreground/80">Choose a goal, practice at your pace, and turn feedback into your next step.</p>
             </div>
-            <Link to="/account" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#24D7E8] px-6 font-semibold text-[#07111E] transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-105">
+            <Link to="/account" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-semibold text-primary-foreground transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-105">
               Get started <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>

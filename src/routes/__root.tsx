@@ -246,7 +246,7 @@ function RootComponent() {
       </main>
       {(hasAccess || isAccountRoute || isPublicMarketingRoute) && (
         <footer className="border-t border-white/10 bg-[#0B1220] px-4 py-8 text-center text-xs text-slate-400">
-          Workforce Prep · A career practice simulator. Practice roles and employers are fictional, not live vacancies.
+          Workforce Prep · Career practice and job-search tools. Simulator roles are fictional; live listings are sourced separately and may change.
         </footer>
       )}
     </QueryClientProvider>

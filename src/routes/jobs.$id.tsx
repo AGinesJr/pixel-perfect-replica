@@ -34,14 +34,20 @@ function JobPage() {
     <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:grid-cols-[1fr_300px]">
       <article className="rounded-lg border bg-card p-6 md:p-8">
         <Link to="/jobs" className="text-sm text-muted-foreground">← All jobs</Link>
-        <div className="mt-3 inline-flex rounded-full border border-amber-600/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">Simulated practice listing · not a live vacancy</div>
+        <div className="mt-3 inline-flex rounded-full border border-warning/35 bg-warning/10 px-3 py-1 text-xs font-semibold tracking-wide text-warning">Simulated practice listing · not a live vacancy</div>
         <h1 className="mt-3 text-3xl font-bold">{job.title}</h1>
         <p className="mt-1 text-muted-foreground">{job.employer} · <MapPin className="inline h-3.5 w-3.5" /> {job.location} · {job.remote}</p>
         <div className="mt-4 flex flex-wrap gap-2 text-sm"><span className="rounded bg-secondary px-2 py-1 font-medium">{fmtSalary(job.salary)}</span><span className="rounded bg-secondary px-2 py-1">{job.type}</span><span className="rounded bg-secondary px-2 py-1">{job.level} level</span></div>
         <div className="mt-6">
           <div className="flex flex-wrap gap-3">
-            {applied ? <Link to="/applications/$id" params={{ id: applied.id }} className="inline-flex h-11 items-center rounded-md border px-6 font-semibold">View latest application</Link> : <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90">Apply now</Link>}
-            <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-md bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90">{applied ? "Reapply as new attempt" : "Start a new application"}</Link>
+            {applied ? (
+              <>
+                <Link to="/applications/$id" params={{ id: applied.id }} className="inline-flex h-11 items-center rounded-lg border border-border px-5 font-semibold transition-colors hover:bg-muted">View latest application</Link>
+                <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-lg bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:brightness-105">Start another attempt</Link>
+              </>
+            ) : (
+              <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-11 items-center rounded-lg bg-primary px-5 font-semibold text-primary-foreground transition-colors hover:brightness-105">Start practice application</Link>
+            )}
           </div>
           {jobApplications.length > 0 && <p className="mt-2 text-xs text-muted-foreground">{jobApplications.length} saved {jobApplications.length === 1 ? "attempt" : "attempts"} for this role. Reapplying creates a new record; previous results stay in your dashboard.</p>}
         </div>
@@ -52,7 +58,7 @@ function JobPage() {
       </article>
       <aside className="space-y-4">
         <div className="rounded-lg border bg-card p-5"><Building2 className="h-6 w-6 text-primary" /><h2 className="mt-3 font-semibold">{emp.name}</h2><p className="text-sm text-muted-foreground">{emp.tagline}</p><dl className="mt-4 space-y-2 text-sm"><div><dt className="text-muted-foreground">Size</dt><dd>{emp.size} employees</dd></div><div><dt className="text-muted-foreground">Headquarters</dt><dd>{emp.hq}</dd></div><div><dt className="text-muted-foreground">Culture</dt><dd>{emp.culture}</dd></div></dl></div>
-        <div className="rounded-lg border bg-card p-5 text-sm"><p className="font-semibold">Recruiter strictness</p><div className="mt-2 flex gap-1">{[1, 2, 3, 4, 5].map((number) => <span key={number} className={`h-2 flex-1 rounded ${number <= job.difficulty ? "bg-primary" : "bg-muted"}`} />)}</div><p className="mt-2 text-muted-foreground">Practice interview threshold: score {55 + job.difficulty * 5}/100. Fictional employer and role for rehearsal only.</p></div>
+        <div className="rounded-lg border bg-card p-5 text-sm"><p className="font-semibold">Practice screening difficulty</p><div className="mt-2 flex gap-1">{[1, 2, 3, 4, 5].map((number) => <span key={number} className={`h-2 flex-1 rounded ${number <= job.difficulty ? "bg-primary" : "bg-muted"}`} />)}</div><p className="mt-2 text-muted-foreground">Practice interview threshold: score {55 + job.difficulty * 5}/100. Fictional employer and role for rehearsal only.</p></div>
       </aside>
     </div>
   );
