@@ -71,6 +71,9 @@ function formatPosted(value: string | number | undefined) {
 function SearchJobs() {
   const getLiveJobs = useServerFn(searchLiveJobs);
   const [query, setQuery] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
   const [seniority, setSeniority] = useState("");
   const [employmentType, setEmploymentType] = useState("");
   const [page, setPage] = useState(1);
@@ -86,6 +89,9 @@ function SearchJobs() {
       const data = await getLiveJobs({
         data: {
           query: query.trim(),
+          city: city.trim(),
+          state: state.trim(),
+          zip: zip.trim(),
           seniority: seniority as "" | "Entry-level" | "Mid-level" | "Senior" | "Manager" | "Director" | "Executive",
           employmentType: employmentType as "" | "Full Time" | "Part Time" | "Contractor" | "Temporary" | "Intern" | "Volunteer" | "Other",
           page: nextPage,
@@ -114,12 +120,15 @@ function SearchJobs() {
 
   function clearFilters() {
     setQuery("");
+    setCity("");
+    setState("");
+    setZip("");
     setSeniority("");
     setEmploymentType("");
     setPage(1);
     setLoading(true);
     setError("");
-    void getLiveJobs({ data: { query: "", seniority: "", employmentType: "", page: 1 } })
+    void getLiveJobs({ data: { query: "", city: "", state: "", zip: "", seniority: "", employmentType: "", page: 1 } })
       .then((data) => {
         setResult(data);
         setSearched(true);
@@ -158,7 +167,19 @@ function SearchJobs() {
             </button>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="text-sm font-medium">
+              <span className="mb-2 block">City</span>
+              <input value={city} onChange={(event) => setCity(event.target.value)} maxLength={80} placeholder="e.g. Orlando" autoComplete="address-level2" className="h-11 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
+            </label>
+            <label className="text-sm font-medium">
+              <span className="mb-2 block">State</span>
+              <input value={state} onChange={(event) => setState(event.target.value)} maxLength={40} placeholder="e.g. Florida or FL" autoComplete="address-level1" className="h-11 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
+            </label>
+            <label className="text-sm font-medium">
+              <span className="mb-2 block">ZIP code</span>
+              <input value={zip} onChange={(event) => setZip(event.target.value.replace(/[^0-9-]/g, "").slice(0, 10))} inputMode="numeric" autoComplete="postal-code" maxLength={10} pattern="\\d{5}(-\\d{4})?" placeholder="e.g. 32801" className="h-11 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
+            </label>
             <label className="text-sm font-medium">
               <span className="mb-2 flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> Career level</span>
               <select value={seniority} onChange={(event) => setSeniority(event.target.value)} className="h-11 w-full rounded-md border bg-background px-3 text-sm">
@@ -176,6 +197,7 @@ function SearchJobs() {
             <p className="text-xs text-muted-foreground"><Globe2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />Remote positions · open to US-based candidates</p>
             <button type="button" onClick={clearFilters} className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground">Clear filters</button>
           </div>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">Location fields are included in the search terms for this free remote-job feed. They do not provide ZIP-radius matching or guarantee onsite/hybrid jobs in that area.</p>
         </form>
       </section>
 
