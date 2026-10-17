@@ -10,9 +10,9 @@ import { rankJobsForResume } from "@/lib/resume-job-matching";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Resume — Workforce Prep" },
+      { title: "Resume Studio — Workforce Prep" },
       { name: "description", content: "Edit, score, and match your resume to career-practice jobs in one workspace." },
-      { property: "og:title", content: "Resume — Workforce Prep" },
+      { property: "og:title", content: "Resume Studio — Workforce Prep" },
       { property: "og:description", content: "Edit, score, and match your resume to career-practice jobs in one workspace." },
     ],
   }),
@@ -112,7 +112,7 @@ function Profile() {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="max-w-3xl">
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">Career tools</p>
-        <h1 className="mt-2 text-3xl font-bold md:text-4xl">Resume workspace</h1>
+        <h1 className="mt-2 text-3xl font-bold md:text-4xl">Resume Studio</h1>
         <p className="mt-2 text-muted-foreground">
           Write and save your resume, check its readiness, and find simulated practice roles that may align with your experience—all in one place.
         </p>
@@ -191,7 +191,7 @@ function Profile() {
       <section className="mt-6 rounded-xl border bg-card p-5 md:p-6">
         <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">Resume checkup</p>
-          <h2 className="mt-1 text-2xl font-bold">2. ATS readiness score</h2>
+          <h2 className="mt-1 text-2xl font-bold">2. Resume match analysis</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Check resume details, qualifications, skills, and evidence of professional traits. For a more targeted estimate, add the job description you plan to apply to.
           </p>
@@ -202,7 +202,7 @@ function Profile() {
           <textarea value={jobDescription} maxLength={12000} onChange={(event) => { setJobDescription(event.target.value); setScoreResult(null); }} rows={5} className="mt-2 w-full rounded-md border bg-background p-3 text-sm" placeholder="Paste the target job description here…" />
         </label>
         <button type="button" onClick={() => setScoreResult(scoreResume(resume, { name: state.name, email: state.contactEmail, phone: state.phone, city: state.city, state: state.state }, jobDescription))} disabled={!ready || resume.trim().length < 40} className="mt-4 h-11 rounded-md bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-50">
-          Score my resume
+          Analyze my resume
         </button>
         {resume.trim().length < 40 && <p className="mt-2 text-sm text-muted-foreground">Add at least 40 characters to your resume to calculate a score.</p>}
         {scoreResult && <div className="mt-6 space-y-5" aria-live="polite">
@@ -210,7 +210,7 @@ function Profile() {
             <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full border-4 border-primary text-center">
               <div><p className="metric-value font-display text-3xl font-bold leading-none">{scoreResult.score}</p><p className="mt-1 text-xs text-muted-foreground">out of 100</p></div>
             </div>
-            <div><h3 className="text-xl font-bold">{scoreResult.label}</h3><p className="mt-1 text-sm text-muted-foreground">Estimated ATS readiness checklist score</p><p className="mt-2 text-sm">Use the category breakdown below to improve clarity and role relevance—not to game an automated filter.</p></div>
+            <div><h3 className="text-xl font-bold">{scoreResult.label}</h3><p className="mt-1 text-sm text-muted-foreground">ATS-style checklist estimate · not an employer ATS score</p><p className="mt-2 text-sm">Use the category breakdown below to improve clarity and role relevance—not to game an automated filter.</p></div>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {scoreResult.categories.map((item) => <article key={item.name} className="rounded-lg border p-4">
