@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, CheckCircle2, FileCheck, MessagesSquare, Search, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import { fmtSalary, jobs } from "@/lib/data";
-import { JobCard } from "@/components/JobCard";
 import heroImg from "@/assets/hero.jpg";
 
 const faqs = [
@@ -122,13 +121,13 @@ function Home() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/account"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-semibold text-primary-foreground shadow-lg shadow-cyan-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1220]"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-semibold text-primary-foreground shadow-lg shadow-cyan-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Start building career confidence <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <a
                 href="#how-it-works"
-                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-6 font-semibold text-white transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#24D7E8]"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-6 font-semibold text-white transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Explore the platform
               </a>

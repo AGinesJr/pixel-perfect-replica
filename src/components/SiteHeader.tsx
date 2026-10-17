@@ -94,7 +94,7 @@ export function SiteHeader() {
         </nav>
       </header>
 
-      <nav aria-label="Quick navigation" className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-50 grid grid-cols-4 border-t border-border bg-card/95 px-2 pt-2 shadow-[0_-8px_28px_rgba(0,0,0,0.18)] backdrop-blur xl:hidden">
+      <nav aria-label="Quick navigation" className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 px-2 pt-2 shadow-[0_-8px_28px_rgba(0,0,0,0.18)] backdrop-blur xl:hidden">
         {primaryNav.map(({ to, label, icon: Icon }) => (
           <Link
             key={to}

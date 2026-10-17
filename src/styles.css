@@ -160,9 +160,13 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 1279px) {
     body:has(.mobile-bottom-nav) main {
       padding-bottom: 5.5rem;
+    }
+
+    body:has(.mobile-bottom-nav) footer {
+      padding-bottom: calc(6rem + env(safe-area-inset-bottom));
     }
   }
 
