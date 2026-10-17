@@ -144,7 +144,7 @@ function RootComponent() {
         control.textContent,
         control instanceof HTMLInputElement ? control.value : "",
       ].filter(Boolean).join(" ").trim();
-      if (!/^next(?:\\b|$)/i.test(label) && !/\\bnext page\\b/i.test(label)) return;
+      if (!/^next(?:\b|$)/i.test(label) && !/\bnext page\b/i.test(label)) return;
       window.requestAnimationFrame(() => window.scrollTo(0, 0));
     };
     document.addEventListener("click", scrollToTopForNextAction);
