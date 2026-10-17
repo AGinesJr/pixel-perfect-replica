@@ -42,21 +42,21 @@ function Dashboard() {
       </header>
 
       <section aria-label="Career practice overview" className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-2xl border border-border bg-hero p-5 text-ink-foreground sm:col-span-2">
+        <article className="rounded-2xl border border-border bg-hero p-5 text-foreground dark:text-ink-foreground sm:col-span-2">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm text-ink-foreground/75">Practice level</p>
+              <p className="text-sm text-foreground/75 dark:text-ink-foreground/75">Practice level</p>
               <p className="metric-value mt-1 font-display text-4xl font-bold sm:text-5xl">Level {lv.level}</p>
             </div>
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-success/15 text-success"><Award className="h-5 w-5" aria-hidden="true" /></span>
           </div>
-          <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-ink-foreground/15" role="progressbar" aria-label="Progress to next practice level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressPercent}>
+          <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-foreground/15 dark:bg-ink-foreground/15" role="progressbar" aria-label="Progress to next practice level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressPercent}>
             <div className="h-full rounded-full bg-success transition-[width] duration-200" style={{ width: `${progressPercent}%` }} />
           </div>
-          <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-ink-foreground/75">
+          <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-foreground/75 dark:text-ink-foreground/75">
             <span>{xp.toLocaleString()} practice XP</span><span>{Math.max(0, lv.next - lv.into).toLocaleString()} XP to next level</span>
           </div>
-          <p className="mt-3 text-xs text-ink-foreground/70">Practice level reflects platform activity, not job readiness or hiring likelihood.</p>
+          <p className="mt-3 text-xs text-foreground/70 dark:text-ink-foreground/70">Practice level reflects platform activity, not job readiness or hiring likelihood.</p>
         </article>
         <Stat label="Applications practiced" value={state.applications.length} detail="Simulated applications" />
         <Stat label="Interview sessions" value={completedInterviews} detail="Completed practice sessions" />
