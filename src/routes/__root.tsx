@@ -15,6 +15,7 @@ import { Moon, Sun } from "lucide-react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "../components/SiteHeader";
+import { WebsiteAdSlot } from "../components/WebsiteAdSlot";
 import { getStoredSession, getValidSession, type AuthSession } from "../lib/supabase";
 
 function NotFoundComponent() {
@@ -283,6 +284,7 @@ function RootComponent() {
           </section>
         )}
       </main>
+      {(hasAccess || isAccountRoute || isPublicMarketingRoute) && <WebsiteAdSlot />}
       {(hasAccess || isAccountRoute || isPublicMarketingRoute) && (
         <footer className="border-t border-border bg-card px-4 py-5 text-xs text-muted-foreground">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
