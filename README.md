@@ -110,3 +110,31 @@ If deployed through Lovable, configure the secret in the platform's supported se
 The app currently exports and deletes browser-local practice data. **Account-level deletion of the Supabase cloud records and Auth account is not yet implemented.** Cloud sync is implemented in the code but must be configured and verified against the deployed app before relying on it.
 
 Before public production use, finish and test authentication, per-user database access, cloud persistence, account deletion, rate limiting/abuse controls, privacy and retention disclosures, accessible error handling, and verified labor-market data integrations with source and timestamp metadata. An authenticated, role-protected AI operations console for monitoring and tuning recruiter behavior is also not yet implemented; do not expose gateway keys or admin controls in the browser. Do not claim these are implemented until they are configured and tested.
+
+## Monetization setup (Despia + AdMob + AdSense)
+
+The code supports two separate ad paths:
+
+- **Android and iOS:** Despia's native AdMob rewarded-video bridge is shown in the signed-in dashboard as an optional bonus interview-tip reward. The callback only unlocks a tip when Despia reports the exact completion status `"true"`. The client enforces a convenience limit of five rewarded ads per local day; this local limit is not a security boundary for valuable rewards.
+- **Website:** A responsive AdSense display slot is rendered only when both public environment variables are configured, and it is hidden inside the Despia runtime.
+
+### Configure native rewarded ads
+
+1. In Google AdMob, create separate app entries for Android and iOS. Each platform needs its own **App ID** and **Rewarded Ad Unit ID**.
+2. Create a **Rewarded** ad unit for each platform (not a banner or standard interstitial).
+3. In AdMob's Privacy & messaging area, configure the consent messages and privacy settings applicable to your audience.
+4. In the Despia Editor, open **App → Integrations → AdMob**, enable it, and enter the Android/iOS App IDs and Rewarded Ad Unit IDs in their matching fields.
+5. For QA, use Google's rewarded test IDs: Android `ca-app-pub-3940256099942544/5224354917`; iOS `ca-app-pub-3940256099942544/1712485313`. Build and test on both platforms, then replace test IDs with the real IDs before store submission.
+6. Rebuild the native app after enabling or changing AdMob configuration. Despia's native Mobile Ads SDK is compiled into the app binary; a web-only redeploy does not activate a newly enabled native integration.
+
+The app loads Despia's documented ESM SDK on demand from jsDelivr when a user requests a rewarded ad. Ordinary web visitors do not load the native ad SDK.
+
+### Configure website display ads
+
+1. Obtain AdSense approval for the deployed website and create a responsive display ad unit.
+2. Add `VITE_ADSENSE_CLIENT_ID` (your `ca-pub-...` publisher ID) and `VITE_ADSENSE_SLOT_ID` (the ad unit's slot ID) to the Lovable project's environment variables and the production hosting environment, then redeploy.
+3. Publish the correct `ads.txt` publisher record at the website root using the exact values shown in your AdSense account. Do not publish a placeholder record.
+4. Configure Google's consent messaging and privacy disclosures for the locations and audiences you serve.
+
+The website ad slot remains hidden until both environment variables are present. AdSense is separate from AdMob; mobile rewarded ads are served by the native Despia/AdMob integration, not by the website slot. Never use live ad IDs or click live ads during development or QA.
+

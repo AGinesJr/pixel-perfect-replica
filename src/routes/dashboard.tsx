@@ -3,6 +3,7 @@ import { ArrowRight, Award, BriefcaseBusiness, FileText, Lock, MessageSquare } f
 import { jobs } from "@/lib/data";
 import { useProgress, xpFor, levelFor, achievements } from "@/lib/progress";
 import { JobCard } from "@/components/JobCard";
+import { RewardedPracticeTip } from "@/components/RewardedPracticeTip";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -61,6 +62,8 @@ function Dashboard() {
         <Stat label="Applications practiced" value={state.applications.length} detail="Simulated applications" />
         <Stat label="Interview sessions" value={completedInterviews} detail="Completed practice sessions" />
       </section>
+
+      <RewardedPracticeTip />
 
       <section className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
