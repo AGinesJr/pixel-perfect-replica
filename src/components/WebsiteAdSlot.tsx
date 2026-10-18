@@ -34,7 +34,10 @@ export function WebsiteAdSlot() {
       script.async = true;
       script.crossOrigin = "anonymous";
       script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(client)}`;
-      script.addEventListener("load", requestAd, { once: true });
+      script.addEventListener("load", () => {
+        script!.dataset.loaded = "true";
+        requestAd();
+      }, { once: true });
       document.head.appendChild(script);
     } else if (script.dataset.loaded === "true") {
       requestAd();
