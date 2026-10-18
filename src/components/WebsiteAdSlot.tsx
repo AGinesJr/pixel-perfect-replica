@@ -8,8 +8,8 @@ declare global {
 }
 
 export function WebsiteAdSlot() {
-  const client = import.meta.env.VITE_ADSENSE_CLIENT_ID?.trim();
-  const slot = import.meta.env.VITE_ADSENSE_SLOT_ID?.trim();
+  const client = import.meta.env["VITE_ADSENSE_CLIENT_ID"]?.trim();
+  const slot = import.meta.env["VITE_ADSENSE_SLOT_ID"]?.trim();
   const [readyForWeb, setReadyForWeb] = useState(false);
 
   useEffect(() => {
