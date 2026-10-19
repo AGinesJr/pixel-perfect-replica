@@ -11,13 +11,13 @@ export default defineConfig({
   plugins: [
     VitePWA({
       strategies: "generateSW",
-      outDir: "dist/client",
+      outDir: ".output/public",
       injectRegister: null,
       registerType: "autoUpdate",
       manifest: false,
       devOptions: { enabled: false },
       workbox: {
-        globDirectory: "dist/client",
+        globDirectory: ".output/public",
         // Precache only public, non-personal static assets. Keep documents, JS, API
         // responses, auth state, resumes, applications, and AI sessions out of cache.
         globPatterns: ["assets/**/*.{css,woff,woff2,png,jpg,jpeg,webp,avif}"],
