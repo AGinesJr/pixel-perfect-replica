@@ -10,6 +10,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
+import { Moon, Sun } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -123,6 +124,43 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const dark = window.localStorage.getItem("workforce-prep-theme") === "dark";
+    setIsDark(dark);
+    document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.style.colorScheme = dark ? "dark" : "light";
+  }, []);
+
+  const toggleTheme = () => {
+    const nextIsDark = !isDark;
+    setIsDark(nextIsDark);
+    document.documentElement.classList.toggle("dark", nextIsDark);
+    document.documentElement.style.colorScheme = nextIsDark ? "dark" : "light";
+    window.localStorage.setItem("workforce-prep-theme", nextIsDark ? "dark" : "light");
+  };
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      onClick={toggleTheme}
+      className="group inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-background px-2.5 py-1.5 text-foreground shadow-sm transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Sun className={`h-4 w-4 transition-colors ${isDark ? "text-muted-foreground" : "text-amber-500"}`} aria-hidden="true" />
+      <span className={`relative h-6 w-11 rounded-full p-0.5 transition-colors ${isDark ? "bg-primary" : "bg-slate-300"}`}>
+        <span className={`block h-5 w-5 rounded-full bg-white shadow-md transition-transform ${isDark ? "translate-x-5" : "translate-x-0"}`} />
+      </span>
+      <Moon className={`h-4 w-4 transition-colors ${isDark ? "text-primary" : "text-muted-foreground"}`} aria-hidden="true" />
+      <span className="sr-only">{isDark ? "Dark theme enabled" : "Light theme enabled"}</span>
+    </button>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -165,7 +203,15 @@ function RootComponent() {
           </div>
         )}
       </main>
-      <footer className="border-t bg-card py-8 text-center text-xs text-muted-foreground">Workforce Prep · A career practice simulator. Employers and listings are fictional.</footer>
+      <footer className="border-t bg-card px-4 py-5 text-xs text-muted-foreground">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 sm:flex-row">
+          <p className="max-w-3xl text-center sm:text-left">Workforce Prep · A career practice simulator. Practice employers and listings are fictional.</p>
+          <div className="flex shrink-0 items-center gap-3">
+            <span className="font-medium text-foreground">Theme</span>
+            <ThemeToggle />
+          </div>
+        </div>
+      </footer>
     </QueryClientProvider>
   );
 }
