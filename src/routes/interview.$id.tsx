@@ -1,11 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { jobs } from "@/lib/data";
 import { useProgress } from "@/lib/progress";
 import { interviewTurn, interviewFeedback } from "@/lib/ai.functions";
 import { jobPayload } from "@/lib/job-payload";
 import { ScoreBar } from "./applications.$id";
+
+const LiveInterview = lazy(() => import("@/components/LiveInterview"));
 
 export const Route = createFileRoute("/interview/$id")({
   head: () => ({
@@ -15,6 +18,8 @@ export const Route = createFileRoute("/interview/$id")({
       { property: "og:title", content: "AI interview — Workforce Prep" },
       { property: "og:description", content: "Practice a realistic interview with an AI hiring manager." },
       { name: "robots", content: "noindex" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Interview,
@@ -47,6 +52,7 @@ function Interview() {
   const app = state.applications.find((a) => a.id === id);
   const job = app && jobs.find((j) => j.id === app.jobId);
   const [history, setHistory] = useState<Msg[]>([]);
+  const [mode, setMode] = useState<"manual" | "live" | null>(null);
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -73,8 +79,8 @@ function Interview() {
   }
 
   useEffect(() => {
-    if (ready && app && !app.interview && !started.current) { started.current = true; next([]); }
-  }, [ready, app]); // eslint-disable-line
+    if (mode === "manual" && ready && app && !app.interview && !started.current) { started.current = true; next([]); }
+  }, [ready, app, mode]); // eslint-disable-line
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }); }, [history, busy]);
 
   useEffect(() => {
@@ -86,7 +92,7 @@ function Interview() {
   }, []);
 
   useEffect(() => {
-    if (!voiceOutput || !speechOutputSupported || !history.length || typeof window === "undefined") return;
+    if (mode !== "manual" || !voiceOutput || !speechOutputSupported || !history.length || typeof window === "undefined") return;
     const latest = history[history.length - 1];
     if (!latest || latest.role !== "interviewer") return;
     window.speechSynthesis.cancel();
@@ -95,7 +101,7 @@ function Interview() {
     utterance.rate = 0.95;
     window.speechSynthesis.speak(utterance);
     return () => window.speechSynthesis.cancel();
-  }, [history, voiceOutput, speechOutputSupported]);
+  }, [history, voiceOutput, speechOutputSupported, mode]);
 
   function startListening() {
     if (typeof window === "undefined") return;
@@ -159,11 +165,11 @@ function Interview() {
     next(h);
   }
 
-  async function finish() {
+  async function finish(transcript: Msg[] = history) {
     if (!job || !app) return;
     setBusy(true); setErr("");
     try {
-      const r = await feedback({ data: { job: jobPayload(job), history } });
+      const r = await feedback({ data: { job: jobPayload(job), history: transcript.slice(0, 40) } });
       update((s) => ({ ...s, applications: s.applications.map((a) => (a.id === id ? { ...a, interview: r } : a)) }));
     } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setBusy(false); }
@@ -207,6 +213,20 @@ function Interview() {
       <h1 className="text-2xl font-bold">Interview: {job.title}</h1>
       <p className="text-sm text-muted-foreground">Hiring manager, {job.employer} · about 5 questions · practice simulation</p>
 
+      <div className="mt-4 flex gap-2" aria-label="Interview mode">
+        <Button variant={mode === "manual" ? "default" : "outline"} disabled={busy} aria-pressed={mode === "manual"} onClick={() => setMode("manual")}>Manual interview</Button>
+        <Button variant={mode === "live" ? "default" : "outline"} disabled={busy} aria-pressed={mode === "live"} onClick={() => {
+          window.speechSynthesis?.cancel(); recognitionRef.current?.abort(); setListening(false); setMode("live");
+        }}>Live voice interview</Button>
+      </div>
+      {mode === "live" && <>
+        <ClientOnly fallback={<p className="mt-6">Loading live interview…</p>}><Suspense fallback={<p className="mt-6">Loading live interview…</p>}>
+          <LiveInterview job={job} scoring={busy} onFinish={(transcript) => void finish(transcript)} onSwitchToManual={() => setMode("manual")} />
+        </Suspense></ClientOnly>
+        {err && <p role="alert" className="mt-3 text-sm text-destructive">{err}</p>}
+      </>}
+      {mode === "manual" && <>
+
       <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3">
         <span className="text-sm font-medium">Voice interview</span>
         <button
@@ -249,7 +269,7 @@ function Interview() {
       </div>
 
       {done ? (
-        <button onClick={finish} disabled={busy} className="mt-6 h-11 rounded-md bg-primary font-semibold text-primary-foreground disabled:opacity-60">{busy ? "Scoring your interview…" : "Get my feedback"}</button>
+        <button onClick={() => void finish()} disabled={busy} className="mt-6 h-11 rounded-md bg-primary font-semibold text-primary-foreground disabled:opacity-60">{busy ? "Scoring your interview…" : "Get my feedback"}</button>
       ) : (
         <div className="sticky bottom-4 mt-6 rounded-lg border bg-card p-3 shadow-lg">
           <p className="mb-2 text-sm font-semibold">{listening ? "Listening — speak your answer" : "Answer out loud"}</p>
@@ -290,6 +310,7 @@ function Interview() {
           {latestQuestion && <p className="mt-2 text-xs text-muted-foreground">Tip: use Situation, Task, Action, Result (STAR) to structure your answer.</p>}
         </div>
       )}
+      </>}
     </div>
   );
 }
