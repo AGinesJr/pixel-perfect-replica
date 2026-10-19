@@ -10,7 +10,6 @@ type Props = {
   scoring: boolean;
   onFinish: (transcript: InterviewMsg[]) => void;
   onSwitchToManual: () => void;
-  voiceOnly?: boolean;
 };
 
 export default function LiveInterview(props: Props) {
@@ -23,7 +22,7 @@ export default function LiveInterview(props: Props) {
 
 type Phase = "ready" | "connecting" | "live" | "finished" | "error";
 
-function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false }: Props) {
+function LiveInner({ job, scoring, onFinish, onSwitchToManual }: Props) {
   const [phase, setPhase] = useState<Phase>("ready");
   const [error, setError] = useState("");
   const [transcript, setTranscript] = useState<InterviewMsg[]>([]);
@@ -161,7 +160,7 @@ function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false
         </div>
       )}
 
-      {!voiceOnly && phase === "live" && connected && (
+      {phase === "live" && connected && (
         <div className="rounded-lg border bg-card p-3">
           <label htmlFor="live-typed" className="text-xs font-medium text-muted-foreground">Prefer to type? Send an answer as text</label>
           <div className="mt-1 flex gap-2">
@@ -182,10 +181,10 @@ function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false
             </button>
           ) : (
             <div className="space-y-3 text-sm">
-              <p>{voiceOnly ? "There is not enough conversation to score yet — we need at least two spoken answers. Retry the live interview to continue." : "There is not enough conversation to score yet — we need at least two spoken answers. You can retry or continue in manual mode."}</p>
+              <p>There isn't enough of a conversation to score yet — we need at least two spoken answers. You can try the live interview again or continue in manual mode.</p>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => setPhase("ready")} className="h-10 rounded-md bg-primary px-4 font-semibold text-primary-foreground">Retry live interview</button>
-                {!voiceOnly && <button type="button" onClick={onSwitchToManual} className="h-10 rounded-md border px-4 font-semibold">Use manual mode</button>}
+                <button type="button" onClick={onSwitchToManual} className="h-10 rounded-md border px-4 font-semibold">Use manual mode</button>
               </div>
             </div>
           )}

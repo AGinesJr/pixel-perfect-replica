@@ -78,20 +78,10 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!elevenLabsResponse.ok) {
-      // Do not return upstream details to the browser; log a bounded diagnostic
-      // in Supabase Function Logs so agent/key/permission failures can be found.
-      const upstreamDetails = await elevenLabsResponse.text().catch(() => "");
-      console.error(
-        "ElevenLabs token request failed:",
-        elevenLabsResponse.status,
-        upstreamDetails.slice(0, 1000),
-      );
+      // Do not return upstream details that could reveal configuration.
+      console.error("ElevenLabs token request failed:", elevenLabsResponse.status);
       return jsonResponse(
-        {
-          error: "ElevenLabs could not start a session. Check your agent configuration.",
-          code: "ELEVENLABS_TOKEN_REQUEST_FAILED",
-          upstreamStatus: elevenLabsResponse.status,
-        },
+        { error: "ElevenLabs could not start a session. Check your agent configuration." },
         502,
       );
     }

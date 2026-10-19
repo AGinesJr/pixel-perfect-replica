@@ -83,34 +83,12 @@ export function useProgress() {
         const cloud = await loadCloudProgress(localProgress);
         if (!active) return;
         if (cloud) {
-          // Cloud reads can finish after a just-submitted application has been
-          // written locally but before its cloud save completes. Never replace
-          // that newer local application history with a stale cloud snapshot.
-          const latestLocal = read();
-          const mergedApplications = new Map(
-            latestLocal.applications.map((application) => [application.id, application]),
-          );
-          for (const application of cloud.progress.applications) {
-            if (!mergedApplications.has(application.id)) {
-              mergedApplications.set(application.id, application);
-            }
-          }
-          const applications = [...mergedApplications.values()].sort(
-            (a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt),
-          );
-          const saved = [...new Set([...cloud.progress.saved, ...latestLocal.saved])];
-          const progress = { ...cloud.progress, saved, applications };
-          const hasLocalOnlyData =
-            applications.length !== cloud.progress.applications.length ||
-            saved.length !== cloud.progress.saved.length;
-
-          localStorage.setItem(KEY, JSON.stringify(progress));
-          setState(progress);
+          localStorage.setItem(KEY, JSON.stringify(cloud.progress));
+          setState(cloud.progress);
           window.dispatchEvent(new Event("wp-progress"));
-          if (cloud.needsRepair || hasLocalOnlyData) {
-            // Repair missing rows and upload locally saved applications/jobs
-            // that were absent from the cloud snapshot.
-            await saveCloudProgress(progress);
+          if (cloud.needsRepair) {
+            // Fill the missing cloud row without discarding local-only data.
+            await saveCloudProgress(cloud.progress);
           }
         } else {
           // First sign-in: migrate this browser's existing practice data once.
