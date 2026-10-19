@@ -3,6 +3,20 @@ import { z } from "zod";
 
 const MODEL = "openai/gpt-6-astra";
 
+async function requireSignedIn(accessToken: string) {
+  const url = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined)?.replace(/\\/$/, "");
+  const key = (import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? import.meta.env["VITE_SUPABASE_ANON_KEY"]) as string | undefined;
+  if (!url || !key || !url.startsWith("https://")) {
+    throw new Error("Account verification is not configured. Please contact support.");
+  }
+  const response = await fetch(`${url}/auth/v1/user`, {
+    headers: { apikey: key, Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) throw new Error("Please sign in again before using AI practice.");
+  const user = (await response.json().catch(() => ({}))) as { id?: string };
+  if (!user.id) throw new Error("Please sign in again before using AI practice.");
+}
+
 async function callAI(
   instructions: string,
   input: string,
@@ -112,6 +126,7 @@ export const evaluateApplication = createServerFn({ method: "POST" })
   .validator((d: unknown) =>
     z
       .object({
+        accessToken: z.string().min(20).max(4096),
         job: jobInput,
         resume: z.string().min(20).max(15000),
         coverLetter: z.string().max(5000),
@@ -120,6 +135,7 @@ export const evaluateApplication = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
+    await requireSignedIn(data.accessToken);
     const schema = {
       type: "object",
       additionalProperties: false,
@@ -189,6 +205,7 @@ export const interviewTurn = createServerFn({ method: "POST" })
   .validator((d: unknown) =>
     z
       .object({
+        accessToken: z.string().min(20).max(4096),
         job: jobInput,
         resume: z.string().max(15000),
         history: z.array(msg).max(40),
@@ -196,6 +213,7 @@ export const interviewTurn = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
+    await requireSignedIn(data.accessToken);
     const asked = data.history.filter((m) => m.role === "interviewer").length;
     // End after five interview questions rather than spend another AI call checking completion.
     if (asked >= 5) {
@@ -228,12 +246,14 @@ export const interviewFeedback = createServerFn({ method: "POST" })
   .validator((d: unknown) =>
     z
       .object({
+        accessToken: z.string().min(20).max(4096),
         job: jobInput,
         history: z.array(msg).max(40),
       })
       .parse(d),
   )
   .handler(async ({ data }) => {
+    await requireSignedIn(data.accessToken);
     const schema = {
       type: "object",
       additionalProperties: false,
