@@ -6,14 +6,16 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "../components/SiteHeader";
 import { registerPwa } from "../lib/pwa";
+import { getValidSession } from "../lib/supabase";
 
 function NotFoundComponent() {
   return (
@@ -123,12 +125,46 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isPublicRoute = pathname === "/" || pathname === "/account";
+  const [authCheck, setAuthCheck] = useState<{ pathname: string; allowed: boolean } | null>(null);
+
   useEffect(() => { void registerPwa().catch(() => { /* Installation must not block the app. */ }); }, []);
+
+  useEffect(() => {
+    let active = true;
+    if (isPublicRoute) {
+      setAuthCheck({ pathname, allowed: true });
+      return () => { active = false; };
+    }
+
+    setAuthCheck(null);
+    void getValidSession().then((session) => {
+      if (!active) return;
+      if (!session) {
+        window.location.replace("/account");
+        return;
+      }
+      setAuthCheck({ pathname, allowed: true });
+    }).catch(() => {
+      if (active) window.location.replace("/account");
+    });
+
+    return () => { active = false; };
+  }, [pathname, isPublicRoute]);
+
+  const routeAllowed = isPublicRoute || (authCheck?.pathname === pathname && authCheck.allowed);
 
   return (
     <QueryClientProvider client={queryClient}>
       <SiteHeader />
-      <main className="min-h-[70vh]"><Outlet /></main>
+      <main className="min-h-[70vh]">
+        {routeAllowed ? <Outlet /> : (
+          <div className="mx-auto flex min-h-[50vh] max-w-xl items-center justify-center px-4 text-center text-sm text-muted-foreground" role="status" aria-live="polite">
+            Checking your account…
+          </div>
+        )}
+      </main>
       <footer className="border-t bg-card py-8 text-center text-xs text-muted-foreground">Workforce Prep · A career practice simulator. Employers and listings are fictional.</footer>
     </QueryClientProvider>
   );
