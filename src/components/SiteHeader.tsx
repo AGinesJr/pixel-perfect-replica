@@ -45,7 +45,7 @@ export function SiteHeader() {
     <>
       <header className="sticky top-0 z-40 border-b border-border/80 bg-card/95 shadow-sm shadow-black/10 backdrop-blur">
         <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-2 px-2 sm:gap-4 sm:px-6">
-          <Link to="/dashboard" onClick={closeMenus} className="flex shrink-0 items-center gap-2 rounded-md font-display text-sm font-bold tracking-tight sm:gap-2.5 sm:text-lg text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-2 rounded-md font-display text-sm font-bold tracking-tight sm:gap-2.5 sm:text-lg text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary sm:h-9 sm:w-9 text-primary-foreground shadow-sm">
               <Briefcase className="h-4 w-4" aria-hidden="true" />
             </span>
