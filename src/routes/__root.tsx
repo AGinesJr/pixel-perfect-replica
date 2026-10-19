@@ -16,7 +16,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "../components/SiteHeader";
 import { WebsiteAdSlot } from "../components/WebsiteAdSlot";
-import { registerPwa } from "../lib/pwa";
 import { getStoredSession, getValidSession, type AuthSession } from "../lib/supabase";
 
 function NotFoundComponent() {
@@ -84,9 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0f1b3d" },
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-title", content: "Workforce Prep" },
+      { name: "theme-color", content: "#F8FAFC" },
       { title: "Workforce Prep | Career Practice & Interview Simulator" },
       {
         name: "description",
@@ -117,9 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap",
       },
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/icons/icon-180.png" },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
@@ -182,7 +177,6 @@ function ThemeToggle() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  useEffect(() => { void registerPwa().catch(() => { /* PWA setup must never block the app. */ }); }, []);
   const pathname = useRouterState({ select: (router) => router.location.pathname });
   const locationHref = useRouterState({ select: (router) => router.location.href });
   const [session, setSession] = useState<AuthSession | null>(null);
