@@ -38,27 +38,120 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      practice_jobs: {
         Row: {
+          country_code: string
           created_at: string
-          display_name: string
-          resume_text: string
+          difficulty: number
+          employer: string
+          employment_type: string
+          experience_level: string
+          id: string
+          industry: string
+          is_active: boolean
+          location: string
+          posted_label: string
+          preferred_qualifications: string[]
+          required_qualifications: string[]
+          responsibilities: string[]
+          salary_max: number
+          salary_min: number
+          search_text: string
+          source_type: string
+          summary: string
+          title: string
           updated_at: string
-          user_id: string
+          workplace_type: string
         }
         Insert: {
+          country_code?: string
           created_at?: string
-          display_name?: string
-          resume_text?: string
+          difficulty: number
+          employer: string
+          employment_type: string
+          experience_level: string
+          id: string
+          industry: string
+          is_active?: boolean
+          location: string
+          posted_label?: string
+          preferred_qualifications?: string[]
+          required_qualifications?: string[]
+          responsibilities?: string[]
+          salary_max: number
+          salary_min: number
+          search_text?: string
+          source_type?: string
+          summary: string
+          title: string
           updated_at?: string
-          user_id: string
+          workplace_type: string
         }
         Update: {
+          country_code?: string
+          created_at?: string
+          difficulty?: number
+          employer?: string
+          employment_type?: string
+          experience_level?: string
+          id?: string
+          industry?: string
+          is_active?: boolean
+          location?: string
+          posted_label?: string
+          preferred_qualifications?: string[]
+          required_qualifications?: string[]
+          responsibilities?: string[]
+          salary_max?: number
+          salary_min?: number
+          search_text?: string
+          source_type?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+          workplace_type?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_data_url: string
+          city: string
+          contact_email: string
+          created_at: string
+          display_name: string
+          phone: string
+          resume_text: string
+          state: string
+          updated_at: string
+          user_id: string
+          zip_code: string
+        }
+        Insert: {
+          avatar_data_url?: string
+          city?: string
+          contact_email?: string
           created_at?: string
           display_name?: string
+          phone?: string
           resume_text?: string
+          state?: string
+          updated_at?: string
+          user_id: string
+          zip_code?: string
+        }
+        Update: {
+          avatar_data_url?: string
+          city?: string
+          contact_email?: string
+          created_at?: string
+          display_name?: string
+          phone?: string
+          resume_text?: string
+          state?: string
           updated_at?: string
           user_id?: string
+          zip_code?: string
         }
         Relationships: []
       }
