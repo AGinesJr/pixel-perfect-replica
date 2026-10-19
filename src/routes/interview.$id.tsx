@@ -6,6 +6,7 @@ import { jobs } from "@/lib/data";
 import { useProgress } from "@/lib/progress";
 import { interviewTurn, interviewFeedback } from "@/lib/ai.functions";
 import { jobPayload } from "@/lib/job-payload";
+import { getValidSession } from "@/lib/supabase";
 import { ScoreBar } from "./applications.$id";
 
 const LiveInterview = lazy(() => import("@/components/LiveInterview"));
@@ -71,7 +72,9 @@ function Interview() {
     if (!job || !app) return;
     setBusy(true); setErr("");
     try {
-      const r = await turn({ data: { job: jobPayload(job), resume: app.resume, history: h } });
+      const session = await getValidSession();
+      if (!session) throw new Error("Sign in again to continue interview practice.");
+      const r = await turn({ data: { accessToken: session.access_token, job: jobPayload(job), resume: app.resume, history: h } });
       setHistory([...h, { role: "interviewer", text: r.question }]);
       if (r.done) setDone(true);
     } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
@@ -169,7 +172,9 @@ function Interview() {
     if (!job || !app) return;
     setBusy(true); setErr("");
     try {
-      const r = await feedback({ data: { job: jobPayload(job), history: transcript.slice(0, 40) } });
+      const session = await getValidSession();
+      if (!session) throw new Error("Sign in again to get interview feedback.");
+      const r = await feedback({ data: { accessToken: session.access_token, job: jobPayload(job), history: transcript.slice(0, 40) } });
       update((s) => ({ ...s, applications: s.applications.map((a) => (a.id === id ? { ...a, interview: r } : a)) }));
     } catch (e) { setErr(e instanceof Error ? e.message : "Error"); }
     finally { setBusy(false); }
