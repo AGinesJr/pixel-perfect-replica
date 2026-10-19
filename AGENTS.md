@@ -9,5 +9,8 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Candidate progress lives in browser localStorage (src/lib/progress.ts) until accounts are added; why: v1 demo without login.
+- Candidate progress remains browser-local for guests and syncs through the existing account integration when signed in; why: preserve guest practice and cross-device progress.
 - AI recruiter/interview calls run only in server functions in src/lib/ai.functions.ts; why: keeps the AI key server-side.
+- Load the ElevenLabs interview component dynamically behind ClientOnly; why: its browser SDK must not enter SSR evaluation.
+- Request live voice tokens from the existing authenticated elevenlabs-session endpoint and send only job context; why: reuse the deployed token service without exposing its secret.
+- Generate the app worker with vite-plugin-pwa into dist/client and register only through src/lib/pwa.ts; why: prevent preview workers and cache only public hashed styling/media, never documents or private responses.
