@@ -23,12 +23,12 @@ function Home() {
   const nav = useNavigate();
   return (
     <div>
-      <section className="relative overflow-hidden bg-hero text-ink-foreground">
+      <section className="relative overflow-hidden bg-hero text-foreground">
         <img src={heroImg} alt="" width={1600} height={900} className="absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-luminosity" />
         <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
-          <p className="text-sm font-medium uppercase tracking-widest text-ink-foreground/70">Career practice platform</p>
+          <p className="text-sm font-medium uppercase tracking-widest text-foreground/70">Career practice platform</p>
           <h1 className="mt-3 max-w-2xl text-4xl font-bold md:text-6xl">Rehearse the whole job search before it counts.</h1>
-          <p className="mt-4 max-w-xl text-lg text-ink-foreground/80">Apply to realistic roles, get screened by an AI recruiter, and practice interviews with honest, explained feedback.</p>
+          <p className="mt-4 max-w-xl text-lg text-foreground/80">Apply to realistic roles, get screened by an AI recruiter, and practice interviews with honest, explained feedback.</p>
           <form
             onSubmit={(e) => { e.preventDefault(); nav({ to: "/jobs", search: { q, loc } }); }}
             className="mt-8 flex max-w-3xl flex-col gap-2 rounded-lg bg-card p-2 shadow-xl md:flex-row"
