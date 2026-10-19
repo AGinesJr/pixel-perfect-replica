@@ -68,9 +68,9 @@ export function SiteHeader() {
           </nav>
 
           <div className="relative flex shrink-0 items-center gap-1 sm:gap-2">
-            <Link to="/jobs" onClick={closeMenus} aria-label="Practice listings" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted sm:px-3">
+            <Link to="/search-jobs" onClick={closeMenus} aria-label="Live listings" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted sm:px-3">
               <Search className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Practice listings</span>
+              <span className="hidden sm:inline">Live listings</span>
             </Link>
 
             <div className="relative">
@@ -139,7 +139,7 @@ export function SiteHeader() {
 
         <nav aria-label="Explore career tools" className="flex items-center gap-2 overflow-x-auto border-t border-border/70 px-4 py-2 text-sm xl:hidden">
           <Link to="/insights" onClick={closeMenus} className="shrink-0 rounded-md px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "shrink-0 rounded-md bg-primary/10 px-3 py-1.5 font-semibold text-foreground" }}>Market insights</Link>
-          <Link to="/jobs" onClick={closeMenus} className="shrink-0 rounded-md px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "shrink-0 rounded-md bg-primary/10 px-3 py-1.5 font-semibold text-foreground" }}>Practice listings</Link>
+          <Link to="/search-jobs" onClick={closeMenus} className="shrink-0 rounded-md px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "shrink-0 rounded-md bg-primary/10 px-3 py-1.5 font-semibold text-foreground" }}>Live job listings</Link>
         </nav>
       </header>
     </>
