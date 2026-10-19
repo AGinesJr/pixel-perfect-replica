@@ -4,7 +4,8 @@ import { z } from "zod";
 const MODEL = "openai/gpt-6-astra";
 
 async function requireSignedIn(accessToken: string) {
-  const url = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined)?.replace(/\\/$/, "");
+  const configuredUrl = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
+  const url = configuredUrl?.endsWith("/") ? configuredUrl.slice(0, -1) : configuredUrl;
   const key = (import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? import.meta.env["VITE_SUPABASE_ANON_KEY"]) as string | undefined;
   if (!url || !key || !url.startsWith("https://")) {
     throw new Error("Account verification is not configured. Please contact support.");
