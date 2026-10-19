@@ -96,7 +96,7 @@ function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <section className="relative isolate overflow-hidden bg-hero text-ink-foreground">
+      <section className="relative isolate overflow-hidden bg-hero text-foreground">
         <img
           src={heroImg}
           alt=""
@@ -127,7 +127,7 @@ function Home() {
               </Link>
               <a
                 href="#how-it-works"
-                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/25 px-6 font-semibold text-white transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-foreground/25 px-6 font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Explore the platform
               </a>
@@ -141,7 +141,7 @@ function Home() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Your career toolkit</p>
-                <h2 className="mt-2 text-xl font-semibold text-white">Practice with a plan</h2>
+                <h2 className="mt-2 text-xl font-semibold text-foreground">Practice with a plan</h2>
               </div>
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                 <TrendingUp className="h-5 w-5" aria-hidden="true" />
@@ -154,10 +154,10 @@ function Home() {
                 { icon: MessagesSquare, title: "Interview simulator", detail: "Practice role-specific questions and follow-ups" },
                 { icon: CheckCircle2, title: "Progress tracking", detail: "Review milestones and practice history" },
               ].map(({ icon: Icon, title, detail }) => (
-                <div key={title} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
+                <div key={title} className="flex items-start gap-3 rounded-xl border border-border/70 bg-background/60 p-3.5">
                   <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                   <div>
-                    <h3 className="text-sm font-semibold text-white">{title}</h3>
+                    <h3 className="text-sm font-semibold text-foreground">{title}</h3>
                     <p className="mt-1 text-sm leading-5 text-muted-foreground">{detail}</p>
                   </div>
                 </div>
@@ -262,7 +262,7 @@ function Home() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 md:grid-cols-[0.8fr_1.2fr] md:items-center sm:py-16">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Insight with context</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white">Understand the labor market—not just the job listing.</h2>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground">Understand the labor market—not just the job listing.</h2>
           </div>
           <div>
             <p className="leading-7 text-muted-foreground">
@@ -318,11 +318,11 @@ function Home() {
       </section>
 
       <section className="px-4 pb-16 sm:pb-20">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-hero px-6 py-10 text-ink-foreground sm:px-10 sm:py-14">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-hero px-6 py-10 text-foreground sm:px-10 sm:py-14">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
             <div className="max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Your next opportunity starts with preparation.</h2>
-              <p className="mt-3 leading-7 text-ink-foreground/80">Choose a goal, practice at your pace, and turn feedback into your next step.</p>
+              <p className="mt-3 leading-7 text-foreground/80">Choose a goal, practice at your pace, and turn feedback into your next step.</p>
             </div>
             <Link to="/account" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-6 font-semibold text-primary-foreground transition-transform duration-200 hover:-translate-y-0.5 hover:brightness-105">
               Get started <ArrowRight className="h-4 w-4" aria-hidden="true" />
