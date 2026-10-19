@@ -88,6 +88,14 @@ function AppResult() {
           </ul>
         )}
       </section>
+      <div className="mt-8 rounded-lg border bg-card p-5">
+        <h2 className="text-lg font-semibold">Want to try again?</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Start a fresh application for this role. This creates a separate attempt with a new screening and interview, while keeping this result in your application history.</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link to="/apply/$id" params={{ id: job.id }} className="inline-flex h-10 items-center rounded-md bg-primary px-5 font-semibold text-primary-foreground">Reapply to this job</Link>
+          <Link to="/dashboard" className="inline-flex h-10 items-center rounded-md border px-5 font-semibold">View application history</Link>
+        </div>
+      </div>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-5"><h3 className="font-semibold">Strengths</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{ev.strengths.map((s) => <li key={s}>{s}</li>)}</ul></div>
         <div className="rounded-lg border bg-card p-5"><h3 className="font-semibold">Gaps to close</h3><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{ev.gaps.map((s) => <li key={s}>{s}</li>)}</ul></div>
