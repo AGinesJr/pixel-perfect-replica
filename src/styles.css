@@ -238,3 +238,96 @@ lovable-badge,
 iframe[src*="lovable.dev"][title*="badge" i] {
   display: none !important;
 }
+
+
+/*
+ * Light-theme readability pass.
+ * These rules intentionally apply only when the document is not in .dark mode.
+ * They strengthen muted text, boundaries, form controls, and interactive states
+ * without changing the dark theme palette.
+ */
+html:not(.dark) {
+  --background: #F7F9FC;
+  --foreground: #172033;
+  --card: #FFFFFF;
+  --card-foreground: #172033;
+  --popover: #FFFFFF;
+  --popover-foreground: #172033;
+  --primary: #086B7A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E5EBF2;
+  --secondary-foreground: #1F2D40;
+  --muted: #E9EEF5;
+  --muted-foreground: #465368;
+  --accent: #D9F0F3;
+  --accent-foreground: #14333B;
+  --border: #C5D0DE;
+  --input: #AAB8C9;
+  --ring: #086B7A;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #172033;
+  --sidebar-accent: #E9EEF5;
+  --sidebar-accent-foreground: #1F2D40;
+  color-scheme: light;
+}
+
+html:not(.dark) body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+html:not(.dark) :is(
+  .text-slate-300, .text-slate-400, .text-slate-500,
+  .text-gray-300, .text-gray-400, .text-gray-500,
+  .text-zinc-300, .text-zinc-400, .text-zinc-500,
+  .text-neutral-300, .text-neutral-400, .text-neutral-500,
+  .text-stone-300, .text-stone-400, .text-stone-500
+) {
+  color: #465368 !important;
+}
+
+html:not(.dark) :is(
+  .placeholder\:text-slate-400::placeholder,
+  .placeholder\:text-gray-400::placeholder,
+  .placeholder\:text-zinc-400::placeholder
+) {
+  color: #596579 !important;
+  opacity: 1 !important;
+}
+
+html:not(.dark) :is(input, select, textarea) {
+  background-color: #FFFFFF;
+  color: #172033;
+  border-color: #AAB8C9;
+}
+
+html:not(.dark) :is(input, select, textarea)::placeholder {
+  color: #596579;
+  opacity: 1;
+}
+
+html:not(.dark) :is(button, a, [role="button"], [role="menuitem"]) {
+  -webkit-tap-highlight-color: rgba(8, 107, 122, 0.12);
+}
+
+html:not(.dark) :is(button, a, [role="button"]):focus-visible {
+  outline-color: #086B7A;
+}
+
+html:not(.dark) :is(.border-slate-100, .border-slate-200, .border-gray-100, .border-gray-200, .border-border\/50, .border-border\/60, .border-border\/70) {
+  border-color: #C5D0DE !important;
+}
+
+html:not(.dark) :is(.bg-muted\/30, .bg-muted\/40, .bg-muted\/50, .bg-slate-50\/50, .bg-slate-50\/70) {
+  background-color: #F0F4F8 !important;
+}
+
+html:not(.dark) .shadow-black\/10,
+html:not(.dark) .shadow-black\/20 {
+  --tw-shadow-color: rgb(23 32 51 / 0.12);
+}
+
+html:not(.dark) ::selection {
+  color: #FFFFFF;
+  background: #086B7A;
+}
