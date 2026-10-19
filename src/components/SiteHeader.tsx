@@ -24,12 +24,12 @@ const desktopNav = [
 const practiceTools = [
   { to: "/jobs", label: "Job Market Simulator", icon: Briefcase, description: "Explore practice roles and hiring scenarios" },
   { to: "/profile", label: "Resume Match", icon: FileText, description: "Review resume fit and ATS-style scoring" },
-  { to: "/job-prep", label: "Interview Prep", icon: MessageSquare, description: "Practice interviews and review feedback" },
+  { to: "/dashboard", label: "Interview Prep", icon: MessageSquare, description: "Open an application from your dashboard to practice its interview" },
 ] as const;
 
 const profileMenu = [
-  { to: "/my-profile", label: "Career profile" },
-  { to: "/account", label: "Account settings" },
+  { to: "/account", label: "My Profile & account" },
+  { to: "/profile", label: "Resume" },
 ] as const;
 
 export function SiteHeader() {
@@ -68,9 +68,9 @@ export function SiteHeader() {
           </nav>
 
           <div className="relative flex shrink-0 items-center gap-1 sm:gap-2">
-            <Link to="/search-jobs" onClick={closeMenus} aria-label="Live listings" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted sm:px-3">
+            <Link to="/jobs" onClick={closeMenus} aria-label="Practice listings" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted sm:px-3">
               <Search className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Live listings</span>
+              <span className="hidden sm:inline">Practice listings</span>
             </Link>
 
             <div className="relative">
@@ -116,16 +116,16 @@ export function SiteHeader() {
                 }}
                 aria-expanded={profileOpen}
                 aria-haspopup="menu"
-                aria-label="Open account menu"
+                aria-label="Open My Profile menu"
                 className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-border px-2 text-sm font-semibold text-foreground transition-colors hover:border-primary/60 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-2 sm:px-3"
               >
                 <UserRound className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">My account</span>
+                <span className="hidden sm:inline">My Profile</span>
                 <ChevronDown className={`hidden h-4 w-4 transition-transform sm:block ${profileOpen ? "rotate-180" : ""}`} aria-hidden="true" />
               </button>
               {profileOpen && (
-                <div role="menu" aria-label="My account" className="absolute right-0 top-full z-50 mt-2 min-w-52 rounded-xl border border-border bg-card p-1.5 shadow-xl shadow-black/20">
-                  <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your workspace</p>
+                <div role="menu" aria-label="My Profile" className="absolute right-0 top-full z-50 mt-2 min-w-52 rounded-xl border border-border bg-card p-1.5 shadow-xl shadow-black/20">
+                  <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your profile</p>
                   {profileMenu.map((item) => (
                     <Link key={item.to} role="menuitem" to={item.to} onClick={closeMenus} className="block rounded-lg px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                       {item.label}
@@ -139,7 +139,7 @@ export function SiteHeader() {
 
         <nav aria-label="Explore career tools" className="flex items-center gap-2 overflow-x-auto border-t border-border/70 px-4 py-2 text-sm xl:hidden">
           <Link to="/insights" onClick={closeMenus} className="shrink-0 rounded-md px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "shrink-0 rounded-md bg-primary/10 px-3 py-1.5 font-semibold text-foreground" }}>Market insights</Link>
-          <Link to="/search-jobs" onClick={closeMenus} className="shrink-0 rounded-md px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "shrink-0 rounded-md bg-primary/10 px-3 py-1.5 font-semibold text-foreground" }}>Live job listings</Link>
+          <Link to="/search-jobs" onClick={closeMenus} className="shrink-0 rounded-md px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "shrink-0 rounded-md bg-primary/10 px-3 py-1.5 font-semibold text-foreground" }}>Practice listings</Link>
         </nav>
       </header>
     </>
