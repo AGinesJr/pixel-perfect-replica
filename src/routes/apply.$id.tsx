@@ -5,6 +5,7 @@ import { jobs } from "@/lib/data";
 import { useProgress, type PracticeMode } from "@/lib/progress";
 import { evaluateApplication } from "@/lib/ai.functions";
 import { jobPayload } from "@/lib/job-payload";
+import { getValidSession } from "@/lib/supabase";
 
 export const Route = createFileRoute("/apply/$id")({
   loader: ({ params }) => {
@@ -39,7 +40,9 @@ function Apply() {
     e.preventDefault();
     setErr(""); setBusy(true);
     try {
-      const evaluation = await evaluate({ data: { job: jobPayload(job), resume, coverLetter: cover, mode } });
+      const session = await getValidSession();
+      if (!session) throw new Error("Sign in again to submit a practice application.");
+      const evaluation = await evaluate({ data: { accessToken: session.access_token, job: jobPayload(job), resume, coverLetter: cover, mode } });
       const id = crypto.randomUUID();
       update((s) => ({ ...s, resume: s.resume || resume, applications: [{ id, jobId: job.id, submittedAt: new Date().toISOString(), mode, resume, coverLetter: cover, evaluation }, ...s.applications] }));
       nav({ to: "/applications/$id", params: { id } });
