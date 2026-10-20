@@ -1,12 +1,79 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { FileText, UploadCloud } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ExternalLink as ExternalLinkIcon, FileText, UploadCloud } from "lucide-react";
 import { RichTextEditor, plainTextFromRichTextHtml, sanitizeRichTextHtml } from "@/components/RichTextEditor";
 import { extractResumeContent } from "@/lib/resume-file-parser";
 import { useProgress } from "@/lib/progress";
 import { buildScoreImprovementPlan, scoreResume, type ResumeScoreResult } from "@/lib/resume-ats-scoring";
 import { jobs } from "@/lib/data";
 import { rankJobsForResume } from "@/lib/resume-job-matching";
+import { searchLiveJobs } from "@/lib/jobs.functions";
+
+type LiveJob = {
+  guid?: string;
+  title?: string;
+  companyName?: string;
+  companyLogo?: string | null;
+  excerpt?: string;
+  description?: string;
+  applicationLink?: string;
+  pubDate?: string | number;
+  employmentType?: string;
+  minSalary?: number | null;
+  maxSalary?: number | null;
+  salaryPeriod?: string;
+  currency?: string;
+  categories?: string[];
+  location?: string;
+  source?: "Himalayas" | "USAJOBS";
+  isRemote?: boolean;
+};
+type LiveJobMatch = { job: LiveJob; score: number; matchedKeywords: string[] };
+
+const MATCH_STOP_WORDS = new Set([
+  "and", "the", "for", "with", "from", "that", "this", "your", "you", "our", "their",
+  "have", "has", "had", "are", "was", "were", "will", "can", "may", "able", "ability",
+  "experience", "years", "year", "plus", "preferred", "required", "including", "such",
+  "into", "using", "use", "work", "working", "role", "job", "team", "teams", "strong",
+  "excellent", "good", "knowledge", "skills", "skill", "support", "provide", "ensure",
+  "maintain", "related", "relevant", "degree", "all", "other", "within", "across",
+  "daily", "who", "what", "when", "where", "will", "must", "not", "you", "they",
+]);
+
+function matchKeywords(value: string): string[] {
+  return [...new Set((value.toLowerCase().match(/[a-z][a-z0-9+#.-]{2,}/g) ?? [])
+    .map((word) => word.replace(/^[.+-]+|[.+-]+$/g, ""))
+    .filter((word) => word.length > 2 && !MATCH_STOP_WORDS.has(word)))];
+}
+
+function scoreLiveJobMatch(resume: string, job: LiveJob): LiveJobMatch {
+  const resumeKeywords = new Set(matchKeywords(resume));
+  const titleKeywords = matchKeywords(job.title ?? "");
+  const descriptionKeywords = matchKeywords(
+    [job.excerpt, job.description, ...(job.categories ?? [])].filter(Boolean).join(" ").replace(/<[^>]*>/g, " "),
+  ).filter((word) => !titleKeywords.includes(word)).slice(0, 10);
+  const keywords = [...titleKeywords, ...descriptionKeywords].slice(0, 15);
+  const matchedKeywords = keywords.filter((word) => resumeKeywords.has(word));
+  const titleMatched = titleKeywords.filter((word) => resumeKeywords.has(word)).length;
+  const titleWeight = titleKeywords.length * 2;
+  const bodyWeight = Math.max(0, keywords.length - titleKeywords.length);
+  const score = keywords.length
+    ? Math.round(((titleMatched * 2 + Math.max(0, matchedKeywords.length - titleMatched)) / Math.max(1, titleWeight + bodyWeight)) * 100)
+    : 0;
+  return { job, score, matchedKeywords };
+}
+
+function distinctPracticeMatches(resume: string) {
+  const ranked = rankJobsForResume(resume, jobs, jobs.length);
+  const seen = new Set<string>();
+  return ranked.filter((result) => {
+    const title = result.job.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    if (!title || seen.has(title)) return false;
+    seen.add(title);
+    return true;
+  }).slice(0, 3);
+}
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -22,6 +89,7 @@ export const Route = createFileRoute("/profile")({
 
 function Profile() {
   const { state, update, ready } = useProgress();
+  const getLiveJobs = useServerFn(searchLiveJobs);
   const [resume, setResume] = useState("");
   const [resumeHtml, setResumeHtml] = useState("");
   const [jobDescriptionHtml, setJobDescriptionHtml] = useState("");
@@ -32,6 +100,10 @@ function Profile() {
   const [completedImprovementTasks, setCompletedImprovementTasks] = useState<string[]>([]);
   const [analyzedResume, setAnalyzedResume] = useState("");
   const [matchError, setMatchError] = useState("");
+  const [liveMatchAsked, setLiveMatchAsked] = useState(false);
+  const [liveMatchLoading, setLiveMatchLoading] = useState(false);
+  const [liveMatchError, setLiveMatchError] = useState("");
+  const [liveMatches, setLiveMatches] = useState<LiveJobMatch[]>([]);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
@@ -124,9 +196,55 @@ function Profile() {
   }
 
   const matchResults = useMemo(
-    () => analyzedResume ? rankJobsForResume(analyzedResume, jobs, 10) : [],
+    () => analyzedResume ? distinctPracticeMatches(analyzedResume) : [],
     [analyzedResume],
   );
+
+  async function matchToLiveJobs() {
+    const resumeText = resume.trim();
+    if (resumeText.length < 40) {
+      setLiveMatchError("Add at least 40 characters of resume detail before matching.");
+      return;
+    }
+    setLiveMatchAsked(true);
+    setLiveMatchLoading(true);
+    setLiveMatchError("");
+    setLiveMatches([]);
+    try {
+      const practiceTitles = distinctPracticeMatches(resumeText).map((result) => result.job.title).slice(0, 3);
+      const queries = practiceTitles.length ? practiceTitles : [""];
+      const responses = await Promise.allSettled(queries.map((query) => getLiveJobs({ data: {
+        query: query.slice(0, 120),
+        city: state.city ?? "",
+        state: state.state ?? "",
+        zip: state.zipCode ?? "",
+        radius: 25,
+        seniority: "",
+        employmentType: "",
+        page: 1,
+      } })));
+      const successful = responses.filter((response): response is PromiseFulfilledResult<Awaited<ReturnType<typeof getLiveJobs>>> => response.status === "fulfilled");
+      if (!successful.length) throw new Error("Live job listings are temporarily unavailable. Please try again later.");
+      const unique = new Map<string, LiveJob>();
+      for (const response of successful) {
+        for (const job of response.value.jobs as LiveJob[]) {
+          const key = (job.applicationLink || job.guid || [job.companyName, job.title].join("-")).toLowerCase();
+          if (!unique.has(key)) unique.set(key, job);
+        }
+      }
+      const matches = [...unique.values()]
+        .map((job) => scoreLiveJobMatch(resumeText, job))
+        .filter((result) => result.score > 80)
+        .sort((a, b) => b.score - a.score || (a.job.title ?? "").localeCompare(b.job.title ?? ""))
+        .slice(0, 10);
+      setLiveMatches(matches);
+      if (!matches.length) setLiveMatchError("No live postings in the current job-board results scored above 80%. Try again later as listings refresh, or broaden your resume details and practice matches.");
+    } catch (error) {
+      setLiveMatchError(error instanceof Error ? error.message : "We couldn’t match your resume to live job listings. Please try again.");
+    } finally {
+      setLiveMatchLoading(false);
+    }
+  }
 
   const improvementPlan = useMemo(
     () => scoreResult ? buildScoreImprovementPlan(scoreResult, jobDescription, resume) : [],
@@ -365,6 +483,37 @@ function Profile() {
           </div>
           <p className="mt-4 text-xs text-muted-foreground">These scores are keyword-overlap estimates, not hiring probabilities. A low score can mean your resume does not clearly describe a skill—not necessarily that you lack it. Roles shown are fictional practice listings.</p>
         </div>}
+        <div className="mt-6 border-t pt-5">
+          <h3 className="font-semibold">Want to match your resume to real job posts?</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Yes will search the same live job board used by Search Jobs and show only postings with a resume keyword-match estimate above 80%. Matches depend on the current listings and available job-description details.</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button type="button" onClick={() => void matchToLiveJobs()} disabled={liveMatchLoading || resume.trim().length < 40} className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">{liveMatchLoading ? "Matching live jobs…" : "Yes, match real job posts"}</button>
+            <button type="button" onClick={() => { setLiveMatchAsked(false); setLiveMatches([]); setLiveMatchError(""); }} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-semibold hover:bg-muted">Not right now</button>
+          </div>
+          {liveMatchAsked && <div className="mt-5" aria-live="polite">
+            {liveMatchLoading && <p role="status" className="text-sm text-muted-foreground">Searching live job-board listings and checking resume keyword overlap…</p>}
+            {liveMatchError && <p role={liveMatches.length ? "status" : "alert"} className="mt-3 rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{liveMatchError}</p>}
+            {liveMatches.length > 0 && <div className="space-y-3">
+              <h4 className="text-lg font-bold">Live job posts with over 80% keyword match</h4>
+              {liveMatches.map(({ job, score, matchedKeywords }) => (
+                <article key={job.guid || job.applicationLink || job.title} className="rounded-lg border p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <h5 className="font-semibold">{job.title || "Untitled position"}</h5>
+                      <p className="mt-1 text-sm text-muted-foreground">{job.companyName || "Company not provided"}{job.location ? ` · ${job.location}` : ""}</p>
+                      <p className="mt-2 text-xs text-muted-foreground">{job.source || "Live job board"}{job.isRemote ? " · Remote" : ""}</p>
+                    </div>
+                    <div className="shrink-0 rounded-md bg-primary/10 px-3 py-2 text-center"><p className="text-xl font-bold">{score}%</p><p className="text-xs text-muted-foreground">keyword match</p></div>
+                  </div>
+                  {(job.excerpt || job.description) && <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{(job.excerpt || job.description || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()}</p>}
+                  {matchedKeywords.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Matching terms: {matchedKeywords.slice(0, 8).join(", ")}</p>}
+                  {job.applicationLink && <a href={job.applicationLink} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90">View live listing &amp; apply <ExternalLinkIcon /></a>}
+                </article>
+              ))}
+              <p className="text-xs text-muted-foreground">The 80% figure is an in-app keyword estimate, not an employer ATS score or a hiring prediction. Always review the full posting and confirm you meet its requirements before applying.</p>
+            </div>}
+          </div>}
+        </div>
       </section>
     </div>
   );
