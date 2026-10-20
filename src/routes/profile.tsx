@@ -57,7 +57,6 @@ function scoreLiveJobMatch(resume: string, job: LiveJob): LiveJobMatch {
   const matchedKeywords = keywords.filter((word) => resumeKeywords.has(word));
   const titleMatched = titleKeywords.filter((word) => resumeKeywords.has(word)).length;
   const titleWeight = titleKeywords.length * 2;
-  const bodyWeight = Math.max(0, keywords.length - titleKeywords.length);
   const score = keywords.length
     ? Math.round(((titleMatched * 2 + Math.max(0, matchedKeywords.length - titleMatched)) / Math.max(1, titleWeight + bodyWeight)) * 100)
     : 0;
@@ -223,11 +222,11 @@ function Profile() {
         employmentType: "",
         page: 1,
       } })));
-      const successful = responses.filter((response): response is PromiseFulfilledResult<Awaited<ReturnType<typeof getLiveJobs>>> => response.status === "fulfilled");
+      const successful = responses.flatMap((response) => response.status === "fulfilled" ? [response.value] : []);
       if (!successful.length) throw new Error("Live job listings are temporarily unavailable. Please try again later.");
       const unique = new Map<string, LiveJob>();
       for (const response of successful) {
-        for (const job of response.value.jobs as LiveJob[]) {
+        for (const job of response.jobs as LiveJob[]) {
           const key = (job.applicationLink || job.guid || [job.companyName, job.title].join("-")).toLowerCase();
           if (!unique.has(key)) unique.set(key, job);
         }
