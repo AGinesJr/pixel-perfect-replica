@@ -36,7 +36,7 @@ describe("resume ATS checklist scoring", () => {
       "Resolved customer questions, managed inventory, and trained new teammates.",
       "Education: High School Diploma",
       "Skills: customer service, scheduling, inventory management, Microsoft Excel",
-    ].join("\\n");
+    ].join("\n");
     const jobDescription = [
       "Customer Service Representative",
       "Required: customer relations, conflict resolution, scheduling, and accurate documentation.",
