@@ -25,7 +25,8 @@ function Profile() {
   const [saved, setSaved] = useState(false);
   const [notice, setNotice] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [scoreResult, setScoreResult] = useState<ResumeScoreResult | null>(null);\n  const [completedImprovementTasks, setCompletedImprovementTasks] = useState<string[]>([]);
+  const [scoreResult, setScoreResult] = useState<ResumeScoreResult | null>(null);
+  const [completedImprovementTasks, setCompletedImprovementTasks] = useState<string[]>([]);
   const [analyzedResume, setAnalyzedResume] = useState("");
   const [matchError, setMatchError] = useState("");
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -106,6 +107,11 @@ function Profile() {
   const matchResults = useMemo(
     () => analyzedResume ? rankJobsForResume(analyzedResume, jobs, 10) : [],
     [analyzedResume],
+  );
+
+  const improvementPlan = useMemo(
+    () => scoreResult ? buildScoreImprovementPlan(scoreResult, jobDescription) : [],
+    [scoreResult, jobDescription],
   );
 
   return (
@@ -224,8 +230,8 @@ function Profile() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">Your next steps</p>
-                <h3 className="mt-1 text-xl font-bold">How to Increase Your Score</h3>
-                <p className="mt-1 max-w-3xl text-sm text-muted-foreground">A prioritized checklist generated from your resume checklist, simulated ATS findings, and the target job description when provided. Check off tasks as you complete them. Recommendations never mean you should claim skills or credentials you do not have.</p>
+                <h3 className="mt-1 text-xl font-bold">How to Improve Your Resume</h3>
+                <p className="mt-1 max-w-3xl text-sm text-muted-foreground">A personalized plan of up to 10 must-have and recommended tasks based on your resume score, six simulated ATS profiles, and the target job description. Tasks may include specific resume edits and practical ways to build missing skills. Complete the highest-priority items first; only list skills, experience, and credentials you can honestly support.</p>
               </div>
               <span className="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold">{completedImprovementTasks.length} of {improvementPlan.length} complete</span>
             </div>
