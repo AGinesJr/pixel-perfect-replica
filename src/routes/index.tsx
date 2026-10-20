@@ -318,7 +318,7 @@ function Home() {
       </section>
 
       <section className="px-4 pb-16 sm:pb-20">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-hero px-6 py-10 text-ink-foreground sm:px-10 sm:py-14">
+        <div className="home-bottom-cta mx-auto max-w-6xl overflow-hidden rounded-2xl bg-hero px-6 py-10 text-ink-foreground sm:px-10 sm:py-14">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
             <div className="max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Your next opportunity starts with preparation.</h2>
