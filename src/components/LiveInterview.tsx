@@ -4,6 +4,7 @@ import {
   appendTranscript, buildInterviewPrompt, firstMessageFor, hasEnoughTranscript,
   requestVoiceToken, toTranscriptMsg, type InterviewMsg, type VoiceJob,
 } from "@/lib/live-interview";
+import { logLiveDiagnostic, safeDiagnosticDetails } from "@/lib/live-interview-diagnostics";
 
 type Props = {
   job: VoiceJob;
@@ -40,13 +41,20 @@ function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false
       setTranscript(next);
     },
     onError: (message) => {
+      logLiveDiagnostic("sdk-error", message);
       setError(message || "The voice connection had a problem.");
       setPhase("error");
     },
     onDisconnect: (details) => {
+      logLiveDiagnostic("sdk-disconnect", details);
       if (userEnded.current) return;
       if (details.reason === "error") {
         setError(details.message || "The voice connection was lost.");
+        setPhase("error");
+      } else if (transcriptRef.current.length === 0) {
+        // A connection that closes before the interviewer speaks is not a
+        // completed interview. Keep the retry action visible and explain this.
+        setError("The voice session disconnected before the interviewer could begin. Please retry. If it repeats, check the ElevenLabs agent's first message and conversation settings.");
         setPhase("error");
       } else {
         setPhase("finished");
@@ -82,7 +90,10 @@ function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false
       userEnded.current = false;
       transcriptRef.current = [];
       setTranscript([]);
-      conversation.startSession({
+      logLiveDiagnostic("session-start-requested", { connectionType: "webrtc" });
+      // startSession is asynchronous. Await it so SDK startup failures are
+      // caught here instead of becoming unhandled promise rejections.
+      await conversation.startSession({
         conversationToken: token,
         connectionType: "webrtc",
         userId,
@@ -90,6 +101,7 @@ function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false
           agent: { prompt: { prompt: buildInterviewPrompt(job) }, firstMessage: firstMessageFor(job), language: "en" },
         },
       });
+      logLiveDiagnostic("session-start-resolved", { status: conversation.status });
       setPhase("live");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't start the live interview.");
