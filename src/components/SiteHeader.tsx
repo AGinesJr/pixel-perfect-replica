@@ -23,7 +23,7 @@ const desktopNav = [
 
 const practiceTools = [
   { to: "/jobs", label: "Job Market Simulator", icon: Briefcase, description: "Explore practice roles and hiring scenarios" },
-  { to: "/profile", label: "Resume Match", icon: FileText, description: "Review resume fit and ATS-style scoring" },
+  { to: "/profile", label: "Resume Studio", icon: FileText, description: "Upload, format, analyze, and tailor your resume" },
   { to: "/job-prep", label: "Interview Prep", icon: MessageSquare, description: "Practice interviews and review feedback" },
 ] as const;
 
