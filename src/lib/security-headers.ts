@@ -3,7 +3,9 @@
  * TanStack Start server, including error pages.
  *
  * Keep this policy aligned with the app's integrations (Supabase auth, Google
- * Fonts/AdSense, and browser-based voice features). Avoid broad script sources.
+ * Fonts/AdSense, and browser-based voice features). Keep generated audio
+ * worklet sources scoped to script elements rather than relaxing script-src
+ * for every script execution context.
  */
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -12,6 +14,10 @@ const CONTENT_SECURITY_POLICY = [
   "frame-ancestors 'self'",
   "form-action 'self' https://*.supabase.co",
   "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://accounts.google.com https://apis.google.com",
+  // ElevenLabs' browser SDK loads its audio analysis worklet from generated
+  // blob:/data: module URLs. script-src-elem overrides script-src for these
+  // script/worklet module loads without broadening the general script-src.
+  "script-src-elem 'self' 'unsafe-inline' blob: data: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://accounts.google.com https://apis.google.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
