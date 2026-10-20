@@ -1,3 +1,5 @@
+import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
+
 type PdfTextItem = { str?: string };
 type PdfPage = { getTextContent(): Promise<{ items: PdfTextItem[] }> };
 type PdfDocument = {
@@ -16,74 +18,24 @@ type MammothModule = {
   extractRawText(input: { arrayBuffer: ArrayBuffer }): Promise<{ value: string }>;
 };
 
-declare global {
-  interface Window {
-    pdfjsLib?: PdfJsModule;
-  }
-}
-
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_PDF_PAGES = 40;
-const PDFJS_VERSION = "3.11.174";
-
-let pdfJsScriptPromise: Promise<PdfJsModule> | undefined;
+let pdfJsModulePromise: Promise<PdfJsModule> | undefined;
 
 function loadPdfJs(): Promise<PdfJsModule> {
-  if (typeof window === "undefined") {
-    return Promise.reject(new Error("PDF reading is only available in the browser."));
+  if (!pdfJsModulePromise) {
+    pdfJsModulePromise = import("pdfjs-dist/legacy/build/pdf.mjs")
+      .then((module) => {
+        module.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+        return module as unknown as PdfJsModule;
+      })
+      .catch((error: unknown) => {
+        pdfJsModulePromise = undefined;
+        const detail = error instanceof Error ? error.message : "";
+        throw new Error(`The bundled PDF reader could not be initialized. Please refresh the page and try again. ${detail}`);
+      });
   }
-  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
-  if (pdfJsScriptPromise) return pdfJsScriptPromise;
-
-  pdfJsScriptPromise = new Promise<PdfJsModule>((resolve, reject) => {
-    const sources = [
-      {
-        script: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.js`,
-        worker: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.js`,
-      },
-      {
-        script: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.js`,
-        worker: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.js`,
-      },
-    ];
-    let index = 0;
-
-    const tryNext = () => {
-      if (window.pdfjsLib) {
-        resolve(window.pdfjsLib);
-        return;
-      }
-      if (index >= sources.length) {
-        pdfJsScriptPromise = undefined;
-        reject(
-          new Error(
-            "The PDF reader couldn't be downloaded. Check your connection or browser content blockers, then try again.",
-          ),
-        );
-        return;
-      }
-
-      const source = sources[index++];
-      const script = document.createElement("script");
-      script.src = source.script;
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      script.onload = () => {
-        if (window.pdfjsLib) {
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc = source.worker;
-          resolve(window.pdfjsLib);
-        } else {
-          tryNext();
-        }
-      };
-      script.onerror = tryNext;
-      document.head.appendChild(script);
-    };
-
-    tryNext();
-  });
-
-  return pdfJsScriptPromise;
+  return pdfJsModulePromise;
 }
 
 async function importFromCdn<T>(urls: string[]): Promise<T> {
