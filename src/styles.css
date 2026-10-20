@@ -331,3 +331,43 @@ html:not(.dark) ::selection {
   color: #FFFFFF;
   background: #086B7A;
 }
+
+
+/* Homepage light-theme contrast: readable text, cards, and controls across sections. */
+html:not(.dark) .home-hero {
+  color: #172033;
+}
+
+html:not(.dark) .home-hero > div[aria-hidden="true"] {
+  background-image: linear-gradient(to right, rgb(247 249 252 / 0.98), rgb(247 249 252 / 0.94) 58%, rgb(247 249 252 / 0.86));
+}
+
+html:not(.dark) .home-hero .text-white {
+  color: #172033 !important;
+}
+
+html:not(.dark) .home-hero a[href="#how-it-works"] {
+  color: #172033;
+  border-color: #8493A6;
+  background-color: rgb(255 255 255 / 0.82);
+}
+
+html:not(.dark) .home-hero-toolkit {
+  background-color: #FFFFFF;
+  border-color: #C5D0DE;
+  color: #172033;
+}
+
+html:not(.dark) .home-hero-toolkit .text-white {
+  color: #172033 !important;
+}
+
+html:not(.dark) .home-hero-toolkit [class*="bg-white/"] {
+  background-color: #F0F4F8;
+  border-color: #C5D0DE;
+}
+
+html:not(.dark) .home-market-insights {
+  background-color: #FFFFFF;
+  color: #172033;
+}
