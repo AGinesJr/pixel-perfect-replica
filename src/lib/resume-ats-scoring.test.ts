@@ -41,7 +41,7 @@ describe("resume ATS checklist scoring", () => {
       "Customer Service Representative",
       "Required: customer relations, conflict resolution, scheduling, and accurate documentation.",
       "Preferred: CRM software and experience tracking service metrics.",
-    ].join("\\n");
+    ].join("\n");
     const result = scoreResume(resume, {}, jobDescription);
     const plan = buildScoreImprovementPlan(result, jobDescription, resume);
     expect(plan.length).toBeLessThanOrEqual(10);
