@@ -41,7 +41,18 @@ function sanitizeHtml(html: string): string {
       const cleaned = cleanNode(child);
       if (cleaned) clean.appendChild(cleaned);
     });
-    return clean;
+    const style = node.getAttribute("style") ?? "";
+    let result: Node = clean;
+    const wrappers: string[] = [];
+    if (style.includes("bold") || /font-weight:\s*[6-9]00/i.test(style)) wrappers.push("strong");
+    if (style.includes("italic")) wrappers.push("em");
+    if (style.includes("underline")) wrappers.push("u");
+    for (const tag of wrappers) {
+      const wrapper = document.createElement(tag);
+      wrapper.appendChild(result);
+      result = wrapper;
+    }
+    return result;
   };
   const output = document.createElement("div");
   [...parsed.body.childNodes].forEach((node) => {
