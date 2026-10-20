@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreResume } from "./resume-ats-scoring";
+import { buildScoreImprovementPlan, scoreResume } from "./resume-ats-scoring";
 
 describe("resume ATS checklist scoring", () => {
   it("returns a usable score and actionable categories for a short resume", () => {
@@ -25,6 +25,29 @@ describe("resume ATS checklist scoring", () => {
     expect(result.keywordMatch?.matched).toContain("excel");
     expect(result.categories.at(-1)?.name).toBe("Target-job keywords");
     expect(result.score).toBeGreaterThan(0);
+  });
+
+
+  it("creates a short, unique, task-based improvement checklist", () => {
+    const resume = [
+      "Taylor Candidate",
+      "Professional Summary: Customer service professional with communication and teamwork experience.",
+      "Work Experience: Retail Associate, 2022-Present",
+      "Resolved customer questions, managed inventory, and trained new teammates.",
+      "Education: High School Diploma",
+      "Skills: customer service, scheduling, inventory management, Microsoft Excel",
+    ].join("\\n");
+    const jobDescription = [
+      "Customer Service Representative",
+      "Required: customer relations, conflict resolution, scheduling, and accurate documentation.",
+      "Preferred: CRM software and experience tracking service metrics.",
+    ].join("\\n");
+    const result = scoreResume(resume, {}, jobDescription);
+    const plan = buildScoreImprovementPlan(result, jobDescription, resume);
+    expect(plan.length).toBeLessThanOrEqual(10);
+    expect(new Set(plan.map((task) => task.title.toLowerCase())).size).toBe(plan.length);
+    expect(plan.every((task) => task.action.length >= 80)).toBe(true);
+    expect(plan.every((task) => task.reason.length > 20)).toBe(true);
   });
 
   it("does not invent a target-job keyword score when no description is supplied", () => {
