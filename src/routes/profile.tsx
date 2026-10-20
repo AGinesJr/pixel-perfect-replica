@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { FileText, UploadCloud } from "lucide-react";
+import { RichTextEditor, plainTextFromRichTextHtml, sanitizeRichTextHtml } from "@/components/RichTextEditor";
 import { extractResumeText } from "@/lib/resume-file-parser";
 import { useProgress } from "@/lib/progress";
 import { buildScoreImprovementPlan, scoreResume, type ResumeScoreResult } from "@/lib/resume-ats-scoring";
@@ -22,6 +23,8 @@ export const Route = createFileRoute("/profile")({
 function Profile() {
   const { state, update, ready } = useProgress();
   const [resume, setResume] = useState("");
+  const [resumeHtml, setResumeHtml] = useState("");
+  const [jobDescriptionHtml, setJobDescriptionHtml] = useState("");
   const [saved, setSaved] = useState(false);
   const [notice, setNotice] = useState("");
   const [jobDescription, setJobDescription] = useState("");
@@ -35,7 +38,11 @@ function Profile() {
   const resumeFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (ready) setResume(state.resume);
+    if (!ready) return;
+    setResume(state.resume);
+    const storedHtml = localStorage.getItem("wp-resume-rich-html") ?? "";
+    const safeHtml = sanitizeRichTextHtml(storedHtml);
+    setResumeHtml(storedHtml && plainTextFromRichTextHtml(safeHtml) === state.resume ? safeHtml : "");
   }, [ready, state.resume]);
 
   useEffect(() => {
@@ -68,6 +75,8 @@ function Profile() {
       }
 
       setResume(normalized.slice(0, 15000));
+      setResumeHtml("");
+      localStorage.removeItem("wp-resume-rich-html");
       setSelectedFileName(file.name);
       setSaved(false);
       setScoreResult(null);
@@ -91,6 +100,7 @@ function Profile() {
   function saveResume(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     update((current) => ({ ...current, resume }));
+    if (resumeHtml) localStorage.setItem("wp-resume-rich-html", sanitizeRichTextHtml(resumeHtml));
     setSaved(true);
     setNotice("Your resume was saved in this browser. If signed in, cloud sync is also being attempted.");
   }
@@ -110,8 +120,8 @@ function Profile() {
   );
 
   const improvementPlan = useMemo(
-    () => scoreResult ? buildScoreImprovementPlan(scoreResult, jobDescription) : [],
-    [scoreResult, jobDescription],
+    () => scoreResult ? buildScoreImprovementPlan(scoreResult, jobDescription, resume) : [],
+    [scoreResult, jobDescription, resume],
   );
 
   return (
@@ -144,7 +154,7 @@ function Profile() {
 
       <form onSubmit={saveResume} className="mt-6 space-y-4 rounded-lg border bg-card p-6">
         <div>
-          <h2 className="font-semibold">1. Edit your resume</h2>
+          <h2 className="font-semibold">1. Upload Your Resume</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Add work history, education, skills, certifications, and achievements. Avoid including Social Security numbers, account numbers, or other sensitive information.
           </p>
@@ -175,17 +185,15 @@ function Profile() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground">Or paste or write your resume below</p>
-        <label className="block">
-          <span className="sr-only">Resume text</span>
-          <textarea
-            value={resume}
-            maxLength={15000}
-            onChange={(event) => { setResume(event.target.value); setSaved(false); setScoreResult(null); setAnalyzedResume(""); setMatchError(""); }}
-            rows={18}
-            className="w-full rounded-md border bg-background p-3 text-sm"
-            placeholder="Your extracted resume text will appear here. You can edit it before review…"
-          />
-        </label>
+        <RichTextEditor
+          value={resume}
+          htmlValue={resumeHtml}
+          onChange={(text) => { setResume(text.slice(0, 15000)); setSaved(false); setScoreResult(null); setAnalyzedResume(""); setMatchError(""); }}
+          onHtmlChange={(html) => { setResumeHtml(html); localStorage.setItem("wp-resume-rich-html", html); }}
+          label="Resume text"
+          placeholder="Your extracted resume text will appear here. Paste a formatted resume or edit it here…"
+          minHeightClass="min-h-[28rem]"
+        />
         <p className="text-right text-xs text-muted-foreground">{resume.length.toLocaleString()} / 15,000 characters</p>
         {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -197,7 +205,7 @@ function Profile() {
       <section className="mt-6 rounded-xl border bg-card p-5 md:p-6">
         <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">Resume checkup</p>
-          <h2 className="mt-1 text-2xl font-bold">2. Resume match analysis</h2>
+          <h2 className="mt-1 text-2xl font-bold">2. Resume Analysis</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Check resume details, qualifications, skills, and evidence of professional traits. For a more targeted estimate, add the job description you plan to apply to.
           </p>
@@ -205,7 +213,17 @@ function Profile() {
         <label className="mt-5 block">
           <span className="font-semibold">Target job description <span className="font-normal text-muted-foreground">(optional)</span></span>
           <span className="mt-1 block text-sm text-muted-foreground">Paste the job requirements to see which relevant terms appear in your resume. Use only skills and qualifications that genuinely apply to you.</span>
-          <textarea value={jobDescription} maxLength={12000} onChange={(event) => { setJobDescription(event.target.value); setScoreResult(null); }} rows={5} className="mt-2 w-full rounded-md border bg-background p-3 text-sm" placeholder="Paste the target job description here…" />
+          <div className="mt-2">
+            <RichTextEditor
+              value={jobDescription}
+              htmlValue={jobDescriptionHtml}
+              onChange={(text) => { setJobDescription(text.slice(0, 12000)); setScoreResult(null); }}
+              onHtmlChange={setJobDescriptionHtml}
+              label="Target job description"
+              placeholder="Paste the job listing here. Headings, bullets, and emphasis are preserved…"
+              minHeightClass="min-h-40"
+            />
+          </div>
         </label>
         <button type="button" onClick={() => { setScoreResult(scoreResume(resume, { name: state.name, email: state.contactEmail, phone: state.phone, city: state.city, state: state.state }, jobDescription)); setCompletedImprovementTasks([]); }} disabled={!ready || resume.trim().length < 40} className="mt-4 h-11 rounded-md bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-50">
           Analyze my resume
@@ -231,7 +249,7 @@ function Profile() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">Your next steps</p>
                 <h3 className="mt-1 text-xl font-bold">How to Improve Your Resume</h3>
-                <p className="mt-1 max-w-3xl text-sm text-muted-foreground">A personalized plan of up to 10 must-have and recommended tasks based on your resume score, six simulated ATS profiles, and the target job description. Tasks may include specific resume edits and practical ways to build missing skills. Complete the highest-priority items first; only list skills, experience, and credentials you can honestly support.</p>
+                <p className="mt-1 max-w-3xl text-sm text-muted-foreground">A prioritized, job-specific checklist built from your resume and the target listing. Each item is a distinct task with concrete steps or an example. The list includes only relevant actions (up to 10), mixes must-have gaps with recommended improvements, and never asks you to claim skills or credentials you do not have.</p>
               </div>
               <span className="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold">{completedImprovementTasks.length} of {improvementPlan.length} complete</span>
             </div>
