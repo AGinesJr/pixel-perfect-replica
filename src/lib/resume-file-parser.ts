@@ -16,13 +16,78 @@ type MammothModule = {
   extractRawText(input: { arrayBuffer: ArrayBuffer }): Promise<{ value: string }>;
 };
 
+declare global {
+  interface Window {
+    pdfjsLib?: PdfJsModule;
+  }
+}
+
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_PDF_PAGES = 40;
+const PDFJS_VERSION = "3.11.174";
+
+let pdfJsScriptPromise: Promise<PdfJsModule> | undefined;
+
+function loadPdfJs(): Promise<PdfJsModule> {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("PDF reading is only available in the browser."));
+  }
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (pdfJsScriptPromise) return pdfJsScriptPromise;
+
+  pdfJsScriptPromise = new Promise<PdfJsModule>((resolve, reject) => {
+    const sources = [
+      {
+        script: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.min.js`,
+        worker: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.min.js`,
+      },
+      {
+        script: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.min.js`,
+        worker: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.min.js`,
+      },
+    ];
+    let index = 0;
+
+    const tryNext = () => {
+      if (window.pdfjsLib) {
+        resolve(window.pdfjsLib);
+        return;
+      }
+      if (index >= sources.length) {
+        pdfJsScriptPromise = undefined;
+        reject(
+          new Error(
+            "The PDF reader couldn't be downloaded. Check your connection or browser content blockers, then try again.",
+          ),
+        );
+        return;
+      }
+
+      const source = sources[index++];
+      const script = document.createElement("script");
+      script.src = source.script;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.onload = () => {
+        if (window.pdfjsLib) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = source.worker;
+          resolve(window.pdfjsLib);
+        } else {
+          tryNext();
+        }
+      };
+      script.onerror = tryNext;
+      document.head.appendChild(script);
+    };
+
+    tryNext();
+  });
+
+  return pdfJsScriptPromise;
+}
 
 async function importFromCdn<T>(urls: string[]): Promise<T> {
-  // These parsers run in the browser so uploaded resume files are not sent to our server.
-  // Use jsDelivr as the primary ESM host; keep esm.sh as a fallback because some
-  // browser/network environments intermittently fail dynamic esm.sh imports.
+  // Parsers run in the browser so uploaded resume files are not sent to our server.
   let lastError: unknown;
   for (const url of urls) {
     try {
@@ -61,12 +126,7 @@ export async function extractResumeText(file: File): Promise<string> {
   }
 
   if (extension === "pdf") {
-    const pdfjs = await importFromCdn<PdfJsModule>([
-      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.mjs",
-      "https://esm.sh/pdfjs-dist@4.10.38/legacy/build/pdf.mjs?bundle",
-    ]);
-    pdfjs.GlobalWorkerOptions.workerSrc =
-      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.mjs";
+    const pdfjs = await loadPdfJs();
     const document = await pdfjs.getDocument({
       data: new Uint8Array(await file.arrayBuffer()),
       isEvalSupported: false,
