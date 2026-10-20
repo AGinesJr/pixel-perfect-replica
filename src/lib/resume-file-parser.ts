@@ -12,6 +12,53 @@ type PdfJsModule = {
     isEvalSupported: boolean;
   }): { promise: Promise<PdfDocument> };
 };
+
+declare global {
+  interface Window {
+    pdfjsLib?: PdfJsModule;
+  }
+}
+
+let pdfJsScriptPromise: Promise<PdfJsModule> | undefined;
+
+function loadPdfJs(): Promise<PdfJsModule> {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("PDF reading is only available in the browser."));
+  }
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (pdfJsScriptPromise) return pdfJsScriptPromise;
+
+  pdfJsScriptPromise = new Promise<PdfJsModule>((resolve, reject) => {
+    const sources = [
+      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js",
+    ];
+    let index = 0;
+    const tryNext = () => {
+      if (window.pdfjsLib) {
+        resolve(window.pdfjsLib);
+        return;
+      }
+      if (index >= sources.length) {
+        pdfJsScriptPromise = undefined;
+        reject(new Error("The PDF reader couldn't be downloaded. Check your connection or browser content blockers, then try again."));
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = sources[index++];
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.onload = () => {
+        if (window.pdfjsLib) resolve(window.pdfjsLib);
+        else tryNext();
+      };
+      script.onerror = tryNext;
+      document.head.appendChild(script);
+    };
+    tryNext();
+  });
+  return pdfJsScriptPromise;
+}
 type MammothModule = {
   extractRawText(input: { arrayBuffer: ArrayBuffer }): Promise<{ value: string }>;
 };
@@ -61,10 +108,7 @@ export async function extractResumeText(file: File): Promise<string> {
   }
 
   if (extension === "pdf") {
-    const pdfjs = await importFromCdn<PdfJsModule>([
-      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.mjs",
-      "https://esm.sh/pdfjs-dist@4.10.38/legacy/build/pdf.mjs?bundle",
-    ]);
+    const pdfjs = await loadPdfJs();
     pdfjs.GlobalWorkerOptions.workerSrc =
       "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.mjs";
     const document = await pdfjs.getDocument({
