@@ -99,7 +99,7 @@ function lineHtml(line: ResumeLine): string {
   }
   const looksLikeHeading = cleanText.length <= 64 &&
     (line.fontSize >= 13 || (line.bold && cleanText === cleanText.toLocaleUpperCase() && /[A-Z]/.test(cleanText)));
-  if (looksLikeHeading) return `<h2>${content}</h2>`;
+  if (looksLikeHeading) return line.fontSize >= 18 ? `<h1>${content}</h1>` : `<h2>${content}</h2>`;
   return `<p>${content}</p>`;
 }
 
