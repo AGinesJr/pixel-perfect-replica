@@ -19,9 +19,21 @@ type MammothModule = {
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_PDF_PAGES = 40;
 
-async function importFromCdn<T>(url: string): Promise<T> {
+async function importFromCdn<T>(urls: string[]): Promise<T> {
   // These parsers run in the browser so uploaded resume files are not sent to our server.
-  return (await import(/* @vite-ignore */ url)) as T;
+  // Use jsDelivr as the primary ESM host; keep esm.sh as a fallback because some
+  // browser/network environments intermittently fail dynamic esm.sh imports.
+  let lastError: unknown;
+  for (const url of urls) {
+    try {
+      return (await import(/* @vite-ignore */ url)) as T;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error
+    ? new Error(`The file parser could not be loaded. Please refresh the page and try again. (${lastError.message})`)
+    : new Error("The file parser could not be loaded. Please refresh the page and try again.");
 }
 
 export async function extractResumeText(file: File): Promise<string> {
@@ -38,9 +50,10 @@ export async function extractResumeText(file: File): Promise<string> {
   }
 
   if (extension === "docx") {
-    const mammoth = await importFromCdn<MammothModule>(
+    const mammoth = await importFromCdn<MammothModule>([
+      "https://cdn.jsdelivr.net/npm/mammoth@1.9.0/+esm",
       "https://esm.sh/mammoth@1.9.0?bundle",
-    );
+    ]);
     const result = await mammoth.extractRawText({
       arrayBuffer: await file.arrayBuffer(),
     });
@@ -48,9 +61,10 @@ export async function extractResumeText(file: File): Promise<string> {
   }
 
   if (extension === "pdf") {
-    const pdfjs = await importFromCdn<PdfJsModule>(
+    const pdfjs = await importFromCdn<PdfJsModule>([
+      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.mjs",
       "https://esm.sh/pdfjs-dist@4.10.38/legacy/build/pdf.mjs?bundle",
-    );
+    ]);
     pdfjs.GlobalWorkerOptions.workerSrc =
       "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.mjs";
     const document = await pdfjs.getDocument({
