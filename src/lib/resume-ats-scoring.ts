@@ -164,101 +164,212 @@ export type ScoreImprovementTask = {
 export function buildScoreImprovementPlan(
   result: ResumeScoreResult,
   jobDescription = "",
+  resume = "",
 ): ScoreImprovementTask[] {
   const candidates: ScoreImprovementTask[] = [];
+  const resumeText = normalize(resume);
+  const jobTerms = (result.keywordMatch?.missing ?? [])
+    .filter((term) => term.length > 3 && !includesTerm(resumeText, term))
+    .slice(0, 5);
+  const roleContext = jobDescription.trim()
+    ? "the target job listing"
+    : "the roles you are targeting";
+
   const add = (task: ScoreImprovementTask) => {
-    const normalized = (task.title + " " + task.action).toLowerCase();
-    if (!candidates.some((existing) =>
-      (existing.title + " " + existing.action).toLowerCase() === normalized
-    )) candidates.push(task);
+    const normalizedTitle = normalize(task.title);
+    const normalizedAction = normalize(task.action);
+    if (!normalizedTitle || candidates.some((existing) =>
+      normalize(existing.title) === normalizedTitle ||
+      normalize(existing.action) === normalizedAction
+    )) return;
+    candidates.push(task);
+  };
+
+  const detailFor = (recommendation: string) => {
+    const text = recommendation.toLowerCase();
+    if (/professional name|resume header/.test(text)) return {
+      title: "Add a clear resume header",
+      action: "At the top of the resume, put your name on its own line, followed by your preferred phone number, professional email, and city/state. Keep contact details in the document body rather than a header or footer.",
+      type: "resume" as const,
+    };
+    if (/email address/.test(text)) return {
+      title: "Add a recruiter-ready email address",
+      action: "Add a professional email beside your phone number near the top of the resume. Check spelling and make sure the address is one you monitor; do not add private account details.",
+      type: "resume" as const,
+    };
+    if (/phone number/.test(text)) return {
+      title: "Add a preferred contact number",
+      action: "If you want employers to call, add the number where you can reliably receive messages. Include it in the resume body near your email and confirm it is current.",
+      type: "resume" as const,
+    };
+    if (/city and state|location/.test(text)) return {
+      title: "Clarify your work location",
+      action: "Add your city and state near your contact details when relevant to the position. If the listing specifies on-site, hybrid, or travel expectations, make sure your application accurately reflects your availability.",
+      type: "resume" as const,
+    };
+    if (/professional summary|summary tailored/.test(text)) return {
+      title: "Write a role-focused professional summary",
+      action: `Write 2–3 lines that connect your strongest real experience to ${roleContext}. Use this structure: “[${jobTerms[0] ?? "Relevant skill"}] professional with experience in [real task or setting], known for [evidence-backed strength].” Replace every bracket with truthful details and remove any claim you cannot support.`,
+      type: "resume" as const,
+    };
+    if (/linkedin|portfolio|work-sample|website/.test(text)) return {
+      title: "Add a relevant professional profile or work sample",
+      action: "If you have a current LinkedIn profile, portfolio, or relevant work sample, add a clean link to the contact line. Open the link in a private browser window to confirm it works and contains only information you intend to share.",
+      type: "resume" as const,
+    };
+    if (/work experience|employment history|section/.test(text) && /experience|employment/.test(text)) return {
+      title: "Make your work history easy to scan",
+      action: "Add a standard “Work Experience” heading. For each role, use job title, employer, location (optional), and dates, followed by 2–4 concise bullets that describe what you did and the result.",
+      type: "resume" as const,
+    };
+    if (/education section|education and relevant degrees/.test(text)) return {
+      title: "Add a clear education section",
+      action: "Create an “Education” heading and list the school or training provider, credential (or program), and completion date or expected date. Include relevant coursework only when it directly supports the role; never imply a degree you have not earned.",
+      type: "resume" as const,
+    };
+    if (/certification|license|credential/.test(text)) return {
+      title: "Verify role-relevant credentials",
+      action: `Compare the listing's required credentials with certificates or licenses you actually hold. Add the exact credential name and status/date when accurate; if a required credential is missing, record how to obtain it instead of listing it as completed.`,
+      type: "skill" as const,
+    };
+    if (/accomplishments|numbers|truthful accomplishments/.test(text)) return {
+      title: "Turn two duties into measurable accomplishments",
+      action: "Choose two existing experience bullets and rewrite each as action + task + result. Example: “Organized daily inventory checks, helping the team reduce stock discrepancies by [verified amount].” Use a real number only if you can explain where it came from; otherwise describe the observable outcome without a number.",
+      type: "resume" as const,
+    };
+    if (/dates|durations|timeline/.test(text)) return {
+      title: "Clarify dates and work timeline",
+      action: "Use one date style consistently (for example, “May 2023 – Aug 2025”) for each role and education entry. Check for unexplained overlaps or typos; do not invent dates or hide experience inaccurately.",
+      type: "resume" as const,
+    };
+    if (/skills or core competencies/.test(text)) return {
+      title: "Build a focused skills section",
+      action: `Add a “Skills” heading with 6–10 relevant skills that you can demonstrate. Prioritize true matches to ${roleContext}; move each important skill into an experience bullet where you have a concrete example.`,
+      type: "resume" as const,
+    };
+    if (/specific skills or tools|software|equipment|systems|methods/.test(text)) return {
+      title: "Name the tools you have actually used",
+      action: `Review ${roleContext} for named software, equipment, systems, or methods. Add only tools you have used and, where possible, show them in a bullet describing the task you completed with them. For a missing must-have tool, make a practice plan rather than claiming proficiency.`,
+      type: "skill" as const,
+    };
+    if (/transferable skills|teamwork|collaboration/.test(text)) return {
+      title: "Prove a transferable skill with an example",
+      action: "Pick one real project or shift where you worked with others. Add a bullet describing your contribution, who you coordinated with, and the outcome; replace a bare claim such as “team player” with evidence.",
+      type: "resume" as const,
+    };
+    if (/communication|presenting information|customer support/.test(text)) return {
+      title: "Show communication in a concrete work example",
+      action: "Add one bullet showing how you communicated with customers, coworkers, or stakeholders. State the situation, what you explained or documented, and the result (for example, fewer errors, a resolved question, or a smoother handoff) only if accurate.",
+      type: "resume" as const,
+    };
+    if (/initiative|training someone|leading a task|leadership/.test(text)) return {
+      title: "Add evidence of initiative or training",
+      action: "Identify a time you volunteered for a task, trained a coworker, or helped coordinate work. Write one bullet beginning with a precise verb such as “Trained,” “Coordinated,” or “Improved,” then explain the scope and verified result.",
+      type: "resume" as const,
+    };
+    if (/problem|adapting|resolving|troubleshooting/.test(text)) return {
+      title: "Describe one problem you resolved",
+      action: "Choose a real work or school problem and write a short STAR bullet: situation/task, action you personally took, and result. Keep the details relevant to the target role and avoid sharing confidential employer or customer information.",
+      type: "resume" as const,
+    };
+    return {
+      title: recommendation.replace(/[.:]+$/, "").slice(0, 90),
+      action: `1) Review the relevant section of your resume. 2) Apply this check: ${recommendation} 3) Add a concrete example from your own experience, or leave the claim out if you cannot support it. Tailor the wording to ${roleContext} without copying requirements as if they were experience.`,
+      type: /skill|tool|software|certification|practice|learn|course/i.test(recommendation) ? "skill" as const : "resume" as const,
+    };
   };
 
   for (const item of result.categories) {
-    for (const [index, recommendation] of item.recommendations.entries()) {
+    for (const recommendation of item.recommendations) {
+      const detail = detailFor(recommendation);
       add({
-        id: `category-${item.name}-${index}`,
-        title: recommendation,
-        priority: item.score < 60 ? "Must-have" : "Recommended",
-        action: recommendation,
-        reason: `${item.name} scored ${item.score}%. Addressing this gap can make your qualifications clearer to reviewers and resume parsers.`,
-        type: /skill|tool|software|certification|practice|learn/i.test(recommendation) ? "skill" : "resume",
+        id: `category-${item.name}-${candidates.length}`,
+        title: detail.title,
+        priority: item.score < 55 ? "Must-have" : "Recommended",
+        action: detail.action,
+        reason: `${item.name} scored ${item.score}%. This task addresses a specific gap found in your resume check. ${jobDescription.trim() ? "Confirm the change supports a real requirement in the target listing." : "Prioritize changes relevant to the jobs you want."}`,
+        type: detail.type,
       });
     }
   }
 
-  for (const platform of result.platformScores) {
-    for (const [index, suggestion] of platform.suggestions.entries()) {
-      const summary = typeof suggestion === "string" ? suggestion : suggestion.summary;
-      const details = typeof suggestion === "string" ? [] : suggestion.details;
-      const impact = typeof suggestion === "string" ? "medium" : suggestion.impact;
-      add({
-        id: `platform-${platform.system}-${index}`,
-        title: summary,
-        priority: impact === "critical" || impact === "high" ? "Must-have" : "Recommended",
-        action: [summary, ...details].join(" "),
-        reason: `Flagged by the ${platform.system} simulation. This is an illustrative parser check, not a real employer-system result.`,
-        type: /skill|learn|training|certification|course|practice/i.test(summary) ? "skill" : "resume",
-      });
-    }
-  }
-
-  if (result.keywordMatch?.missing.length) {
-    const terms = result.keywordMatch.missing.slice(0, 6);
-    add({
-      id: "target-keywords",
-      title: "Align your resume with the target job",
+  if (jobDescription.trim() && result.keywordMatch?.missing.length) {
+    const terms = jobTerms.slice(0, 4);
+    if (terms.length) add({
+      id: "target-job-evidence",
+      title: "Map key job requirements to truthful resume evidence",
       priority: result.keywordMatch.score < 50 ? "Must-have" : "Recommended",
-      action: `Review these terms from the job description: ${terms.join(", ")}. For each one, add a truthful example or skill only if it reflects your experience; otherwise, make a learning plan to develop it.`,
-      reason: `The target-job keyword overlap estimate is ${result.keywordMatch.score}%. Missing terms may reflect wording gaps or skills to develop—not necessarily a lack of ability.`,
-      type: "skill",
+      action: `1) Review these terms from the listing: ${terms.join(", ")}. 2) For each term, find a real example in your work, education, volunteering, or training. 3) Add the strongest example to the relevant experience bullet using an action and outcome. If you have no evidence for a must-have, mark it as a skill to develop—do not add the keyword as an unsupported claim.`,
+      reason: `The text-overlap estimate is ${result.keywordMatch.score}%; missing words may be a wording gap or a genuine skill gap. Validate each term against the full listing before editing.`,
+      type: "resume",
     });
   }
 
   const weakFormatting = result.platformScores.some((platform) =>
     platform.breakdown.formatting.score < 70 || platform.breakdown.formatting.issues.length > 0
   );
-  if (weakFormatting) {
-    add({
-      id: "ats-format",
-      title: "Use a clean, ATS-friendly resume layout",
-      priority: "Must-have",
-      action: "Use standard section headings, a simple single-column layout, readable fonts, and consistent dates. Avoid tables, text boxes, graphics, and important details in headers or footers; then export a text-selectable PDF or DOCX.",
-      reason: "At least one platform simulation flagged formatting concerns. Recheck the exported file by selecting and copying its text.",
-      type: "resume",
-    });
-  }
+  if (weakFormatting) add({
+    id: "ats-format",
+    title: "Improve readability for resume parsers",
+    priority: "Must-have",
+    action: "Use standard headings, a simple single-column layout, readable type, and consistent dates. Keep important contact details in the document body; avoid tables, text boxes, and graphics for essential information. Export as a text-selectable PDF or DOCX, then copy its text into a plain-text editor to check reading order.",
+    reason: "One or more simulated parser profiles flagged layout concerns. This is a formatting check, not a prediction of any specific employer's system.",
+    type: "resume",
+  });
 
   const lowQuantification = result.platformScores.some((platform) =>
     platform.breakdown.experience.totalBullets > 0 &&
     platform.breakdown.experience.quantifiedBullets < platform.breakdown.experience.totalBullets
   );
-  if (lowQuantification) {
-    add({
-      id: "measurable-impact",
-      title: "Show results in your experience bullets",
-      priority: "Recommended",
-      action: "Rewrite two or three bullets using action + task + result. Add truthful numbers such as customers served, team size, time saved, accuracy, sales, or projects completed when you can verify them.",
-      reason: "The ATS simulations detected experience bullets that could show measurable impact more clearly.",
-      type: "resume",
-    });
+  if (lowQuantification) add({
+    id: "measurable-impact",
+    title: "Strengthen two experience bullets with outcomes",
+    priority: "Recommended",
+    action: "Select two bullets that currently describe duties only. Rewrite them with an action verb, the task or scope, and the result. Example: “Resolved customer questions at the service desk and documented recurring issues for the team.” Add verified volume, time, quality, or sales figures only when you can substantiate them.",
+    reason: "The simulated parser profiles found experience bullets where the impact could be clearer.",
+    type: "resume",
+  });
+
+  if (jobDescription.trim() && result.keywordMatch?.missing.length) add({
+    id: "target-skill-development",
+    title: "Make a plan for one genuine skill gap",
+    priority: "Recommended",
+    action: "Choose the highest-priority requirement you cannot yet demonstrate. Find a free reputable lesson, practice environment, or supervised opportunity; set one measurable milestone for this week and keep a note of what you complete. Add the skill to your resume only after you can honestly demonstrate it.",
+    reason: "This separates a real development need from a resume wording gap and gives you a practical next step.",
+    type: "skill",
+  });
+
+  // Avoid near-duplicate tasks by grouping common topics as well as exact titles.
+  const topicFor = (task: ScoreImprovementTask) => {
+    const value = normalize(task.title + " " + task.action);
+    if (/format|parser|single column|readability/.test(value)) return "formatting";
+    if (/keyword|job requirement|target listing|target job evidence/.test(value)) return "job-evidence";
+    if (/measurable|quantif|outcome|accomplishment/.test(value)) return "impact";
+    if (/skill gap|build a plan|training|free reputable lesson/.test(value)) return "skill-development";
+    if (/skill section|tools you have actually used/.test(value)) return "skills-inventory";
+    if (/communication|teamwork|transferable skill|initiative|problem you resolved/.test(value)) return "behavioral-evidence-" + task.title.toLowerCase();
+    return normalize(task.title);
+  };
+  const unique: ScoreImprovementTask[] = [];
+  const seenTitles = new Set<string>();
+  const seenTopics = new Set<string>();
+  for (const task of candidates) {
+    const titleKey = normalize(task.title);
+    const topicKey = topicFor(task);
+    if (seenTitles.has(titleKey) || seenTopics.has(topicKey)) continue;
+    seenTitles.add(titleKey);
+    seenTopics.add(topicKey);
+    unique.push(task);
   }
 
-  if (jobDescription.trim()) {
-    add({
-      id: "skill-gap-plan",
-      title: "Build evidence for any genuine skill gaps",
-      priority: "Recommended",
-      action: "Choose the most important missing requirement you do not yet meet. Practice it with a small project, a free learning resource, or supervised experience; record what you completed and add it to your resume only when accurate.",
-      reason: "A resume score can improve when relevant skills are both developed and clearly evidenced. Never claim a certification or skill you have not earned.",
-      type: "skill",
-    });
-  }
-
-  const unique = candidates.filter((task, index, all) =>
-    all.findIndex((candidate) => candidate.title.toLowerCase() === task.title.toLowerCase()) === index
-  );
-  return unique
-    .sort((a, b) => Number(b.priority === "Must-have") - Number(a.priority === "Must-have"))
-    .slice(0, 10)
-    .map((task, index) => ({ ...task, id: task.id || `task-${index}` }));
+  // Keep must-have gaps first while retaining recommended work when it is available.
+  const mustHave = unique.filter((task) => task.priority === "Must-have");
+  const recommended = unique.filter((task) => task.priority === "Recommended");
+  const ordered = mustHave.length && recommended.length
+    ? [...mustHave.slice(0, 7), ...recommended.slice(0, 3), ...mustHave.slice(7), ...recommended.slice(3)]
+    : [...mustHave, ...recommended];
+  return ordered.slice(0, 10).map((task, index) => ({
+    ...task,
+    id: task.id || `task-${index}`,
+  }));
 }
