@@ -561,7 +561,7 @@ function Profile() {
                 <h4 className="font-semibold">How to improve your resume toward an 80%+ match</h4>
                 <p className="mt-1 text-sm text-muted-foreground">Use these suggestions to strengthen alignment with the real postings above. Never add a skill or qualification you do not have.</p>
                 <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6">{liveMatchTips.map((tip, index) => <li key={`${index}-${tip}`}>{tip}</li>)}</ol>
-              </section>
+              </section>}
             </div>}
           </div>}
         </div>
