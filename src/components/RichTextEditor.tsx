@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ClipboardEvent } from "react";
 import { Bold, Italic, List, ListOrdered, Underline } from "lucide-react";
 
 type RichTextEditorProps = {
@@ -51,7 +51,7 @@ function sanitizeHtml(html: string): string {
   return output.innerHTML;
 }
 
-function textFromHtml(html: string): string {
+export function plainTextFromRichTextHtml(html: string): string {
   if (typeof window === "undefined") return html.replace(/<[^>]*>/g, " ");
   const parsed = new DOMParser().parseFromString(html, "text/html");
   return (parsed.body.innerText || parsed.body.textContent || "")
@@ -96,7 +96,7 @@ export function RichTextEditor({
 
   function publishHtml(rawHtml: string) {
     const clean = sanitizeHtml(rawHtml);
-    const text = textFromHtml(clean);
+    const text = plainTextFromRichTextHtml(clean);
     if (editorRef.current && editorRef.current.innerHTML !== clean) {
       editorRef.current.innerHTML = clean;
     }
@@ -111,7 +111,7 @@ export function RichTextEditor({
     if (editorRef.current) publishHtml(editorRef.current.innerHTML);
   }
 
-  function handlePaste(event: React.ClipboardEvent<HTMLDivElement>) {
+  function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
     event.preventDefault();
     const html = event.clipboardData.getData("text/html");
     const plain = event.clipboardData.getData("text/plain");
