@@ -81,7 +81,7 @@ function lineHtml(line: ResumeLine): string {
   const content = line.items.map((item) => {
     const gap = previous ? item.x - (previous.x + previous.width) : 0;
     const separator = previous && gap > Math.max(1.5, item.fontSize * 0.12) &&
-      !/\\s$/.test(previous.text) && !/^\\s/.test(item.text) ? " " : "";
+      !/\s$/.test(previous.text) && !/^\s/.test(item.text) ? " " : "";
     previous = item;
     const text = separator + escapeHtml(item.text);
     if (item.bold && item.italic) return `<strong><em>${text}</em></strong>`;
