@@ -167,8 +167,9 @@ export function buildScoreImprovementPlan(
   resume = "",
 ): ScoreImprovementTask[] {
   const candidates: ScoreImprovementTask[] = [];
+  const resumeText = normalize(resume);
   const jobTerms = (result.keywordMatch?.missing ?? [])
-    .filter((term) => term.length > 3)
+    .filter((term) => term.length > 3 && !includesTerm(resumeText, term))
     .slice(0, 5);
   const roleContext = jobDescription.trim()
     ? "the target job listing"
