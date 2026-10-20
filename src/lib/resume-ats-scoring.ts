@@ -167,7 +167,6 @@ export function buildScoreImprovementPlan(
   resume = "",
 ): ScoreImprovementTask[] {
   const candidates: ScoreImprovementTask[] = [];
-  const normalizedResume = normalize(resume);
   const jobTerms = (result.keywordMatch?.missing ?? [])
     .filter((term) => term.length > 3)
     .slice(0, 5);
@@ -185,7 +184,7 @@ export function buildScoreImprovementPlan(
     candidates.push(task);
   };
 
-  const detailFor = (recommendation: string, categoryName: string) => {
+  const detailFor = (recommendation: string) => {
     const text = recommendation.toLowerCase();
     if (/professional name|resume header/.test(text)) return {
       title: "Add a clear resume header",
@@ -281,7 +280,7 @@ export function buildScoreImprovementPlan(
 
   for (const item of result.categories) {
     for (const recommendation of item.recommendations) {
-      const detail = detailFor(recommendation, item.name);
+      const detail = detailFor(recommendation);
       add({
         id: `category-${item.name}-${candidates.length}`,
         title: detail.title,
