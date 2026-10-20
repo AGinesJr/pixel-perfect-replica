@@ -1,3 +1,6 @@
+import { scoreResumeAcrossPlatforms } from "@/lib/ats-screener";
+import type { ScoreResult as ATSPlatformScore } from "@/lib/ats-screener/scorer/types";
+
 export type ResumeScoreProfile = {
   name?: string;
   email?: string;
@@ -19,6 +22,7 @@ export type ResumeScoreResult = {
   label: string;
   categories: ResumeScoreCategory[];
   keywordMatch?: { score: number; matched: string[]; missing: string[] };
+  platformScores: ATSPlatformScore[];
   disclaimer: string;
 };
 
@@ -137,6 +141,7 @@ export function scoreResume(
     label,
     categories,
     keywordMatch,
+    platformScores: scoreResumeAcrossPlatforms(resume, jobDescription),
     disclaimer: "This is a transparent, browser-based checklist estimate—not a score from a real ATS, a hiring prediction, or a judgment of your personality. Professional traits are counted only when your text explicitly mentions related evidence. Different employers and applicant-tracking systems use different criteria.",
   };
 }
