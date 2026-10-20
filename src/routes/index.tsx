@@ -103,7 +103,7 @@ function Home() {
           width={1600}
           height={900}
           fetchPriority="high"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20 mix-blend-luminosity"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-[35%] dark:opacity-20 mix-blend-luminosity"
         />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-background/95 via-background/80 to-background/45" />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:py-28">
