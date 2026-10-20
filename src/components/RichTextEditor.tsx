@@ -22,6 +22,7 @@ function sanitizeHtml(html: string): string {
   const cleanNode = (node: Node): Node | null => {
     if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent ?? "");
     if (!(node instanceof HTMLElement)) return null;
+    if (["SCRIPT", "STYLE", "IFRAME", "OBJECT", "EMBED", "SVG", "MATH", "META", "LINK"].includes(node.tagName)) return null;
     if (!ALLOWED_TAGS.has(node.tagName)) {
       const fragment = document.createDocumentFragment();
       [...node.childNodes].forEach((child) => {
