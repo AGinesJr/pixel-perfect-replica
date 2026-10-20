@@ -96,7 +96,7 @@ function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <section className="relative isolate overflow-hidden bg-hero text-ink-foreground">
+      <section className="home-hero relative isolate overflow-hidden bg-hero text-ink-foreground">
         <img
           src={heroImg}
           alt=""
@@ -137,7 +137,7 @@ function Home() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/15 bg-card/90 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-6">
+          <div className="home-hero-toolkit rounded-2xl border border-white/15 bg-card/90 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Your career toolkit</p>
@@ -258,11 +258,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="border-y border-border bg-card">
+      <section className="home-market-insights border-y border-border bg-card">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 md:grid-cols-[0.8fr_1.2fr] md:items-center sm:py-16">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Insight with context</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white">Understand the labor market—not just the job listing.</h2>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight">Understand the labor market—not just the job listing.</h2>
           </div>
           <div>
             <p className="leading-7 text-muted-foreground">
