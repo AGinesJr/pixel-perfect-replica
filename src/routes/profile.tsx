@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { FileText, UploadCloud } from "lucide-react";
 import { extractResumeText } from "@/lib/resume-file-parser";
 import { useProgress } from "@/lib/progress";
-import { scoreResume, type ResumeScoreResult } from "@/lib/resume-ats-scoring";
+import { buildScoreImprovementPlan, scoreResume, type ResumeScoreResult } from "@/lib/resume-ats-scoring";
 import { jobs } from "@/lib/data";
 import { rankJobsForResume } from "@/lib/resume-job-matching";
 
@@ -25,7 +25,7 @@ function Profile() {
   const [saved, setSaved] = useState(false);
   const [notice, setNotice] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [scoreResult, setScoreResult] = useState<ResumeScoreResult | null>(null);
+  const [scoreResult, setScoreResult] = useState<ResumeScoreResult | null>(null);\n  const [completedImprovementTasks, setCompletedImprovementTasks] = useState<string[]>([]);
   const [analyzedResume, setAnalyzedResume] = useState("");
   const [matchError, setMatchError] = useState("");
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -201,7 +201,7 @@ function Profile() {
           <span className="mt-1 block text-sm text-muted-foreground">Paste the job requirements to see which relevant terms appear in your resume. Use only skills and qualifications that genuinely apply to you.</span>
           <textarea value={jobDescription} maxLength={12000} onChange={(event) => { setJobDescription(event.target.value); setScoreResult(null); }} rows={5} className="mt-2 w-full rounded-md border bg-background p-3 text-sm" placeholder="Paste the target job description here…" />
         </label>
-        <button type="button" onClick={() => setScoreResult(scoreResume(resume, { name: state.name, email: state.contactEmail, phone: state.phone, city: state.city, state: state.state }, jobDescription))} disabled={!ready || resume.trim().length < 40} className="mt-4 h-11 rounded-md bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-50">
+        <button type="button" onClick={() => { setScoreResult(scoreResume(resume, { name: state.name, email: state.contactEmail, phone: state.phone, city: state.city, state: state.state }, jobDescription)); setCompletedImprovementTasks([]); }} disabled={!ready || resume.trim().length < 40} className="mt-4 h-11 rounded-md bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-50">
           Analyze my resume
         </button>
         {resume.trim().length < 40 && <p className="mt-2 text-sm text-muted-foreground">Add at least 40 characters to your resume to calculate a score.</p>}
@@ -220,6 +220,42 @@ function Profile() {
               {item.recommendations.length > 0 ? <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">{item.recommendations.map((recommendation) => <li key={recommendation}>{recommendation}</li>)}</ul> : <p className="mt-3 text-sm">No checklist gaps detected in this category. Review for accuracy before applying.</p>}
             </article>)}
           </div>
+          <section className="rounded-xl border bg-muted/20 p-4 md:p-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Your next steps</p>
+                <h3 className="mt-1 text-xl font-bold">How to Increase Your Score</h3>
+                <p className="mt-1 max-w-3xl text-sm text-muted-foreground">A prioritized checklist generated from your resume checklist, simulated ATS findings, and the target job description when provided. Check off tasks as you complete them. Recommendations never mean you should claim skills or credentials you do not have.</p>
+              </div>
+              <span className="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold">{completedImprovementTasks.length} of {improvementPlan.length} complete</span>
+            </div>
+            {improvementPlan.length > 0 ? <ol className="mt-4 space-y-3">
+              {improvementPlan.map((task, index) => {
+                const completed = completedImprovementTasks.includes(task.id);
+                return <li key={task.id} className={`rounded-lg border bg-card p-4 ${completed ? "opacity-70" : ""}`}>
+                  <div className="flex items-start gap-3">
+                    <input
+                      id={`improvement-task-${index}`}
+                      type="checkbox"
+                      checked={completed}
+                      onChange={(event) => setCompletedImprovementTasks((current) => event.target.checked ? [...current, task.id] : current.filter((id) => id !== task.id))}
+                      className="mt-1 h-4 w-4 shrink-0 accent-primary"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <label htmlFor={`improvement-task-${index}`} className={`cursor-pointer font-semibold ${completed ? "line-through" : ""}`}>{index + 1}. {task.title}</label>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${task.priority === "Must-have" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}>{task.priority}</span>
+                        <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">{task.type === "skill" ? "Build skills" : "Improve resume"}</span>
+                      </div>
+                      <p className="mt-2 text-sm">{task.action}</p>
+                      <p className="mt-2 text-xs leading-5 text-muted-foreground">Why this matters: {task.reason}</p>
+                    </div>
+                  </div>
+                </li>;
+              })}
+            </ol> : <p className="mt-4 text-sm text-muted-foreground">No additional tasks were generated from this checkup. Review the score breakdown and make sure your resume is accurate and tailored to the role.</p>}
+            {completedImprovementTasks.length > 0 && <button type="button" onClick={() => setCompletedImprovementTasks([])} className="mt-3 rounded-md border px-3 py-2 text-sm font-semibold hover:bg-muted">Reset checklist</button>}
+          </section>
           <section className="space-y-3">
             <div>
               <h3 className="text-lg font-bold">Six simulated ATS platform profiles</h3>
