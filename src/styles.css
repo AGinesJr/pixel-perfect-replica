@@ -371,3 +371,19 @@ html:not(.dark) .home-market-insights {
   background-color: #FFFFFF;
   color: #172033;
 }
+
+/* Bottom homepage call-to-action: restore readable contrast in light mode. */
+html:not(.dark) .home-bottom-cta {
+  background-image: linear-gradient(135deg, #EAF4F8 0%, #DDF4F6 58%, #D1EEF2 100%);
+  color: #172033;
+  border: 1px solid #C5D0DE;
+}
+
+html:not(.dark) .home-bottom-cta h2,
+html:not(.dark) .home-bottom-cta p {
+  color: #172033;
+}
+
+html:not(.dark) .home-bottom-cta a {
+  color: #FFFFFF;
+}
