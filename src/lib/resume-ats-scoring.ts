@@ -145,3 +145,120 @@ export function scoreResume(
     disclaimer: "This is a transparent, browser-based checklist estimate—not a score from a real ATS, a hiring prediction, or a judgment of your personality. Professional traits are counted only when your text explicitly mentions related evidence. Different employers and applicant-tracking systems use different criteria.",
   };
 }
+
+
+export type ScoreImprovementTask = {
+  id: string;
+  title: string;
+  priority: "Must-have" | "Recommended";
+  action: string;
+  reason: string;
+  type: "resume" | "skill";
+};
+
+/**
+ * Converts the actual checklist and simulated ATS results into a short,
+ * prioritized action plan. Suggestions are guidance, not claims that the
+ * applicant has a skill they have not demonstrated.
+ */
+export function buildScoreImprovementPlan(
+  result: ResumeScoreResult,
+  jobDescription = "",
+): ScoreImprovementTask[] {
+  const candidates: ScoreImprovementTask[] = [];
+  const add = (task: ScoreImprovementTask) => {
+    const normalized = (task.title + " " + task.action).toLowerCase();
+    if (!candidates.some((existing) =>
+      (existing.title + " " + existing.action).toLowerCase() === normalized
+    )) candidates.push(task);
+  };
+
+  for (const item of result.categories) {
+    for (const [index, recommendation] of item.recommendations.entries()) {
+      add({
+        id: `category-${item.name}-${index}`,
+        title: recommendation,
+        priority: item.score < 60 ? "Must-have" : "Recommended",
+        action: recommendation,
+        reason: `${item.name} scored ${item.score}%. Addressing this gap can make your qualifications clearer to reviewers and resume parsers.`,
+        type: /skill|tool|software|certification|practice|learn/i.test(recommendation) ? "skill" : "resume",
+      });
+    }
+  }
+
+  for (const platform of result.platformScores) {
+    for (const [index, suggestion] of platform.suggestions.entries()) {
+      const summary = typeof suggestion === "string" ? suggestion : suggestion.summary;
+      const details = typeof suggestion === "string" ? [] : suggestion.details;
+      const impact = typeof suggestion === "string" ? "medium" : suggestion.impact;
+      add({
+        id: `platform-${platform.system}-${index}`,
+        title: summary,
+        priority: impact === "critical" || impact === "high" ? "Must-have" : "Recommended",
+        action: [summary, ...details].join(" "),
+        reason: `Flagged by the ${platform.system} simulation. This is an illustrative parser check, not a real employer-system result.`,
+        type: /skill|learn|training|certification|course|practice/i.test(summary) ? "skill" : "resume",
+      });
+    }
+  }
+
+  if (result.keywordMatch?.missing.length) {
+    const terms = result.keywordMatch.missing.slice(0, 6);
+    add({
+      id: "target-keywords",
+      title: "Align your resume with the target job",
+      priority: result.keywordMatch.score < 50 ? "Must-have" : "Recommended",
+      action: `Review these terms from the job description: ${terms.join(", ")}. For each one, add a truthful example or skill only if it reflects your experience; otherwise, make a learning plan to develop it.`,
+      reason: `The target-job keyword overlap estimate is ${result.keywordMatch.score}%. Missing terms may reflect wording gaps or skills to develop—not necessarily a lack of ability.`,
+      type: "skill",
+    });
+  }
+
+  const weakFormatting = result.platformScores.some((platform) =>
+    platform.breakdown.formatting.score < 70 || platform.breakdown.formatting.issues.length > 0
+  );
+  if (weakFormatting) {
+    add({
+      id: "ats-format",
+      title: "Use a clean, ATS-friendly resume layout",
+      priority: "Must-have",
+      action: "Use standard section headings, a simple single-column layout, readable fonts, and consistent dates. Avoid tables, text boxes, graphics, and important details in headers or footers; then export a text-selectable PDF or DOCX.",
+      reason: "At least one platform simulation flagged formatting concerns. Recheck the exported file by selecting and copying its text.",
+      type: "resume",
+    });
+  }
+
+  const lowQuantification = result.platformScores.some((platform) =>
+    platform.breakdown.experience.totalBullets > 0 &&
+    platform.breakdown.experience.quantifiedBullets < platform.breakdown.experience.totalBullets
+  );
+  if (lowQuantification) {
+    add({
+      id: "measurable-impact",
+      title: "Show results in your experience bullets",
+      priority: "Recommended",
+      action: "Rewrite two or three bullets using action + task + result. Add truthful numbers such as customers served, team size, time saved, accuracy, sales, or projects completed when you can verify them.",
+      reason: "The ATS simulations detected experience bullets that could show measurable impact more clearly.",
+      type: "resume",
+    });
+  }
+
+  if (jobDescription.trim()) {
+    add({
+      id: "skill-gap-plan",
+      title: "Build evidence for any genuine skill gaps",
+      priority: "Recommended",
+      action: "Choose the most important missing requirement you do not yet meet. Practice it with a small project, a free learning resource, or supervised experience; record what you completed and add it to your resume only when accurate.",
+      reason: "A resume score can improve when relevant skills are both developed and clearly evidenced. Never claim a certification or skill you have not earned.",
+      type: "skill",
+    });
+  }
+
+  const unique = candidates.filter((task, index, all) =>
+    all.findIndex((candidate) => candidate.title.toLowerCase() === task.title.toLowerCase()) === index
+  );
+  return unique
+    .sort((a, b) => Number(b.priority === "Must-have") - Number(a.priority === "Must-have"))
+    .slice(0, 10)
+    .map((task, index) => ({ ...task, id: task.id || `task-${index}` }));
+}
