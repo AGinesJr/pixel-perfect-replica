@@ -29,7 +29,7 @@ type LiveJob = {
   source?: "Himalayas" | "USAJOBS";
   isRemote?: boolean;
 };
-type LiveJobMatch = { job: LiveJob; score: number; matchedKeywords: string[] };
+type LiveJobMatch = { job: LiveJob; score: number; matchedKeywords: string[]; missingKeywords: string[] };
 
 const MATCH_STOP_WORDS = new Set([
   "and", "the", "for", "with", "from", "that", "this", "your", "you", "our", "their",
@@ -55,12 +55,38 @@ function scoreLiveJobMatch(resume: string, job: LiveJob): LiveJobMatch {
   ).filter((word) => !titleKeywords.includes(word)).slice(0, 10);
   const keywords = [...titleKeywords, ...descriptionKeywords].slice(0, 15);
   const matchedKeywords = keywords.filter((word) => resumeKeywords.has(word));
+  const missingKeywords = keywords.filter((word) => !resumeKeywords.has(word));
   const titleMatched = titleKeywords.filter((word) => resumeKeywords.has(word)).length;
   const titleWeight = titleKeywords.length * 2;
   const score = keywords.length
     ? Math.round(((titleMatched * 2 + Math.max(0, matchedKeywords.length - titleMatched)) / Math.max(1, titleWeight + Math.max(0, keywords.length - titleKeywords.length))) * 100)
     : 0;
-  return { job, score, matchedKeywords };
+  return { job, score, matchedKeywords, missingKeywords };
+}
+
+function buildResumeMatchTips(resume: string, matches: LiveJobMatch[]): string[] {
+  const tips: string[] = [];
+  const resumeKeywords = new Set(matchKeywords(resume));
+  const missingCounts = new Map<string, number>();
+  for (const match of matches) {
+    for (const keyword of match.missingKeywords) {
+      missingCounts.set(keyword, (missingCounts.get(keyword) ?? 0) + 1);
+    }
+  }
+  const highValueGaps = [...missingCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([word]) => word)
+    .filter((word) => !resumeKeywords.has(word))
+    .slice(0, 6);
+
+  if (highValueGaps.length) {
+    tips.push(`If accurate for your background, add specific examples using job-related terms such as ${highValueGaps.slice(0, 5).join(", ")}. Include them in your experience or skills section only where they genuinely apply.`);
+  }
+  tips.push("Tailor your summary to the closest roles: name the type of work you do best and the strongest relevant experience you bring.");
+  tips.push("Turn general duties into evidence of impact. Add truthful numbers where possible, such as customers served, tasks completed, time saved, sales achieved, or team size.");
+  tips.push("Move the most relevant skills and accomplishments near the top so employers can spot the match quickly; use wording from each posting when it accurately describes your experience.");
+  tips.push("Review each listing for required tools, licenses, certifications, or training. Add only credentials you already hold, or note relevant training you are actively completing.");
+  return tips.slice(0, 5);
 }
 
 function distinctPracticeMatches(resume: string) {
@@ -103,6 +129,7 @@ function Profile() {
   const [liveMatchLoading, setLiveMatchLoading] = useState(false);
   const [liveMatchError, setLiveMatchError] = useState("");
   const [liveMatches, setLiveMatches] = useState<LiveJobMatch[]>([]);
+  const [liveMatchTips, setLiveMatchTips] = useState<string[]>([]);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
@@ -209,6 +236,7 @@ function Profile() {
     setLiveMatchLoading(true);
     setLiveMatchError("");
     setLiveMatches([]);
+    setLiveMatchTips([]);
     try {
       const practiceTitles = distinctPracticeMatches(resumeText).map((result) => result.job.title).slice(0, 3);
       const queries = practiceTitles.length ? practiceTitles : [""];
@@ -231,13 +259,31 @@ function Profile() {
           if (!unique.has(key)) unique.set(key, job);
         }
       }
-      const matches = [...unique.values()]
+      if (!unique.size) {
+        const fallback = await getLiveJobs({ data: {
+          query: "",
+          city: state.city ?? "",
+          state: state.state ?? "",
+          zip: state.zipCode ?? "",
+          radius: 25,
+          seniority: "",
+          employmentType: "",
+          page: 1,
+        } });
+        for (const job of fallback.jobs as LiveJob[]) {
+          const key = (job.applicationLink || job.guid || [job.companyName, job.title].join("-")).toLowerCase();
+          if (!unique.has(key)) unique.set(key, job);
+        }
+      }
+      const ranked = [...unique.values()]
         .map((job) => scoreLiveJobMatch(resumeText, job))
-        .filter((result) => result.score > 80)
         .sort((a, b) => b.score - a.score || (a.job.title ?? "").localeCompare(b.job.title ?? ""))
-        .slice(0, 10);
-      setLiveMatches(matches);
-      if (!matches.length) setLiveMatchError("No live postings in the current job-board results scored above 80%. Try again later as listings refresh, or broaden your resume details and practice matches.");
+        .slice(0, 3);
+      setLiveMatches(ranked);
+      setLiveMatchTips(buildResumeMatchTips(resumeText, ranked));
+      if (!ranked.some((result) => result.score > 80)) {
+        setLiveMatchError("No live postings in the current job-board results scored above 80%. Try again later as listings refresh, or broaden your resume details and practice matches.");
+      }
     } catch (error) {
       setLiveMatchError(error instanceof Error ? error.message : "We couldn’t match your resume to live job listings. Please try again.");
     } finally {
@@ -487,13 +533,14 @@ function Profile() {
           <p className="mt-1 text-sm text-muted-foreground">Yes will search the same live job board used by Search Jobs and show only postings with a resume keyword-match estimate above 80%. Matches depend on the current listings and available job-description details.</p>
           <div className="mt-3 flex flex-wrap gap-3">
             <button type="button" onClick={() => void matchToLiveJobs()} disabled={liveMatchLoading || resume.trim().length < 40} className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">{liveMatchLoading ? "Matching live jobs…" : "Yes, match real job posts"}</button>
-            <button type="button" onClick={() => { setLiveMatchAsked(false); setLiveMatches([]); setLiveMatchError(""); }} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-semibold hover:bg-muted">Not right now</button>
+            <button type="button" onClick={() => { setLiveMatchAsked(false); setLiveMatches([]); setLiveMatchTips([]); setLiveMatchError(""); }} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-semibold hover:bg-muted">Not right now</button>
           </div>
           {liveMatchAsked && <div className="mt-5" aria-live="polite">
             {liveMatchLoading && <p role="status" className="text-sm text-muted-foreground">Searching live job-board listings and checking resume keyword overlap…</p>}
             {liveMatchError && <p role={liveMatches.length ? "status" : "alert"} className="mt-3 rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{liveMatchError}</p>}
             {liveMatches.length > 0 && <div className="space-y-3">
-              <h4 className="text-lg font-bold">Live job posts with over 80% keyword match</h4>
+              <h4 className="text-lg font-bold">Your 3 closest live job matches</h4>
+              <p className="text-sm text-muted-foreground">These are the closest matches found in the current live listings, ranked from strongest to weakest. A result can appear here even if it does not reach 80%.</p>
               {liveMatches.map(({ job, score, matchedKeywords }) => (
                 <article key={job.guid || job.applicationLink || job.title} className="rounded-lg border p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -509,7 +556,12 @@ function Profile() {
                   {job.applicationLink && <a href={job.applicationLink} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90">View live listing &amp; apply <ExternalLinkIcon /></a>}
                 </article>
               ))}
-              <p className="text-xs text-muted-foreground">The 80% figure is an in-app keyword estimate, not an employer ATS score or a hiring prediction. Always review the full posting and confirm you meet its requirements before applying.</p>
+              <p className="text-xs text-muted-foreground">The match percentage is an in-app keyword estimate, not an employer ATS score or a hiring prediction. Always review the full posting and confirm you meet its requirements before applying.</p>
+              {liveMatchTips.length > 0 && <section className="rounded-lg border bg-muted/30 p-4">
+                <h4 className="font-semibold">How to improve your resume toward an 80%+ match</h4>
+                <p className="mt-1 text-sm text-muted-foreground">Use these suggestions to strengthen alignment with the real postings above. Never add a skill or qualification you do not have.</p>
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6">{liveMatchTips.map((tip, index) => <li key={`${index}-${tip}`}>{tip}</li>)}</ol>
+              </section>
             </div>}
           </div>}
         </div>
