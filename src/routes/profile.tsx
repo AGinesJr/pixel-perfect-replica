@@ -220,6 +220,43 @@ function Profile() {
               {item.recommendations.length > 0 ? <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">{item.recommendations.map((recommendation) => <li key={recommendation}>{recommendation}</li>)}</ul> : <p className="mt-3 text-sm">No checklist gaps detected in this category. Review for accuracy before applying.</p>}
             </article>)}
           </div>
+          <section className="space-y-3">
+            <div>
+              <h3 className="text-lg font-bold">Six simulated ATS platform profiles</h3>
+              <p className="mt-1 text-sm text-muted-foreground">The same resume can be interpreted differently across systems. These are research-based simulations—not the vendors’ private algorithms, actual employer scores, or hiring predictions.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {scoreResult.platformScores.map((platform) => {
+                const dimensions = [
+                  { label: "Formatting", score: platform.breakdown.formatting.score },
+                  { label: "Keywords", score: platform.breakdown.keywordMatch.score },
+                  { label: "Sections", score: platform.breakdown.sections.score },
+                  { label: "Experience", score: platform.breakdown.experience.score },
+                  { label: "Education", score: platform.breakdown.education.score },
+                ];
+                return <article key={platform.system} className="min-w-0 rounded-lg border bg-card p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0"><h4 className="font-semibold">{platform.system}</h4><p className="mt-1 text-xs text-muted-foreground">{platform.vendor}</p></div>
+                    <span className="metric-value shrink-0 text-2xl font-bold">{platform.overallScore}<span className="text-sm">/100</span></span>
+                  </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: platform.overallScore + "%" }} /></div>
+                  <p className="mt-2 text-xs text-muted-foreground">{platform.passesFilter ? "At or above this model’s illustrative threshold" : "Below this model’s illustrative threshold"}</p>
+                  <div className="mt-4 space-y-2">
+                    {dimensions.map((dimension) => <div key={dimension.label}>
+                      <div className="flex justify-between gap-2 text-xs"><span>{dimension.label}</span><span className="metric-value font-semibold">{dimension.score}%</span></div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary/80" style={{ width: dimension.score + "%" }} /></div>
+                    </div>)}
+                  </div>
+                  {platform.suggestions.length > 0 && <div className="mt-4 border-t pt-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recommended improvements</p>
+                    <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs leading-5">
+                      {platform.suggestions.slice(0, 3).map((suggestion, index) => <li key={index}>{typeof suggestion === "string" ? suggestion : suggestion.summary}</li>)}
+                    </ul>
+                  </div>}
+                </article>;
+              })}
+            </div>
+          </section>
           {scoreResult.keywordMatch && <article className="rounded-lg border p-4">
             <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-semibold">Target-job keyword overlap</h3><p className="mt-1 text-sm text-muted-foreground">A simple word-overlap estimate, not a semantic or employer ATS analysis.</p></div><span className="metric-value text-xl font-bold">{scoreResult.keywordMatch.score}%</span></div>
             {scoreResult.keywordMatch.matched.length > 0 && <div className="mt-4"><h4 className="text-sm font-semibold">Terms found</h4><div className="mt-2 flex flex-wrap gap-2">{scoreResult.keywordMatch.matched.map((term) => <span key={term} className="rounded-full border px-2.5 py-1 text-xs">{term}</span>)}</div></div>}
