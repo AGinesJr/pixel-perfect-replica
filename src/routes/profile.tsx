@@ -58,7 +58,7 @@ function scoreLiveJobMatch(resume: string, job: LiveJob): LiveJobMatch {
   const titleMatched = titleKeywords.filter((word) => resumeKeywords.has(word)).length;
   const titleWeight = titleKeywords.length * 2;
   const score = keywords.length
-    ? Math.round(((titleMatched * 2 + Math.max(0, matchedKeywords.length - titleMatched)) / Math.max(1, titleWeight + bodyWeight)) * 100)
+    ? Math.round(((titleMatched * 2 + Math.max(0, matchedKeywords.length - titleMatched)) / Math.max(1, titleWeight + Math.max(0, keywords.length - titleKeywords.length))) * 100)
     : 0;
   return { job, score, matchedKeywords };
 }
