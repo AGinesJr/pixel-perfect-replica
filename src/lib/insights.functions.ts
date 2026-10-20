@@ -3,7 +3,8 @@ import { z } from "zod";
 import { blsLausAreas } from "../data/bls-laus-areas";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
-const CACHE_MS = 6 * 60 * 60 * 1000;
+// BLS LAUS data is updated monthly; a 24-hour cache sharply reduces public API calls.
+const CACHE_MS = 24 * 60 * 60 * 1000;
 const CATALOG_CACHE_MS = 24 * 60 * 60 * 1000;
 
 const nationalSeries = {
@@ -196,7 +197,7 @@ async function fetchBLS(seriesIds: string[], startYear: number, endYear: number)
     signal: AbortSignal.timeout(15000),
   });
   if (!response.ok) throw new Error(response.status === 429
-    ? "The BLS data service is rate-limiting requests. Please try again later."
+    ? "The BLS data service is rate-limiting requests. Cached statistics will be reused when available. If this keeps happening, the site administrator should configure a BLS_API_KEY server-side secret to increase the API allowance."
     : "The BLS data service is temporarily unavailable. Please try again.");
   const data = (await response.json()) as BLSResponse;
   if (data.status !== "REQUEST_SUCCEEDED") {
@@ -249,7 +250,22 @@ export const getMarketInsights = createServerFn({ method: "GET" })
           return candidates ? [candidates.S, candidates.U] : [];
         })
       : [];
-    const seriesMap = await fetchBLS([...nationalIds, ...localIds], startYear, currentYear);
+    let seriesMap: Map<string, BLSPoint[]>;
+    try {
+      seriesMap = await fetchBLS([...nationalIds, ...localIds], startYear, currentYear);
+    } catch (cause) {
+      // A stale result is better than a hard failure when BLS temporarily rate-limits
+      // the service. Never substitute data from a different location.
+      if (
+        cached &&
+        cause instanceof Error &&
+        /rate-limit|temporarily unavailable|public API limit/i.test(cause.message)
+      ) {
+        resultCache.set(cacheKey, { expiresAt: Date.now() + CACHE_MS, data: cached.data });
+        return cached.data;
+      }
+      throw cause;
+    }
     if (selectedArea) {
       for (const measure of localMeasures) {
         const candidates = selectedArea.seriesCandidatesByMeasure[measure];
