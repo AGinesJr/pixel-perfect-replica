@@ -66,7 +66,25 @@ function sanitizeHtml(html: string): string {
 export function plainTextFromRichTextHtml(html: string): string {
   if (typeof window === "undefined") return html.replace(/<[^>]*>/g, " ");
   const parsed = new DOMParser().parseFromString(html, "text/html");
-  return (parsed.body.innerText || parsed.body.textContent || "")
+  const blockTags = new Set(["P", "DIV", "H1", "H2", "H3", "UL", "OL", "LI", "BLOCKQUOTE"]);
+  let text = "";
+  const visit = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent ?? "";
+      return;
+    }
+    if (!(node instanceof HTMLElement)) return;
+    if (node.tagName === "BR") {
+      text += "\n";
+      return;
+    }
+    const isBlock = blockTags.has(node.tagName);
+    if (isBlock && text && !text.endsWith("\n")) text += "\n";
+    [...node.childNodes].forEach(visit);
+    if (isBlock && !text.endsWith("\n")) text += "\n";
+  };
+  [...parsed.body.childNodes].forEach(visit);
+  return text
     .replace(/\u00a0/g, " ")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
