@@ -38,12 +38,12 @@ function loadPdfJs(): Promise<PdfJsModule> {
   pdfJsScriptPromise = new Promise<PdfJsModule>((resolve, reject) => {
     const sources = [
       {
-        script: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.min.js`,
-        worker: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.min.js`,
+        script: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.js`,
+        worker: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.js`,
       },
       {
-        script: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.min.js`,
-        worker: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.min.js`,
+        script: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.js`,
+        worker: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/legacy/build/pdf.worker.js`,
       },
     ];
     let index = 0;
