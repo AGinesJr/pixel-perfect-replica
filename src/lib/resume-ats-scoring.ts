@@ -362,9 +362,13 @@ export function buildScoreImprovementPlan(
     unique.push(task);
   }
 
-  // Sort by urgency, then preserve the generation order within each priority.
-  unique.sort((a, b) => Number(b.priority === "Must-have") - Number(a.priority === "Must-have"));
-  return unique.slice(0, 10).map((task, index) => ({
+  // Keep must-have gaps first while retaining recommended work when it is available.
+  const mustHave = unique.filter((task) => task.priority === "Must-have");
+  const recommended = unique.filter((task) => task.priority === "Recommended");
+  const ordered = mustHave.length && recommended.length
+    ? [...mustHave.slice(0, 7), ...recommended.slice(0, 3), ...mustHave.slice(7), ...recommended.slice(3)]
+    : [...mustHave, ...recommended];
+  return ordered.slice(0, 10).map((task, index) => ({
     ...task,
     id: task.id || `task-${index}`,
   }));
