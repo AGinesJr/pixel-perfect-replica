@@ -16,6 +16,11 @@ describe("security response headers", () => {
     expect(await response.text()).toBe("ok");
   });
 
+  it("allows the narrowly scoped ElevenLabs LiveKit voice signaling endpoints", () => {
+    expect(CONTENT_SECURITY_POLICY).toContain("https://livekit.rtc.elevenlabs.io");
+    expect(CONTENT_SECURITY_POLICY).toContain("wss://livekit.rtc.elevenlabs.io");
+  });
+
   it("does not allow plugin objects or arbitrary remote scripts", () => {
     expect(CONTENT_SECURITY_POLICY).toContain("object-src 'none'");
     expect(CONTENT_SECURITY_POLICY).toContain("script-src 'self' 'unsafe-inline'");
