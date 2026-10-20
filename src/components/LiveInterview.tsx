@@ -4,7 +4,7 @@ import {
   appendTranscript, buildInterviewPrompt, firstMessageFor, hasEnoughTranscript,
   requestVoiceToken, toTranscriptMsg, type InterviewMsg, type VoiceJob,
 } from "@/lib/live-interview";
-import { logLiveDiagnostic, safeDiagnosticDetails } from "@/lib/live-interview-diagnostics";
+import { logLiveDiagnostic } from "@/lib/live-interview-diagnostics";
 
 type Props = {
   job: VoiceJob;
