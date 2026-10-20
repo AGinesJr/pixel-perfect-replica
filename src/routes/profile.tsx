@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { FileText, UploadCloud } from "lucide-react";
 import { RichTextEditor, plainTextFromRichTextHtml, sanitizeRichTextHtml } from "@/components/RichTextEditor";
-import { extractResumeText } from "@/lib/resume-file-parser";
+import { extractResumeContent } from "@/lib/resume-file-parser";
 import { useProgress } from "@/lib/progress";
 import { buildScoreImprovementPlan, scoreResume, type ResumeScoreResult } from "@/lib/resume-ats-scoring";
 import { jobs } from "@/lib/data";
@@ -60,32 +60,41 @@ function Profile() {
 
     setUploadBusy(true);
     try {
-      const extracted = await extractResumeText(file);
-      const normalized = extracted
+      const extracted = await extractResumeContent(file);
+      const extractedText = extracted.text
         .split(String.fromCharCode(0)).join("")
         .replace(/\r/g, "\n")
         .replace(/[ \t]+\n/g, "\n")
         .replace(/\n{3,}/g, "\n\n")
         .trim();
 
-      if (normalized.length < 40) {
+      if (extractedText.length < 40) {
         throw new Error(
           "We couldn't find enough selectable text in this file. If it's a scanned PDF, run OCR on it first or paste the resume text below.",
         );
       }
 
-      setResume(normalized.slice(0, 15000));
-      setResumeHtml("");
-      localStorage.removeItem("wp-resume-rich-html");
+      const safeHtml = sanitizeRichTextHtml(extracted.html);
+      const formattedText = plainTextFromRichTextHtml(safeHtml)
+        .split(String.fromCharCode(0)).join("")
+        .replace(/\r/g, "\n")
+        .replace(/[ \t]+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+      const normalized = (formattedText.length >= 40 ? formattedText : extractedText).slice(0, 15000);
+
+      setResume(normalized);
+      setResumeHtml(safeHtml);
+      localStorage.setItem("wp-resume-rich-html", safeHtml);
       setSelectedFileName(file.name);
       setSaved(false);
       setScoreResult(null);
       setAnalyzedResume("");
       setMatchError("");
       setNotice(
-        normalized.length > 15000
-          ? "Resume imported. Only the first 15,000 characters were added; review and trim the text below."
-          : "Resume imported from your file. Review the extracted text below before scoring or saving.",
+        extractedText.length > 15000
+          ? "Resume imported with detected headings, bold text, and list structure. Only the first 15,000 characters were added; review and trim it below."
+          : "Resume imported with detected headings, bold text, and list structure. Review the formatting and text below before scoring or saving.",
       );
     } catch (error) {
       setUploadError(
