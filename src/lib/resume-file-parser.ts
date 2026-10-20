@@ -31,7 +31,7 @@ function loadPdfJs(): Promise<PdfJsModule> {
   pdfJsScriptPromise = new Promise<PdfJsModule>((resolve, reject) => {
     const sources = [
       "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js",
+      "https://unpkg.com/pdfjs-dist@4.10.38/legacy/build/pdf.js",
     ];
     let index = 0;
     const tryNext = () => {
@@ -110,7 +110,7 @@ export async function extractResumeText(file: File): Promise<string> {
   if (extension === "pdf") {
     const pdfjs = await loadPdfJs();
     pdfjs.GlobalWorkerOptions.workerSrc =
-      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.mjs";
+      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.js";
     const document = await pdfjs.getDocument({
       data: new Uint8Array(await file.arrayBuffer()),
       isEvalSupported: false,
