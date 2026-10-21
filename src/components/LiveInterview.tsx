@@ -98,7 +98,7 @@ function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false
         connectionType: "webrtc",
         userId,
         overrides: {
-          agent: { prompt: { prompt: buildInterviewPrompt(job) }, firstMessage: firstMessageFor(job), language: "en" },
+          agent: { prompt: { prompt: buildInterviewPrompt(job) }, firstMessage: firstMessageFor(job) },
         },
       });
       logLiveDiagnostic("session-start-resolved", { status: conversation.status });
