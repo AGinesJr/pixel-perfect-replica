@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import {
-  appendTranscript, buildInterviewPrompt, firstMessageFor, hasEnoughTranscript,
+  appendTranscript, buildInterviewPrompt, hasEnoughTranscript,
   requestVoiceToken, toTranscriptMsg, type InterviewMsg, type VoiceJob,
 } from "@/lib/live-interview";
 import { logLiveDiagnostic } from "@/lib/live-interview-diagnostics";
@@ -98,7 +98,9 @@ function LiveInner({ job, scoring, onFinish, onSwitchToManual, voiceOnly = false
         connectionType: "webrtc",
         userId,
         overrides: {
-          agent: { prompt: { prompt: buildInterviewPrompt(job) }, firstMessage: firstMessageFor(job), language: "en" },
+          // Free ElevenLabs plans may not permit first-message overrides.
+          // Use the agent dashboard greeting; keep only enabled prompt/language overrides.
+          agent: { prompt: { prompt: buildInterviewPrompt(job) }, language: "en" },
         },
       });
       logLiveDiagnostic("session-start-resolved", { status: conversation.status });
