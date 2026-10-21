@@ -1,4 +1,3 @@
-
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -50,7 +49,6 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Voice interviews are not configured." }, 500);
     }
 
-    // Validate the caller's Supabase access token.
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authorization } },
       auth: {
@@ -65,12 +63,14 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Your session is invalid. Please sign in again." }, 401);
     }
 
-    // Request a short-lived WebRTC token. Never send the API key to the browser.
     const tokenUrl = new URL(
       "https://api.elevenlabs.io/v1/convai/conversation/token",
     );
     tokenUrl.searchParams.set("agent_id", agentId);
     tokenUrl.searchParams.set("participant_name", data.user.id);
+    // Enables server-side debug events for this agent session. This requires the
+    // Edge Function's ElevenLabs account to have editor access to the agent.
+    tokenUrl.searchParams.set("debug_events_request", "true");
 
     const elevenLabsResponse = await fetch(tokenUrl, {
       method: "GET",
@@ -78,8 +78,6 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!elevenLabsResponse.ok) {
-      // Do not return upstream details to the browser; log a bounded diagnostic
-      // in Supabase Function Logs so agent/key/permission failures can be found.
       const upstreamDetails = await elevenLabsResponse.text().catch(() => "");
       console.error(
         "ElevenLabs token request failed:",

@@ -18,7 +18,7 @@ export function safeDiagnosticDetails(value: unknown): Record<string, string> {
   if (!value || typeof value !== "object") return { valueType: typeof value };
   const item = value as Record<string, unknown>;
   const details: Record<string, string> = {};
-  for (const key of ["name", "message", "code", "status", "type", "reason", "state", "stage", "connectionType", "event", "event_type", "level", "severity", "timestamp"] as const) {
+  for (const key of ["name", "message", "code", "status", "type", "reason", "state", "stage", "connectionType", "event", "event_type", "level", "severity", "timestamp", "conversationId", "conversation_id", "context", "error", "source"] as const) {
     const text = safeText(item[key]);
     if (text) details[key] = text;
   }
@@ -38,7 +38,6 @@ export function safeDiagnosticDetails(value: unknown): Record<string, string> {
 }
 
 export function logLiveDiagnostic(event: string, value?: unknown): void {
-  // These logs contain only allowlisted, redacted metadata and help diagnose deployed sessions.
   console.info("[Workforce Prep live voice]", event, safeDiagnosticDetails(value));
 }
 
