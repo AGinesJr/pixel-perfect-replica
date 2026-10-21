@@ -28,7 +28,7 @@ type TokenDeps = {
 };
 
 /** Requests a short-lived ElevenLabs WebRTC token from the deployed Supabase function. */
-export async function requestVoiceToken(deps: TokenDeps = {}): Promise<{ token: string; userId: string }> {
+export async function requestVoiceToken(deps: TokenDeps = {}): Promise<{ token: string; userId: string; conversationId?: string }> {
   const fetchImpl = deps.fetchImpl ?? fetch;
   const url = (deps.supabaseUrl ?? (import.meta.env["VITE_SUPABASE_URL"] as string | undefined))?.replace(/\/$/, "");
   const key = deps.supabaseKey ??
@@ -67,10 +67,13 @@ export async function requestVoiceToken(deps: TokenDeps = {}): Promise<{ token: 
     throw new LiveInterviewError(errMsg || `The voice service couldn't start a session (${res.status}).`, "server");
   }
   const token = body && typeof body === "object" && "token" in body ? (body as { token: unknown }).token : null;
+  const conversationId = body && typeof body === "object" && "conversationId" in body &&
+    typeof (body as { conversationId: unknown }).conversationId === "string"
+    ? (body as { conversationId: string }).conversationId : undefined;
   if (typeof token !== "string" || !token) {
     throw new LiveInterviewError("The voice service returned an unexpected response.", "malformed");
   }
-  return { token, userId: session.user.id };
+  return { token, userId: session.user.id, conversationId };
 }
 
 /** Job-only context for the voice recruiter. No resume or personal data is included. */
