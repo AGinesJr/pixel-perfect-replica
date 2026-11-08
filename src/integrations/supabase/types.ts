@@ -38,6 +38,81 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_jobs: {
+        Row: {
+          country_code: string
+          created_at: string
+          difficulty: number
+          employer: string
+          employment_type: string
+          experience_level: string
+          id: string
+          industry: string
+          is_active: boolean
+          location: string
+          posted_label: string
+          preferred_qualifications: string[]
+          required_qualifications: string[]
+          responsibilities: string[]
+          salary_max: number
+          salary_min: number
+          search_text: string
+          source_type: string
+          summary: string
+          title: string
+          updated_at: string
+          workplace_type: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          difficulty: number
+          employer: string
+          employment_type: string
+          experience_level: string
+          id: string
+          industry: string
+          is_active?: boolean
+          location: string
+          posted_label?: string
+          preferred_qualifications?: string[]
+          required_qualifications?: string[]
+          responsibilities?: string[]
+          salary_max: number
+          salary_min: number
+          search_text?: string
+          source_type?: string
+          summary: string
+          title: string
+          updated_at?: string
+          workplace_type: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          difficulty?: number
+          employer?: string
+          employment_type?: string
+          experience_level?: string
+          id?: string
+          industry?: string
+          is_active?: boolean
+          location?: string
+          posted_label?: string
+          preferred_qualifications?: string[]
+          required_qualifications?: string[]
+          responsibilities?: string[]
+          salary_max?: number
+          salary_min?: number
+          search_text?: string
+          source_type?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+          workplace_type?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_data_url: string

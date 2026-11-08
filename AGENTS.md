@@ -11,3 +11,5 @@
 
 - Candidate progress lives in browser localStorage (src/lib/progress.ts) until accounts are added; why: v1 demo without login.
 - AI recruiter/interview calls run only in server functions in src/lib/ai.functions.ts; why: keeps the AI key server-side.
+- Interview mode switches invalidate pending manual turns; why: stale questions must not overwrite the live transcript.
+- PWA registration is production-only and its worker has no fetch/cache handlers; why: authentication, resumes and interviews must never be cached.

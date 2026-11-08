@@ -1,11 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LiveInterviewError, requestVoiceToken } from "./live-interview";
+import { LiveInterviewError, requestVoiceToken, toTranscriptMsg } from "./live-interview";
 
 const session = {
   access_token: "test-access-token",
   refresh_token: "test-refresh-token",
   user: { id: "user-123" },
 };
+
+it("maps final ElevenLabs user and agent messages to the feedback roles", () => {
+  expect(toTranscriptMsg({ role: "user", message: "I built SQL reports." })).toEqual({ role: "candidate", text: "I built SQL reports." });
+  expect(toTranscriptMsg({ role: "agent", message: "Tell me about a project." })).toEqual({ role: "interviewer", text: "Tell me about a project." });
+});
 
 describe("requestVoiceToken", () => {
   beforeEach(() => {

@@ -17,6 +17,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "../components/SiteHeader";
 import { WebsiteAdSlot } from "../components/WebsiteAdSlot";
 import { getStoredSession, getValidSession, type AuthSession } from "../lib/supabase";
+import { registerPwa } from "../lib/pwa";
 
 function NotFoundComponent() {
   return (
@@ -84,6 +85,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#F8FAFC" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Workforce Prep" },
       { title: "Workforce Prep | Career Practice & Interview Simulator" },
       {
         name: "description",
@@ -115,6 +118,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/workforce-192.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -176,6 +181,7 @@ function ThemeToggle() {
 }
 
 function RootComponent() {
+  useEffect(() => { void registerPwa(); }, []);
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (router) => router.location.pathname });
   const locationHref = useRouterState({ select: (router) => router.location.href });

@@ -49,11 +49,11 @@ function formatUSAJobs(job: USAJobsDescriptor): Job | null {
   return {
     guid: "usajobs-" + (job.PositionID || applicationLink), title,
     companyName: job.OrganizationName || job.DepartmentName || "U.S. Federal Government",
-    excerpt: summary?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 900),
-    applicationLink, pubDate: job.PublicationStartDate,
+    ...(summary ? { excerpt: summary.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 900) } : {}),
+    applicationLink, ...(job.PublicationStartDate ? { pubDate: job.PublicationStartDate } : {}),
     minSalary: minSalary != null && Number.isFinite(minSalary) ? minSalary : null,
     maxSalary: maxSalary != null && Number.isFinite(maxSalary) ? maxSalary : null,
-    salaryPeriod: remuneration?.RateIntervalCode?.toLowerCase() === "pa" ? "annual" : remuneration?.RateIntervalCode,
+    ...(remuneration?.RateIntervalCode ? { salaryPeriod: remuneration.RateIntervalCode.toLowerCase() === "pa" ? "annual" : remuneration.RateIntervalCode } : {}),
     currency: "USD", categories: ["Federal government"], location: locations.join(" · ") || "Location listed on USAJOBS",
     source: "USAJOBS", isRemote: false,
   };
@@ -78,8 +78,8 @@ async function fetchHimalayas(data: z.infer<typeof searchInput>): Promise<{ jobs
 }
 
 async function fetchUSAJobs(data: z.infer<typeof searchInput>, locationName: string, stateOnly: boolean): Promise<{ jobs: Job[]; totalCount: number }> {
-  const apiKey = process.env.USAJOBS_API_KEY;
-  const userAgent = process.env.USAJOBS_USER_AGENT;
+  const apiKey = process.env["USAJOBS_API_KEY"];
+  const userAgent = process.env["USAJOBS_USER_AGENT"];
   if (!apiKey || !userAgent) return { jobs: [], totalCount: 0 };
   const url = new URL("https://data.usajobs.gov/api/search");
   url.searchParams.set("WhoMayApply", "Public");
@@ -112,7 +112,7 @@ export const searchLiveJobs = createServerFn({ method: "GET" })
     if (cached && cached.expiresAt > Date.now()) return cached;
     const locationName = data.zip || [data.city, data.state].filter(Boolean).join(", ");
     const stateOnly = !data.zip && !data.city && Boolean(data.state);
-    const usaJobsConfigured = Boolean(process.env.USAJOBS_API_KEY && process.env.USAJOBS_USER_AGENT);
+    const usaJobsConfigured = Boolean(process.env["USAJOBS_API_KEY"] && process.env["USAJOBS_USER_AGENT"]);
     const [remoteResult, federalResult] = await Promise.allSettled([
       fetchHimalayas(data),
       usaJobsConfigured ? fetchUSAJobs(data, locationName, stateOnly) : Promise.resolve({ jobs: [], totalCount: 0 }),

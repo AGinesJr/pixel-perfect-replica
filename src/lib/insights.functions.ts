@@ -3,8 +3,7 @@ import { z } from "zod";
 import { blsLausAreas } from "../data/bls-laus-areas";
 
 const BLS_SERIES_URL = "https://api.bls.gov/publicAPI";
-// BLS LAUS data is updated monthly; a 24-hour cache sharply reduces public API calls.
-const CACHE_MS = 24 * 60 * 60 * 1000;
+const CACHE_MS = 6 * 60 * 60 * 1000;
 const CATALOG_CACHE_MS = 24 * 60 * 60 * 1000;
 
 const nationalSeries = {
@@ -162,13 +161,14 @@ function toSeriesMap(payload: BLSResponse): Map<string, BLSPoint[]> {
 
 function latestMetric(points: BLSPoint[] | undefined): Metric {
   if (!points?.length) return null;
-  const point = points[points.length - 1]!;
+  const point = points[points.length - 1];
+  if (!point) return null;
   return {
     value: Number(point.value),
     year: point.year,
     period: point.period,
     periodName: point.periodName,
-    footnotes: (point.footnotes ?? []).map((note) => note.text).filter(Boolean),
+    footnotes: (point.footnotes ?? []).map((note) => note.text).filter((text): text is string => typeof text === "string" && Boolean(text)),
   };
 }
 
@@ -181,14 +181,14 @@ function trend(points: BLSPoint[] | undefined, divisor = 1): TrendPoint[] {
 }
 
 async function fetchBLS(seriesIds: string[], startYear: number, endYear: number): Promise<Map<string, BLSPoint[]>> {
-  const apiKey = process.env.BLS_API_KEY;
+  const apiKey = process.env["BLS_API_KEY"];
   const version = apiKey ? "v2" : "v1";
   const payload: Record<string, unknown> = {
     seriesid: [...new Set(seriesIds)],
     startyear: String(startYear),
     endyear: String(endYear),
   };
-  if (apiKey) payload.registrationkey = apiKey;
+  if (apiKey) payload["registrationkey"] = apiKey;
 
   const response = await fetch(BLS_SERIES_URL + "/" + version + "/timeseries/data/", {
     method: "POST",
@@ -197,7 +197,7 @@ async function fetchBLS(seriesIds: string[], startYear: number, endYear: number)
     signal: AbortSignal.timeout(15000),
   });
   if (!response.ok) throw new Error(response.status === 429
-    ? "The BLS data service is rate-limiting requests. Cached statistics will be reused when available. If this keeps happening, the site administrator should configure a BLS_API_KEY server-side secret to increase the API allowance."
+    ? "The BLS data service is rate-limiting requests. Please try again later."
     : "The BLS data service is temporarily unavailable. Please try again.");
   const data = (await response.json()) as BLSResponse;
   if (data.status !== "REQUEST_SUCCEEDED") {
@@ -250,22 +250,7 @@ export const getMarketInsights = createServerFn({ method: "GET" })
           return candidates ? [candidates.S, candidates.U] : [];
         })
       : [];
-    let seriesMap: Map<string, BLSPoint[]>;
-    try {
-      seriesMap = await fetchBLS([...nationalIds, ...localIds], startYear, currentYear);
-    } catch (cause) {
-      // A stale result is better than a hard failure when BLS temporarily rate-limits
-      // the service. Never substitute data from a different location.
-      if (
-        cached &&
-        cause instanceof Error &&
-        /rate-limit|temporarily unavailable|public API limit/i.test(cause.message)
-      ) {
-        resultCache.set(cacheKey, { expiresAt: Date.now() + CACHE_MS, data: cached.data });
-        return cached.data;
-      }
-      throw cause;
-    }
+    const seriesMap = await fetchBLS([...nationalIds, ...localIds], startYear, currentYear);
     if (selectedArea) {
       for (const measure of localMeasures) {
         const candidates = selectedArea.seriesCandidatesByMeasure[measure];
@@ -321,7 +306,7 @@ export const getMarketInsights = createServerFn({ method: "GET" })
       locationType: selectedArea?.areaType ?? "National",
       refreshedAt: new Date().toISOString(),
       latestPeriod: national.unemploymentRate ? national.unemploymentRate.periodName + " " + national.unemploymentRate.year : "Latest available release",
-      apiKeyConfigured: Boolean(process.env.BLS_API_KEY),
+      apiKeyConfigured: Boolean(process.env["BLS_API_KEY"]),
       localSeasonalAdjustment: selectedArea?.seasonalAdjustment ?? null,
       national,
       local,

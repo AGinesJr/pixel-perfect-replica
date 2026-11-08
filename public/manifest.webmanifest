@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "Workforce Prep",
+  "short_name": "Workforce Prep",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#F8FAFC",
+  "background_color": "#F8FAFC",
+  "description": "Career practice and interview preparation. Cloud tools require an internet connection.",
+  "icons": [
+    { "src": "/icons/workforce-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/workforce-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

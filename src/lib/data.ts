@@ -79,13 +79,15 @@ const employmentTypes: Job["type"][] = ["Full-time","Part-time","Contract","Temp
 export function generatePracticeJobs(count=10_000): Job[] {
  const target=Math.max(0,Math.floor(count)); const total=occupationFamilies.length*4;
  return Array.from({length:target},(_,index)=>{
-  const familyIndex=index%total; const family=occupationFamilies[Math.floor(familyIndex/4)]!;
-  const role=family.roles[familyIndex%4]!; const level=levels[Math.floor(index/total)%levels.length]!;
+  const familyIndex=index%total; const family=occupationFamilies[Math.floor(familyIndex/4)];
+  if (!family) throw new Error("Missing practice occupation family");
+  const role=family.roles[familyIndex%4]; const level=levels[Math.floor(index/total)%levels.length] ?? "Entry";
   const locIndex=Math.floor(index/(total*levels.length))%usLocations.length;
-  const location=usLocations[(locIndex+familyIndex*7)%usLocations.length]!;
-  const employer=generatedEmployerNames[(familyIndex*7+Math.floor(index/(total*levels.length)))%employers.length]!;
+  const location=usLocations[(locIndex+familyIndex*7)%usLocations.length] ?? "Remote, US";
+  const employer=generatedEmployerNames[(familyIndex*7+Math.floor(index/(total*levels.length)))%generatedEmployerNames.length] ?? "Sample Employer";
   const remote:Job["remote"]=index%11===0?"Remote":index%5===0?"Hybrid":"On-site";
-  const type=employmentTypes[(index+familyIndex)%employmentTypes.length]!;
+  const type=employmentTypes[(index+familyIndex)%employmentTypes.length] ?? "Full-time";
+  if (!role) throw new Error("Missing practice occupation role");
   const base=family.baseSalary*multipliers[level]; const low=Math.round((base*(0.9+(familyIndex%4)*0.025))/1000)*1000;
   const high=Math.round((low*(1.18+(index%3)*0.04))/1000)*1000; const skill=family.skills;
   const required=level==="Entry"?[skill[0],skill[1],"Reliable communication and follow-through"]:
@@ -95,7 +97,7 @@ export function generatePracticeJobs(count=10_000): Job[] {
    industry:family.industry,location,remote,type,level,salary:[low,Math.max(low+1000,high)],posted:"Sample posting",
    summary:"Simulated "+family.industry.toLowerCase()+" practice role. "+focus+". This fictional opening is designed for application and interview rehearsal.",
    responsibilities:["Coordinate "+family.focus+".","Use "+skill[(index+1)%4]+" to complete daily work and document outcomes.","Collaborate with teammates to resolve issues and meet service standards.",level==="Manager"||level==="Director"||level==="Executive"?"Set priorities, coach team members, and report progress against goals.":"Follow established procedures, identify process improvements, and escalate risks appropriately."],
-   required,preferred:[skill[(index+2)%4],skill[(index+3)%4],"Experience with relevant industry tools"],
+   required,preferred:[skill[(index+2)%4] ?? skill[0],skill[(index+3)%4] ?? skill[0],"Experience with relevant industry tools"],
    difficulty:Math.min(5,Math.max(1,levels.indexOf(level)+1)),sourceType:"simulated" as const} satisfies Job;
  });
 }

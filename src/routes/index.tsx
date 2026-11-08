@@ -96,14 +96,14 @@ function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <section className="home-hero relative isolate overflow-hidden bg-hero text-ink-foreground">
+      <section className="relative isolate overflow-hidden bg-hero text-ink-foreground">
         <img
           src={heroImg}
           alt=""
           width={1600}
           height={900}
           fetchPriority="high"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-[35%] dark:opacity-20 mix-blend-luminosity"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20 mix-blend-luminosity"
         />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-background/95 via-background/80 to-background/45" />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:py-28">
@@ -137,7 +137,7 @@ function Home() {
             </p>
           </div>
 
-          <div className="home-hero-toolkit rounded-2xl border border-white/15 bg-card/90 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-6">
+          <div className="rounded-2xl border border-white/15 bg-card/90 p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Your career toolkit</p>
@@ -258,11 +258,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="home-market-insights border-y border-border bg-card">
+      <section className="border-y border-border bg-card">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 md:grid-cols-[0.8fr_1.2fr] md:items-center sm:py-16">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Insight with context</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight">Understand the labor market—not just the job listing.</h2>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white">Understand the labor market—not just the job listing.</h2>
           </div>
           <div>
             <p className="leading-7 text-muted-foreground">
@@ -318,7 +318,7 @@ function Home() {
       </section>
 
       <section className="px-4 pb-16 sm:pb-20">
-        <div className="home-bottom-cta mx-auto max-w-6xl overflow-hidden rounded-2xl bg-hero px-6 py-10 text-ink-foreground sm:px-10 sm:py-14">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-hero px-6 py-10 text-ink-foreground sm:px-10 sm:py-14">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
             <div className="max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Your next opportunity starts with preparation.</h2>
