@@ -118,7 +118,6 @@ function JobPrep() {
 
   function reset() {
     setFeedback(null);
-    setDone(false);
     setError("");
     setStage("setup");
   }

@@ -13,10 +13,10 @@ describe("live interview diagnostics", () => {
       cause: { name: "TypeError", message: "api_key=private-value" },
     });
 
-    expect(details.message).not.toContain("abc123");
-    expect(details.message).not.toContain("secret");
-    expect(details.message).not.toContain("https://");
-    expect(details.causeMessage).not.toContain("private-value");
+    expect(details["message"]).not.toContain("abc123");
+    expect(details["message"]).not.toContain("secret");
+    expect(details["message"]).not.toContain("https://");
+    expect(details["causeMessage"]).not.toContain("private-value");
     expect(JSON.stringify(details)).not.toContain("private");
   });
 

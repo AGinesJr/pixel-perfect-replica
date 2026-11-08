@@ -22,18 +22,18 @@ export function safeDiagnosticDetails(value: unknown): Record<string, string> {
     const text = safeText(item[key]);
     if (text) details[key] = text;
   }
-  const cause = item.cause;
+  const cause = item["cause"];
   if (cause && typeof cause === "object") {
     const causeItem = cause as Record<string, unknown>;
-    const causeName = safeText(causeItem.name);
-    const causeMessage = safeText(causeItem.message);
-    if (causeName) details.causeName = causeName;
-    if (causeMessage) details.causeMessage = causeMessage;
+    const causeName = safeText(causeItem["name"]);
+    const causeMessage = safeText(causeItem["message"]);
+    if (causeName) details["causeName"] = causeName;
+    if (causeMessage) details["causeMessage"] = causeMessage;
   } else {
     const causeText = safeText(cause);
-    if (causeText) details.cause = causeText;
+    if (causeText) details["cause"] = causeText;
   }
-  if (!Object.keys(details).length) details.valueType = "object";
+  if (!Object.keys(details).length) details["valueType"] = "object";
   return details;
 }
 
@@ -44,8 +44,8 @@ export function logLiveDiagnostic(event: string, value?: unknown): void {
 
 export function formatLiveStartupError(error: unknown, stage: LiveStartupStage): string {
   const details = safeDiagnosticDetails(error);
-  const name = details.name ?? "";
-  const message = details.message ?? "";
+  const name = details["name"] ?? "";
+  const message = details["message"] ?? "";
   const combined = (name + " " + message).toLowerCase();
 
   if (stage === "microphone") {

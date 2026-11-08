@@ -98,7 +98,6 @@ function Account() {
         return;
       }
       const fullName = providerName();
-      setName(fullName);
       update((current) => ({ ...current, name: fullName }));
     }
     if (provider === "indeed") {

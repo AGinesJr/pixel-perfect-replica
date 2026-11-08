@@ -35,11 +35,11 @@ export function WebsiteAdSlot() {
       script.crossOrigin = "anonymous";
       script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(client)}`;
       script.addEventListener("load", () => {
-        script!.dataset.loaded = "true";
+        if (script) script.dataset["loaded"] = "true";
         requestAd();
       }, { once: true });
       document.head.appendChild(script);
-    } else if (script.dataset.loaded === "true") {
+    } else if (script.dataset["loaded"] === "true") {
       requestAd();
     } else {
       script.addEventListener("load", requestAd, { once: true });

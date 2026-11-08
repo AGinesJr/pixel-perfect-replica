@@ -28,14 +28,14 @@ type PracticeJobRow = {
 };
 
 export type PracticeJobSearch = {
-  q?: string;
-  loc?: string;
-  industry?: string;
-  remote?: string;
-  level?: string;
-  type?: string;
-  sort?: "relevance" | "salary-desc" | "salary-asc" | "title";
-  page?: number;
+  q?: string | undefined;
+  loc?: string | undefined;
+  industry?: string | undefined;
+  remote?: string | undefined;
+  level?: string | undefined;
+  type?: string | undefined;
+  sort?: "relevance" | "salary-desc" | "salary-asc" | "title" | undefined;
+  page?: number | undefined;
 };
 
 export type PracticeJobResults = {
@@ -157,10 +157,10 @@ let catalogAvailability: Promise<boolean | null> | undefined;
 
 async function hasActiveCatalog(supabase: SupabaseClient): Promise<boolean | null> {
   if (!catalogAvailability) {
-    catalogAvailability = supabase.from("practice_jobs")
+    catalogAvailability = Promise.resolve(supabase.from("practice_jobs")
       .select("id", { count: "exact", head: true })
       .eq("is_active", true)
-      .eq("source_type", "simulated")
+      .eq("source_type", "simulated"))
       .then(({ count, error }) => error ? null : Boolean(count))
       .catch(() => null);
   }
