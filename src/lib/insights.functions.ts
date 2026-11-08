@@ -161,13 +161,14 @@ function toSeriesMap(payload: BLSResponse): Map<string, BLSPoint[]> {
 
 function latestMetric(points: BLSPoint[] | undefined): Metric {
   if (!points?.length) return null;
-  const point = points[points.length - 1]!;
+  const point = points[points.length - 1];
+  if (!point) return null;
   return {
     value: Number(point.value),
     year: point.year,
     period: point.period,
     periodName: point.periodName,
-    footnotes: (point.footnotes ?? []).map((note) => note.text).filter(Boolean),
+    footnotes: (point.footnotes ?? []).map((note) => note.text).filter((text): text is string => typeof text === "string" && Boolean(text)),
   };
 }
 
@@ -180,14 +181,14 @@ function trend(points: BLSPoint[] | undefined, divisor = 1): TrendPoint[] {
 }
 
 async function fetchBLS(seriesIds: string[], startYear: number, endYear: number): Promise<Map<string, BLSPoint[]>> {
-  const apiKey = process.env.BLS_API_KEY;
+  const apiKey = process.env["BLS_API_KEY"];
   const version = apiKey ? "v2" : "v1";
   const payload: Record<string, unknown> = {
     seriesid: [...new Set(seriesIds)],
     startyear: String(startYear),
     endyear: String(endYear),
   };
-  if (apiKey) payload.registrationkey = apiKey;
+  if (apiKey) payload["registrationkey"] = apiKey;
 
   const response = await fetch(BLS_SERIES_URL + "/" + version + "/timeseries/data/", {
     method: "POST",
@@ -305,7 +306,7 @@ export const getMarketInsights = createServerFn({ method: "GET" })
       locationType: selectedArea?.areaType ?? "National",
       refreshedAt: new Date().toISOString(),
       latestPeriod: national.unemploymentRate ? national.unemploymentRate.periodName + " " + national.unemploymentRate.year : "Latest available release",
-      apiKeyConfigured: Boolean(process.env.BLS_API_KEY),
+      apiKeyConfigured: Boolean(process.env["BLS_API_KEY"]),
       localSeasonalAdjustment: selectedArea?.seasonalAdjustment ?? null,
       national,
       local,
